@@ -1,8 +1,7 @@
 import React, { useState } from "react";
  import axios from "axios";
 import { useNavigate } from "react-router-dom";
- import onsoo from '../assets/Images/futuristic-sports-car-qx65b3sxm4ed6g6v.jpg'
-const Login: React.FC = () => {
+ const Login: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [passWord, setPassword] = useState<string>("");
   const [user,setUser]=useState<string>("");
@@ -35,13 +34,13 @@ const Login: React.FC = () => {
 
   return (
     <div className="h-full m-0 overflow-hidden">
-      <div className="grid grid-cols-2 gap-0 mt-0 rounded-lg h-fit bg-slate-50">
+      <div className="grid gap-0 mt-0 rounded-lg h-fit bg-slate-50">
         <div>
           <h3 className="mt-0 mb-10 ml-2 text-sm font-bold text-black">
             Kirinyaga Catholic Student Associations
           </h3>
 
-          <div className="flex flex-col items-center justify-start pb-5 pl-20">
+          <div className="flex flex-col items-center justify-center shadow-md h-fit w-[70%] lg:w-[50%] mx-auto bg-white rounded-lg p-8 border border-gray-300">
             <h1 className="mt-2 mb-4 text-4xl font-bold">
               Holla,
               <br /> Welcome Back
@@ -94,10 +93,6 @@ const Login: React.FC = () => {
               />
             </div>
           </div>
-        </div>
-
-        <div className="h-full p-4 mt-0 mr-1 w-fit">
-          <img src={onsoo} alt="car" className="h-screen cover" />
         </div>
       </div>
     </div>

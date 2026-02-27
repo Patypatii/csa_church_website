@@ -8,6 +8,7 @@ import {
 import Authorisation from "./assets/Layouts/Authorisation";
 import Reset from "./pages/Authorization/Reset";
 import ResetPasswordPage from "./pages/Authorization/ResetPasswordPage";
+import Pageoulet from "./assets/Layouts/Pageoulet";
 
 // Lazy-loaded component
 const Login = lazy(() => import("./pages/Authorization/Login"));
@@ -18,11 +19,18 @@ const FallBack: React.FC = () => <div>🍷 Please wait ...</div>;
 const App: React.FC = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
-      <Route element={<Authorisation />}>
+      <>
+      <Route path="/login" element={<Authorisation />} >
         <Route index element={<Login />} />
-        <Route path="/reset" element={<Reset />} />
-        <Route path="/otp/:reg" element={<ResetPasswordPage />} />
+        <Route path="reset" element={<Reset />} />
+        <Route path="otp/:reg" element={<ResetPasswordPage />} />
       </Route>
+
+      <Route path="/" element={<Pageoulet />}>
+        {/* <Route index element={<Home />} /> */}
+      </Route>
+      </>
+    
     )
   );
 
