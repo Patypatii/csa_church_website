@@ -4,9 +4,12 @@ import { Outlet } from "react-router-dom";
 import Footers from "../../layOuts/Footers";
 const Pageoulet = () => {
   return (
-    <div>
+    <div className="flex flex-col min-h-screen" >
       <Headers />
-      <Outlet />
+      <main className="flex-1">
+        <Outlet />
+      </main>
+     
       <Footers />
     </div>
   );

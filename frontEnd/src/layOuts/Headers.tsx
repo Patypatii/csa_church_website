@@ -1,5 +1,6 @@
 import React from "react";
 import { FaHome, FaInfoCircle, FaUsers } from "react-icons/fa";
+import { FiImage } from "react-icons/fi";
 import { HiOutlineMenu, HiOutlineSupport, HiOutlineX } from "react-icons/hi";
 import { Link } from "react-router-dom";
 
@@ -7,29 +8,34 @@ const Headers = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   return (
     <>
-    <div className="hidden flex-row items-center justify-between px-[8%] py-4 bg-white shadow-md md:flex">
-      <section>
+    <div className="hidden flex-row items-center justify-between px-[8%] py-4 bg-white shadow-md md:flex ">
+      <section className="flex flex-row items-center gap-2 ">
         <img src="" alt="" />
         <h1 className="text-xl font-bold text-blue-600">CSA Kirinyaga</h1>
       </section>
 
-      <ul className="flex flex-row gap-[10%]">
+      <ul className="flex flex-row gap-2 lg:gap-8">
         <Link to="/" className="flex flex-row items-center gap-1">
           <FaHome className="w-5 h-5" />
           <li className="font-semibold">Home</li>
         </Link>
-         <Link to="/about" className="flex flex-row items-center gap-1">
-         <FaInfoCircle className="inline w-5 h-5" />
-          <li className="font-semibold">About</li>
+          <Link to="/jumuia" className="flex flex-row items-center gap-1 px-4 py-2">
+          <FaInfoCircle className="inline w-5 h-5" />
+          <li className="font-semibold">Jumuia</li>
         </Link>
-        <Link to="/community" className="flex flex-row items-center gap-1">
-         <FaUsers className="w-5 h-5"/>
-          <li className="font-semibold">community</li>
+          <Link to="/officials" className="flex flex-row items-center gap-1 px-4 py-2">
+          <FaUsers className="w-5 h-5"/>
+          <li className="font-semibold">officials</li>
         </Link>
-        <Link to="/support" className="flex flex-row items-center gap-1">
-        <HiOutlineSupport className="w-5 h-5" />
-          <li className="font-semibold">support</li>
+          <Link to="/activities" className="flex flex-row items-center gap-1 px-4 py-2">
+          <HiOutlineSupport className="w-5 h-5" />
+          <li className="font-semibold">Activities</li>
         </Link>
+        <Link to="/gallery" className="flex flex-row items-center gap-1 px-4 py-2">
+        <FiImage className="w-5 h-5" />
+          <li className="font-semibold">Gallery</li>
+        </Link>
+       
       </ul>
       <section>
         <button className="px-5 py-1 text-white transition duration-200 bg-blue-600 rounded-md hover:bg-blue-700">Login</button>
@@ -53,18 +59,23 @@ const Headers = () => {
           <FaHome className="w-5 h-5" />
           <li className="font-semibold">Home</li>
         </Link>
-          <Link to="/about" className="flex flex-row items-center gap-1 px-4 py-2">
+          <Link to="/jumuia" className="flex flex-row items-center gap-1 px-4 py-2">
           <FaInfoCircle className="inline w-5 h-5" />
-          <li className="font-semibold">About</li>
+          <li className="font-semibold">Jumuia</li>
         </Link>
-          <Link to="/community" className="flex flex-row items-center gap-1 px-4 py-2">
+          <Link to="/officials" className="flex flex-row items-center gap-1 px-4 py-2">
           <FaUsers className="w-5 h-5"/>
-          <li className="font-semibold">community</li>
+          <li className="font-semibold">officials</li>
         </Link>
-          <Link to="/support" className="flex flex-row items-center gap-1 px-4 py-2">
+          <Link to="/activities" className="flex flex-row items-center gap-1 px-4 py-2">
           <HiOutlineSupport className="w-5 h-5" />
-          <li className="font-semibold">support</li>
+          <li className="font-semibold">Activities</li>
         </Link>
+        <Link to="/gallery" className="flex flex-row items-center gap-1 px-4 py-2">
+        <FiImage className="w-5 h-5" />
+          <li className="font-semibold">Gallery</li>
+        </Link>
+       
           <Link to="/login" className="block px-4 py-2 text-center text-white bg-blue-600 rounded-md hover:bg-blue-700">
             Login
           </Link>
