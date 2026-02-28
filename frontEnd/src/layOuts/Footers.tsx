@@ -50,7 +50,7 @@ const Footers = () => {
           </ul>
         </section>
       </div>
-      <h2 className="text-sm text-gray-600">© 2024 CSA Kirinyaga. All rights reserved.</h2>
+      <h2 className="text-sm text-gray-600">© 2026 CSA Kirinyaga. All rights reserved.</h2>
     </div>
   )
 };

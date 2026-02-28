@@ -2,10 +2,11 @@ import React from "react";
 import { FaHome, FaInfoCircle, FaUsers } from "react-icons/fa";
 import { FiImage } from "react-icons/fi";
 import { HiOutlineMenu, HiOutlineSupport, HiOutlineX } from "react-icons/hi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Headers = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const navigate=useNavigate();
   return (
     <>
     <div className="hidden flex-row items-center justify-between px-[8%] py-4 bg-white shadow-md md:flex ">
@@ -38,7 +39,8 @@ const Headers = () => {
        
       </ul>
       <section>
-        <button className="px-5 py-1 text-white transition duration-200 bg-blue-600 rounded-md hover:bg-blue-700">Login</button>
+        <button className="px-5 py-1 text-white transition duration-200 bg-blue-600 rounded-md hover:bg-blue-700"
+        onClick={()=>navigate('/login')}>Login</button>
       </section>
     </div>
 

@@ -88,7 +88,7 @@ import { useNavigate } from "react-router-dom";
               <input
                 type="button"
                 value="Reset Password"
-                onClick={() => navigate('/reset')}
+                onClick={() => navigate('/login/reset')}
                 className="text-lg font-bold text-black cursor-pointer bg-slate-50"
               />
             </div>

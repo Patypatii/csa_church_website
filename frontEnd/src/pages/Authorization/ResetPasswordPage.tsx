@@ -32,9 +32,11 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div>
-      <h2>Enter Verification Code</h2>
+    <div className="absolute top-[30%] w-full">
+    <div className="flex flex-col items-center justify-center shadow-md h-fit w-[70%] lg:w-[50%] mx-auto bg-white rounded-lg p-8 border border-gray-300" >
+      <h2 className="mb-3 text-lg font-bold text-black">Enter Verification Code</h2>
       <OTPInput length={6} onComplete={handleOTPComplete} />
+    </div>
     </div>
   );
 }
