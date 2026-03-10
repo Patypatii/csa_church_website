@@ -1,5 +1,6 @@
 import { testDb } from "../Configs/dbConfig.js";
 import bcrypt from "bcrypt";
+import logger from "../logger/winston.js";
 
 export const createUser = async (req, res) => {
   const { username, password, role } = req.body;

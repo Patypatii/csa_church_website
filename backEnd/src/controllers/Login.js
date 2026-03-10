@@ -1,12 +1,12 @@
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import { testDb } from "../Configs/dbConfig.js";
+import logger from "../logger/winston.js";
 dotenv.config();
 
 const Login = async (req, res) => {
-  const { userReg, password } = req.body;
-  console.log(userReg, password);
-
+  const { userReg, password } = req.body ?? []; 
+ 
   if (!userReg || !password) {
     logger.warn("Login attempt with missing credentials");
     return res.status(400).json({ error: "Username and password required" });
