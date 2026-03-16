@@ -9,17 +9,33 @@ export const Reset = async (req, res) => {
 
   logger.debug("Received reset request for user: " + userName);
 
-  if (!userName && !email && !password) {
+// Validate input
+
+  if (!userName || !email || !password) {
     logger.warn("Reset attempt with missing fields");
     return res.status(400).send("userName, email, password are required");
   }
+// check if user exists
+  const userCheck = await testDb.query(
+    `SELECT * FROM members WHERE member_id = $1`,
+    [userName],
+  );
+  if (userCheck.rows.length === 0) {
+    logger.warn(`Reset attempt for non-existent user: ${userName} with email: ${email}`);
+    return res.status(404).send("User not found");
+  }
 
+  // Hash the new password and generate OTP
   const hashedPassword = await bcrypt.hash(password, 10);
   const OTP = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
 
   const hashedOtp = crypto.createHash("sha256").update(OTP).digest("hex");
 
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  // Set OTP expiration time ( 10 minutes)
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); 
+
+
+  // Update user record with hashed OTP, expiration time, and new password
 
   const user = await testDb.query(
     `UPDATE members 
@@ -27,9 +43,12 @@ export const Reset = async (req, res) => {
    WHERE member_id = $5`,
     [hashedOtp, expiresAt, email, hashedPassword, userName],
   );
+  // Send OTP to user's email
 
   await sendMail("password reset OTP", OTP, email);
-  logger.info(`Password reset OTP sent to email: ${email} for user: ${userName}`);
+  logger.info(
+    `Password reset OTP sent to email: ${email} for user: ${userName}`,
+  );
   return res.status(200).json("user updated successfully");
 };
 
@@ -38,6 +57,7 @@ export const OTPverification = async (req, res) => {
   const { otp } = req.body;
   const hashedInputOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
+  // Fetch the stored OTP and expiration time for the user
   const user = await testDb.query(
     `SELECT reset_otp, reset_otp_expires 
    FROM members 
@@ -55,7 +75,8 @@ export const OTPverification = async (req, res) => {
    WHERE member_id = $1`,
       [reg],
     );
-logger.warn(`Invalid or expired OTP attempt for user: ${reg}`); 
+    logger.warn(`Invalid or expired OTP attempt for user: ${reg}`);
+    return res.status(400).json({ message: "Invalid or expired OTP" });
   } else {
     await testDb.query(
       `UPDATE members 
