@@ -1,9 +1,9 @@
 import express from "express";
-import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import multer from "multer";
 import fs from "fs";
+import cors from "cors";
 import authRoute from "./routers/index.js";
 import route from "./routers/index.js";
 import { api } from "./routers/api.js";
@@ -30,20 +30,24 @@ app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+<<<<<<< HEAD
 // this is the best way to to get the actual ip adress of a device even if the server is behind a proxy
 //rather than getting the proxy ip adress , usefull in fare shairing of resorces
+=======
+// IP detection
+>>>>>>> d6e993e5a26dbd36e92f690e2a821ffb4e548903
 app.use(requestIp.mw());
 
 app.use(cors(corsOptions));
 
-// Rate limiter to avoid misuse of the service and avoid cost spikes
+// Rate limiter
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5000, // Limit each IP to 500 requests per `window` (here, per 15 minutes)
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  windowMs: 15 * 60 * 1000,
+  max: 5000,
+  standardHeaders: true,
+  legacyHeaders: false,
   keyGenerator: (req, res) => {
-    return req.clientIp; // IP address from requestIp.mw(), as opposed to req.ip
+    return req.clientIp;
   },
   handler: (req, res, next, options) => {
     res.status(options.statusCode || 429).json({
@@ -54,7 +58,6 @@ const limiter = rateLimit({
   },
 });
 
-// Apply the rate limiting middleware to all requests
 app.use(limiter);
 
 // Gallery Storage Config
@@ -101,7 +104,7 @@ app.post("/api/choir/gallery", upload.single("photo"), (req, res) => {
   res.status(201).json(newPhoto);
 });
 
-// Other legacy questions routes
+// Legacy questions routes
 app.use("/questions", authRoute);
 
 // Static Files

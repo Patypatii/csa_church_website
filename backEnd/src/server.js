@@ -3,16 +3,28 @@ import { serverConfig } from "./Configs/serverConfigs.js";
 import { app } from "./app.js";
 import logger from "./logger/winston.js";
 
+<<<<<<< HEAD
 const PORT = serverConfig.PORT || 3001;
 const HOST = serverConfig.HOST || "0.0.0.0";
 
 // function that initiate express server , it waits for postgree db and mongo db to connect then runs the server at defined port
+=======
+// function that initiate express server , it waits for postgres db then attempts mongo
+>>>>>>> d6e993e5a26dbd36e92f690e2a821ffb4e548903
 const initServer = async () => {
   try {
-    // asynchronous operation to connect to remote databases
     await connectDb();
-    await connectToMongoDb();
+    
+    // Optional Mongo
+    try {
+      await connectToMongoDb();
+      process.env.mongoConnected = 'true';
+    } catch (mongoError) {
+      process.env.mongoConnected = 'false';
+      logger.warn('MongoDB unavailable, questions feature disabled:', mongoError.message);
+    }
 
+<<<<<<< HEAD
     app.listen(PORT, () => {
       logger.info(`⚙️  Server is running on ${PORT}`);
       logger.debug("Server running. Listening for shutdown signals...");
@@ -23,19 +35,38 @@ const initServer = async () => {
         error?.message,
       ` ${error?.stack}`,
     );
+=======
+    app.listen( serverConfig.PORT , serverConfig.HOST , () => {
+      logger.info("⚙️  Server is running!");
+    });
+  } catch (error) {
+    logger.error("Database connection failed:", error.message);
+>>>>>>> d6e993e5a26dbd36e92f690e2a821ffb4e548903
   }
 };
 
-// Graceful shutdown handling
+
+
+
+// Step 1: Define signals to listen for
 const signals = ["SIGINT", "SIGTERM", "SIGHUP"];
+
+// Step 2: Flag to track shutdown state
 let isShuttingDown = false;
 
+// Step 3: Shutdown handler
 const shutDown = (signal) => {
-  if (isShuttingDown) return;
+  if (isShuttingDown) return; // Prevent multiple calls
   isShuttingDown = true;
   logger.debug(`Received ${signal}. Shutting down gracefully...`);
+  // Close server, release resources, etc.
+  // Example: server.close(() => { ... });
+  
+  // Exit with code 0 (success)
   process.exit(0);
 };
+
+// Step 4: Attach listeners for each signal
 
 signals.forEach((sig) => {
   process.on(sig, () => shutDown(sig));

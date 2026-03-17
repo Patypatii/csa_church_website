@@ -9,95 +9,140 @@ export const Reset = async (req, res) => {
 
   logger.debug("Received reset request for user: " + userName);
 
-  // Validate input
-
   if (!userName || !password) {
     logger.warn("Reset attempt with missing fields");
-    return res.status(400).send("userName, email, password are required");
+    return res.status(400).send("userName and password are required");
   }
-  // check if user exists
-  const userCheck = await testDb.query(
-    `SELECT * FROM members WHERE member_id = $1`,
-    [userName],
-  );
-  if (userCheck.rows.length === 0) {
-    logger.warn(
-      `Reset attempt for non-existent user: ${userName} with email: ${email}`,
+
+  try {
+    //   Check if user exists
+    const userCheck = await testDb.query(
+      `SELECT * FROM members WHERE member_id = $1`,
+      [userName],
     );
-    return res.status(404).send("User not found");
+
+    if (userCheck.rows.length === 0) {
+      logger.warn(`Reset attempt for non-existent user: ${userName}`);
+      return res.status(404).send("User not found");
+    }
+
+    const existingUser = userCheck.rows[0];
+
+    //   If user has no email, email must be provided
+    if (!existingUser.email && !email) {
+      return res
+        .status(400)
+        .json({ error: "Email is required for this account" });
+    }
+
+    //   If email is provided, check if already used
+    if (email) {
+      const emailCheck = await testDb.query(
+        `SELECT 1 FROM members WHERE email = $1 AND member_id != $2`,
+        [email, userName],
+      );
+
+      if (emailCheck.rows.length > 0) {
+        return res.status(400).json({ error: "Email already in use" });
+      }
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedOtp = crypto.createHash("sha256").update(OTP).digest("hex");
+
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    //   Insert or update password_resets
+    await testDb.query(
+      `INSERT INTO password_resets (member_id, email, otp, otp_expires, temp_password)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (member_id) DO UPDATE 
+       SET email = EXCLUDED.email,
+           otp = EXCLUDED.otp,
+           otp_expires = EXCLUDED.otp_expires,
+           temp_password = EXCLUDED.temp_password`,
+      [
+        userName,
+        email || existingUser.email,
+        hashedOtp,
+        expiresAt,
+        hashedPassword,
+      ],
+    );
+
+    await sendMail("Password Reset OTP", OTP, email || existingUser.email);
+
+    logger.info(`OTP sent to ${email || existingUser.email}`);
+
+    return res.status(200).json({ message: "OTP sent successfully" });
+  } catch (error) {
+    logger.error("Reset error: " + error.message);
+    return res.status(500).json({ error: "Internal server error" });
   }
-
-  // Hash the new password and generate OTP
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const OTP = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
-
-  const hashedOtp = crypto.createHash("sha256").update(OTP).digest("hex");
-
-  // Set OTP expiration time ( 10 minutes)
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-
-  // Update user record with hashed OTP, expiration time, and new password
-
-  var query;
-  email
-    ? (query = `INSERT INTO password_resets (member_id, email, otp, otp_expires, temp_password)
-  VALUES ($1, $2, $3, $4, $5)
-  ON CONFLICT (member_id) DO UPDATE 
-  SET email = EXCLUDED.email, otp = EXCLUDED.otp, otp_expires = EXCLUDED.otp_expires, temp_password = EXCLUDED.temp_password`)
-    : (query = `INSERT INTO password_resets (member_id, otp, otp_expires, temp_password)
-  VALUES ($1, $2, $3, $4)
-  ON CONFLICT (member_id) DO UPDATE 
-  SET otp = EXCLUDED.otp, otp_expires = EXCLUDED.otp_expires, temp_password = EXCLUDED.temp_password`);
-
-  const user = await testDb.query(
-    `INSERT INTO password_resets (member_id, otp, otp_expires)
-   VALUES ($1, $2, $3)
-   ON CONFLICT (member_id) DO UPDATE 
-   SET reset_otp = EXCLUDED.reset_otp, reset_otp_expires = EXCLUDED.reset_otp_expires`,
-    [userName, hashedOtp, expiresAt],
-  );
-  // Send OTP to user's email
-
-  await sendMail("password reset OTP", OTP, email);
-  logger.info(
-    `Password reset OTP sent to email: ${email} for user: ${userName}`,
-  );
-  return res.status(200).json("user updated successfully");
 };
 
 export const OTPverification = async (req, res) => {
   const reg = decodeURIComponent(req.params.regNo);
-  const { otp, passWord } = req.body;
+  const { otp } = req.body;
+
   const hashedInputOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
-  // Fetch the stored OTP and expiration time for the user
-  const user = await testDb.query(
-    `SELECT reset_otp, reset_otp_expires 
-   FROM members 
-   WHERE member_id = $1`,
-    [reg],
-  );
+  const client = await testDb.connect();
 
-  if (
-    user.rows[0].reset_otp !== hashedInputOtp ||
-    new Date() > user.rows[0].reset_otp_expires
-  ) {
-    await testDb.query(
-      `UPDATE members 
-   SET password = $1, reset_otp = NULL, reset_otp_expires = NULL
-   WHERE member_id = $1`,
+  try {
+    await client.query("BEGIN");
+
+    const result = await client.query(
+      `SELECT * FROM password_resets WHERE member_id = $1`,
       [reg],
     );
-    logger.warn(`Invalid or expired OTP attempt for user: ${reg}`);
-    return res.status(400).json({ message: "Invalid or expired OTP" });
-  } else {
-    await testDb.query(
-      `UPDATE members 
-   SET  reset_otp = NULL, reset_otp_expires = NULL
-   WHERE member_id = $1`,
-      [reg],
+
+    //   No OTP record
+    if (result.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "No OTP request found" });
+    }
+
+    const resetData = result.rows[0];
+
+    //   Invalid or expired OTP
+    if (
+      resetData.otp !== hashedInputOtp ||
+      new Date() > resetData.otp_expires
+    ) {
+      await client.query("ROLLBACK");
+      logger.warn(`Invalid/expired OTP for user: ${reg}`);
+      return res.status(400).json({ error: "Invalid or expired OTP" });
+    }
+
+    //   Update password + email (only if NULL)
+    await client.query(
+      `UPDATE members
+       SET password = $1,
+           email = COALESCE(email, $2)
+       WHERE member_id = $3`,
+      [resetData.temp_password, resetData.email, reg],
     );
-    logger.info(`Successful OTP verification for user: ${reg}`);
-    return res.status(200).json({ message: "password updated successfully" });
+
+    //  Delete reset record
+    await client.query(`DELETE FROM password_resets WHERE member_id = $1`, [
+      reg,
+    ]);
+
+    await client.query("COMMIT");
+
+    logger.info(`Password reset successful for user: ${reg}`);
+
+    return res.status(200).json({
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    logger.error(`OTP verification error for ${reg}: ${error.message}`);
+    return res.status(500).json({ error: "Internal server error" });
+  } finally {
+    client.release();
   }
 };
