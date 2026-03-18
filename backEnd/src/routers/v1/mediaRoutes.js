@@ -1,21 +1,19 @@
 
 
 import express from "express"
-import {createFile , deleteFile} from "../../controllers/mediaController.js"
-import upload from "../../Configs/multerStorageConfig.js";
+import { createFile, deleteFile , getAllfiles} from "../../controllers/mediaController.js";
+import {uploadMiddleware  } from "../../middleWares/uploadMiddleware.js"
 
 
 const route = express.Router()
 
-
-// Upload single file (profile image/video)
-route.post("/single", upload.single("file"), createFile);
-
-// Upload multiple files (church members, bulk)
-route.post("/multiple", upload.array("files", 10), createFile);
+route.get("/" , getAllfiles)
+route.post("/upload" , uploadMiddleware , createFile)
 
 // Delete one or many files
-route.delete("/", deleteFile);
+route.delete("/delete", deleteFile);
+
+
 
 
 

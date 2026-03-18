@@ -12,8 +12,7 @@ import morganMiddleware from "./logger/morgan.js";
 import { rateLimit } from "express-rate-limit";
 import requestIp from "request-ip";
 import corsOptions from "./Configs/corsConfigs.js";
-import { testDb } from "./Configs/dbConfig.js";
-
+import upload from "./Configs/multerStorageConfig.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -53,36 +52,36 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
+app.use(morganMiddleware);
 
-// Gallery Storage Config
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    const uploadDir = path.join(
-      __dirname,
-      "../../frontEnd/public/images/gallery",
-    );
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
-});
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+
+// Static Files
+app.use(express.static(path.join(__dirname, "../../frontEnd/public")));
+app.use(express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental/public")));
+app.use("/community-assets/backend",express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental/dist/backend"),),);
+app.use("/community-assets", express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental")),);
+
 
 // Routes
 app.get('/', (_req, res) => res.redirect('/community-hub'));
 app.use("/authentication", apiRoutes);
 app.use("/api", api);
 app.use("/community-hub", hubRouter);
+app.use("/questions", apiRoutes);
+app.use("/files" , apiRoutes)
+
+
+
+
+
+
 
 // Gallery APIs
 app.get("/api/choir/gallery", (_req, res) => {
   const gallery = BackendDataService.load("choir_gallery.json", []);
   res.json(gallery);
 });
-app.post("/api/choir/gallery", upload.single("photo"), (req, res) => {
+app.post("/api/choir/gallery", upload.single("file"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
   const gallery = BackendDataService.load("choir_gallery.json", []);
   const newPhoto = {
@@ -98,32 +97,9 @@ app.post("/api/choir/gallery", upload.single("photo"), (req, res) => {
   res.status(201).json(newPhoto);
 });
 
-// Other legacy questions routes
-app.use("/questions", apiRoutes);
-app.use("/files" , apiRoutes)
 
 
 
-// Static Files
-app.use(express.static(path.join(__dirname, "../../frontEnd/public")));
-app.use(
-  express.static(
-    path.join(__dirname, "../../frontEnd/src/pages/sacramental/public"),
-  ),
-);
-app.use(
-  "/community-assets/backend",
-  express.static(
-    path.join(__dirname, "../../frontEnd/src/pages/sacramental/dist/backend"),
-  ),
-);
-app.use(
-  "/community-assets",
-  express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental")),
-);
 
-
-
-app.use(morganMiddleware);
 
 export { app };
