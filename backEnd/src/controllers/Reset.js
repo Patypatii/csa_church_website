@@ -66,11 +66,12 @@ export const Reset = async (req, res) => {
 
     await sendMail("Password Reset OTP", OTP, email || existingUser.email);
 
-    logger.info(`OTP sent to ${email || existingUser.email}`);
-
-    return res.status(200).json({ message: "OTP sent successfully" });
+    logger.info(`Password reset OTP sent to ${email} for user: ${userName}`);
+    return res
+      .status(200)
+      .json({ message: "Password reset initiated successfully" });
   } catch (error) {
-    logger.error("Reset error: " + error.message);
+    logger.error("Error during password reset: ", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };

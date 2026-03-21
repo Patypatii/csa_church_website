@@ -66,3 +66,11 @@ CREATE TABLE notifications (
     member_id VARCHAR(30) REFERENCES members(member_id),
     status VARCHAR(100) DEFAULT 'normal' CHECK (status IN ('normal', 'urgent', 'info'))
 );
+CREATE TABLE IF NOT EXISTS uploads (
+    id SERIAL PRIMARY KEY,
+    public_id TEXT UNIQUE NOT NULL,
+    url TEXT NOT NULL,
+    format TEXT,
+    resource_type TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -17,6 +17,8 @@ import Readings from "./pages/Devotions/pages/Readings";
 import Dashboard from "./pages/Devotions/pages/Dashboard";
 import Layout from "./pages/Devotions/components/Layout";
 import Appadmin from "./pages/Devotions/Adminpage/App"
+import AdminPanel from "./pages/officials/AdminPanel";
+import PublicView from "./pages/officials/PublicView";
 import {
   AboutSection,
   CommunitySection,

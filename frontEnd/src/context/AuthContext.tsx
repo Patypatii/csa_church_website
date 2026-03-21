@@ -32,7 +32,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-
+  const login = (userData: { user_id: number; username: string; role: string }, authToken: string) => {
+    console.log("AuthContext login called with:", userData, authToken);
+    setUser(userData);
+    setToken(authToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', authToken);
+    console.log("AuthContext user state after login:", userData);
+  };
 
   const logout = () => {
     setUser(null);

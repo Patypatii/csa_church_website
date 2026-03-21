@@ -41,7 +41,6 @@ const QuestionSchema = new mongoose.Schema({
     type: Date,
     default: Date.now, // timestamp when the question is created
   },
-
   questionText: { type: String, required: true },
   answers: [
     {

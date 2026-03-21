@@ -1,32 +1,21 @@
-import connectToMongoDb, { connectDb } from "./Configs/dbConfig.js";
 import { serverConfig } from "./Configs/serverConfigs.js";
 import { app } from "./app.js";
+import { connectDb, connectToMongoDb } from "./configs/dbConfig.js";
 import logger from "./logger/winston.js";
 
-const PORT = serverConfig.PORT || 3001;
-const HOST = serverConfig.HOST || "0.0.0.0";
+
 
 // function that initiate express server , it waits for postgree db and mongo db to connect then runs the server at defined port
+// function that initiate express server , it waits for postgres db then attempts mongo
 const initServer = async () => {
   try {
     await connectDb();
+     await connectToMongoDb();
 
-    // Optional Mongo
-    try {
-      await connectToMongoDb();
-      process.env.mongoConnected = "true";
-    } catch (mongoError) {
-      process.env.mongoConnected = "false";
-      logger.warn(
-        "MongoDB unavailable, questions feature disabled:",
-        mongoError.message,
-      );
-    }
-
-    app.listen(PORT, () => {
-      logger.info(`⚙️  Server is running on ${PORT}`);
-      logger.debug("Server running. Listening for shutdown signals...");
+    app.listen(serverConfig.PORT, () => {
+      logger.info(`⚙️  Server is running on http://localhost:${serverConfig.PORT}`);
     });
+
   } catch (error) {
     logger.error(
       "Failed to connect to the database. Server not started. " +
@@ -61,3 +50,4 @@ signals.forEach((sig) => {
 });
 
 initServer();
+  
