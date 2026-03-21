@@ -3,8 +3,8 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
 
- const user= process.env.MAIL_USER;
- const pass= process.env.MAIL_PASSWORD;
+const user = process.env.MAIL_USER;
+const pass = process.env.MAIL_PASSWORD;
 const x = nodemailer.createTransport({
   service: process.env.MAIL_SERVICE,
   auth: {

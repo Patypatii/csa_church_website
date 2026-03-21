@@ -89,7 +89,13 @@ const App: React.FC = () => {
           <Route path="reset" element={<Reset />} loader={emailChecker} />
           <Route path="otp/:email" element={<ResetPasswordPage />} />
         </Route>
+<<<<<<< HEAD
         <Route path="/admin/quiz" element={<Appadmin />} />
+=======
+        <Route path="/admin/quiz" element={<Appadmin />}/>
+        <Route path="/admin/officials" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>}/>
+        <Route path="/officials" element={<PublicView />} />
+>>>>>>> 3bb50442ea0a9be098fdf4c20257c12809c7e132
 
         <Route path="/" element={<Pageoulet />}>
           <Route index element={<Home />} />

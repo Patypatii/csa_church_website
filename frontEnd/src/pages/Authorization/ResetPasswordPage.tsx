@@ -51,21 +51,6 @@ const ResetPasswordPage = () => {
 export default ResetPasswordPage;
 
 
-export const emailChecker = async () => {
-  try {
-    const response = await fetch("http://localhost:3001/authentication/v1/check-email", {
-      method: "get",
-      headers: { "Content-Type": "application/json" },
-    });
-
-    const data = await response.json();
-    console.log("Email check response:", data);
-    return data
-  }
-  catch (err) {
-    console.error("Error checking email:", err);
-    return { status: "error", message: "Failed to check email" };
-  }
 
 
-}
+
