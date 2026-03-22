@@ -25,9 +25,6 @@ const initServer = async () => {
   }
 };
 
-
-
-
 // Step 1: Define signals to listen for
 const signals = ["SIGINT", "SIGTERM", "SIGHUP"];
 
@@ -41,7 +38,7 @@ const shutDown = (signal) => {
   logger.debug(`Received ${signal}. Shutting down gracefully...`);
   // Close server, release resources, etc.
   // Example: server.close(() => { ... });
-  
+
   // Exit with code 0 (success)
   process.exit(0);
 };
