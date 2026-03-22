@@ -1,5 +1,14 @@
 import { lazy, Suspense } from "react";
+<<<<<<< HEAD
 import { createBrowserRouter, createRoutesFromElements, RouterProvider, Route, } from "react-router-dom";
+=======
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  RouterProvider,
+  Route,
+} from "react-router-dom";
+>>>>>>> 3bb50442ea0a9be098fdf4c20257c12809c7e132
 import Authorisation from "./assets/Layouts/Authorisation";
 import Reset from "./pages/Authorization/Reset";
 import ResetPasswordPage from "./pages/Authorization/ResetPasswordPage";
@@ -11,7 +20,14 @@ import Prayer from "./pages/Devotions/pages/Prayer";
 import Readings from "./pages/Devotions/pages/Readings";
 import Dashboard from "./pages/Devotions/pages/Dashboard";
 import Layout from "./pages/Devotions/components/Layout";
-import { AboutSection, CommunitySection, SupportSection } from "./pages/Landing/components/sections";
+import Appadmin from "./pages/Devotions/Adminpage/App"
+import AdminPanel from "./pages/officials/AdminPanel";
+import PublicView from "./pages/officials/PublicView";
+import {
+  AboutSection,
+  CommunitySection,
+  SupportSection,
+} from "./pages/Landing/components/sections";
 import ActivitiesSection from "./pages/Landing/components/sections/activities";
 import GallerySection from "./pages/Landing/components/sections/gallery";
 import ProjectsSection from "./pages/Landing/components/sections/projects";
@@ -21,6 +37,7 @@ import ImageSlider from "./pages/Landing/components/ImageSlider";
 import JumuiyaLanding from "./pages/Jumuiya/JumuiyaLanding";
 import JumuiyaDetail from "./pages/Jumuiya/JumuiyaDetail";
 import { useAuth } from "./context/AuthContext";
+<<<<<<< HEAD
 import { DataProvider } from "./pages/Jumuiya/context/DataContext";
 
 import AdminLayout from "./pages/Jumuiya/admin/AdminLayout";
@@ -31,6 +48,9 @@ import AdminGallery from "./pages/Jumuiya/admin/AdminGallery";
 import AdminMembers from "./pages/Jumuiya/admin/AdminMembers";
 import ProtectedRoute from "./pages/Jumuiya/components/ProtectedRoute";
 // import LoginPage from "./pages/Jumuiya/LoginPage";
+=======
+import { PublicRoute, ProtectedRoute } from "./Regulator";
+>>>>>>> 3bb50442ea0a9be098fdf4c20257c12809c7e132
 
 // Lazy-loaded component
 const Login = lazy(() => import("./pages/Authorization/Login"));
@@ -61,8 +81,12 @@ const Home: React.FC = () => {
             <OfficialsSection />
             <ProjectsSection />
             <ActivitiesSection />
+<<<<<<< HEAD
             <GallerySection
             />
+=======
+            <GallerySection />
+>>>>>>> 3bb50442ea0a9be098fdf4c20257c12809c7e132
           </>
         )}
 
@@ -73,13 +97,27 @@ const Home: React.FC = () => {
   );
 };
 
-
-
 const App: React.FC = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Authorisation />
+            </PublicRoute>
+          }
+        >
+          <Route index element={<Login />} />
+          <Route path="reset" element={<Reset />} />
+          <Route path="otp/:reg" element={<ResetPasswordPage />} />
+        </Route>
+        <Route path="/admin/quiz" element={<Appadmin />}/>
+        <Route path="/admin/officials" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>}/>
+        <Route path="/officials" element={<PublicView />} />
 
+<<<<<<< HEAD
         <Route path="/login" element={<Authorisation />} >
           <Route index element={<Login />} />
           <Route path="reset" element={<Reset />} />
@@ -127,6 +165,29 @@ const App: React.FC = () => {
       </>
 
     )
+=======
+        <Route path="/" element={<Pageoulet />}>
+        <Route index element={<Home />} />
+
+          <Route
+            path="devotions"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="readings" element={<Readings />} />
+            <Route path="prayer" element={<Prayer />} />
+            <Route path="liturgy" element={<Liturgy />} />
+            <Route path="rosary" element={<Rosary />} />
+            <Route path="challenge" element={<Challenge />} />
+          </Route>
+        </Route>
+      </>,
+    ),
+>>>>>>> 3bb50442ea0a9be098fdf4c20257c12809c7e132
   );
 
   return (

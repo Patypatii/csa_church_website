@@ -1,12 +1,14 @@
 import dotenv from "dotenv";
-dotenv.config();
-import { db } from "../Configs/dbConfig.js";
 import bcrypt from "bcrypt";
+import { testDb as db } from "../Configs/dbConfig.js";
+import logger from "../logger/winston.js";
 import jwt from "jsonwebtoken";
+
+dotenv.config();
 
 const Login = async (req, res) => {
   const { passWord, user: loginIdentifier, googleEmail } = req.body;
-  console.log("Login request body:", req.body);
+  logger.info("Login request received", { loginIdentifier, googleEmail });
 
   try {
     let user;
@@ -27,6 +29,7 @@ const Login = async (req, res) => {
       }
 
       if (response.rows.length === 0) {
+        logger.warn("Invalid username or email login attempt", { loginIdentifier });
         return res.status(401).json({ message: "Invalid username or email" });
       }
 
@@ -35,11 +38,13 @@ const Login = async (req, res) => {
       // Compare password
       const storedPassword = user.password;
       if (!storedPassword) {
+        logger.warn("Account has no password set", { loginIdentifier });
         return res.status(401).json({ message: "Account has no password set" });
       }
 
       const isMatch = await bcrypt.compare(passWord, storedPassword);
       if (!isMatch) {
+        logger.warn("Invalid password for user", { loginIdentifier });
         return res.status(401).json({ message: "Invalid password" });
       }
     } else if (googleEmail) {
@@ -48,6 +53,7 @@ const Login = async (req, res) => {
         googleEmail,
       ]);
       if (response.rows.length === 0) {
+        logger.warn("Google email not registered", { googleEmail });
         return res.status(401).json({ message: "Email not registered" });
       }
 
@@ -68,6 +74,7 @@ const Login = async (req, res) => {
       { expiresIn: "1h" },
     );
 
+    logger.info("Login successful", { id, role });
     return res.json({
       token,
       status: "success",
@@ -79,7 +86,7 @@ const Login = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Login error:", error);
+    logger.error("Login error:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };

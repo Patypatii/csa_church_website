@@ -18,7 +18,7 @@ const Login: React.FC = () => {
     console.log("Submitting login with:", { username, password });
     try {
       const response = await axios.post(
-        "http://localhost:3000/authentication/login",
+        "http://localhost:3001/authentication/v1/login",
         {
           user: username,
           passWord: password,
@@ -27,6 +27,9 @@ const Login: React.FC = () => {
       console.log("Login response:", response.data);
 
       if (response.data.status === "success") {
+        console.log("Full response data keys:", Object.keys(response.data));
+        console.log("User data:", response.data.user);
+        console.log("Token data:", response.data.token);
         login(response.data.user, response.data.token);
         navigate("/");
       } else {

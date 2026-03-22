@@ -1,6 +1,5 @@
 import { MailtrapClient } from "mailtrap";
-import dotenv from "dotenv";
-dotenv.config();
+
 
 const TOKEN = process.env.MAILTRAP_TOKEN;
 console.log(TOKEN);
@@ -29,8 +28,9 @@ const sendEmail = async (subject, text, recipient) => {
       text,
       category: "test ",
     });
+    logger.info(`Email sent successfully to ${recipient} with subject: "${subject}"`);
   } catch (error) {
-    console.error("error from mailtrap", error?.message);
+    logger.error(`Failed to send email to ${recipient} with subject: "${subject}" - ${error?.message}`);
   }
 };
 
