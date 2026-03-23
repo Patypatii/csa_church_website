@@ -9,10 +9,6 @@ function AdminPanel({ onClose }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState('members')
   const [data, setData] = useState<Record<string, any[]>>({})
   const [loading, setLoading] = useState(true)
-<<<<<<< HEAD
-=======
-
->>>>>>> 3bb50442ea0a9be098fdf4c20257c12809c7e132
   const [showAddUser, setShowAddUser] = useState(false)
   const [newUser, setNewUser] = useState({ username: '', password: '', role: 'user' })
 
@@ -45,7 +41,7 @@ function AdminPanel({ onClose }: AdminPanelProps) {
           return [] // Return empty array on failure
         }
       })
-      
+
       const results = await Promise.all(promises)
       const dataObj: Record<string, any[]> = {}
       tables.forEach((table, index) => {

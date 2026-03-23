@@ -1,14 +1,10 @@
 import { lazy, Suspense } from "react";
-<<<<<<< HEAD
-import { createBrowserRouter, createRoutesFromElements, RouterProvider, Route, } from "react-router-dom";
-=======
 import {
   createBrowserRouter,
   createRoutesFromElements,
   RouterProvider,
   Route,
 } from "react-router-dom";
->>>>>>> 3bb50442ea0a9be098fdf4c20257c12809c7e132
 import Authorisation from "./assets/Layouts/Authorisation";
 import Reset from "./pages/Authorization/Reset";
 import ResetPasswordPage from "./pages/Authorization/ResetPasswordPage";
@@ -37,20 +33,7 @@ import ImageSlider from "./pages/Landing/components/ImageSlider";
 import JumuiyaLanding from "./pages/Jumuiya/JumuiyaLanding";
 import JumuiyaDetail from "./pages/Jumuiya/JumuiyaDetail";
 import { useAuth } from "./context/AuthContext";
-<<<<<<< HEAD
-import { DataProvider } from "./pages/Jumuiya/context/DataContext";
-
-import AdminLayout from "./pages/Jumuiya/admin/AdminLayout";
-import AdminOfficials from "./pages/Jumuiya/admin/AdminOfficials";
-import AdminAbout from "./pages/Jumuiya/admin/AdminAbout";
-import AdminActivities from "./pages/Jumuiya/admin/AdminActivities";
-import AdminGallery from "./pages/Jumuiya/admin/AdminGallery";
-import AdminMembers from "./pages/Jumuiya/admin/AdminMembers";
-import ProtectedRoute from "./pages/Jumuiya/components/ProtectedRoute";
-// import LoginPage from "./pages/Jumuiya/LoginPage";
-=======
 import { PublicRoute, ProtectedRoute } from "./Regulator";
->>>>>>> 3bb50442ea0a9be098fdf4c20257c12809c7e132
 
 // Lazy-loaded component
 const Login = lazy(() => import("./pages/Authorization/Login"));
@@ -81,12 +64,7 @@ const Home: React.FC = () => {
             <OfficialsSection />
             <ProjectsSection />
             <ActivitiesSection />
-<<<<<<< HEAD
-            <GallerySection
-            />
-=======
             <GallerySection />
->>>>>>> 3bb50442ea0a9be098fdf4c20257c12809c7e132
           </>
         )}
 
@@ -113,61 +91,12 @@ const App: React.FC = () => {
           <Route path="reset" element={<Reset />} />
           <Route path="otp/:reg" element={<ResetPasswordPage />} />
         </Route>
-        <Route path="/admin/quiz" element={<Appadmin />}/>
-        <Route path="/admin/officials" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>}/>
+        <Route path="/admin/quiz" element={<Appadmin />} />
+        <Route path="/admin/officials" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
         <Route path="/officials" element={<PublicView />} />
-
-<<<<<<< HEAD
-        <Route path="/login" element={<Authorisation />} >
-          <Route index element={<Login />} />
-          <Route path="reset" element={<Reset />} />
-          <Route path="otp/:reg" element={<ResetPasswordPage />} />
-        </Route>
-
-        <Route path="/jumuiya" element={<DataProvider><Pageoulet /></DataProvider>} >
-          <Route index element={<JumuiyaLanding />} />
-          <Route path=":name" element={<JumuiyaDetail />} />
-          {/* <Route path="login" element={<LoginPage />} /> */}
-        </Route>
-
-        {/* Jumuiya Admin Routes */}
-        <Route path="/admin" element={
-          <ProtectedRoute>
-            <DataProvider>
-              <AdminLayout />
-            </DataProvider>
-          </ProtectedRoute>
-        }>
-          <Route index element={<AdminOfficials />} />
-          <Route path="officials" element={<AdminOfficials />} />
-          <Route path="about" element={<AdminAbout />} />
-          <Route path="activities" element={<AdminActivities />} />
-          <Route path="gallery" element={<AdminGallery />} />
-          <Route path="members" element={<AdminMembers />} />
-        </Route>
-
 
         <Route path="/" element={<Pageoulet />}>
           <Route index element={<Home />} />
-
-
-          <Route path="devotions" element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="readings" element={<Readings />} />
-            <Route path="prayer" element={<Prayer />} />
-            <Route path="liturgy" element={<Liturgy />} />
-            <Route path="rosary" element={<Rosary />} />
-            <Route path="challenge" element={<Challenge />} />
-          </Route>
-
-        </Route>
-
-      </>
-
-    )
-=======
-        <Route path="/" element={<Pageoulet />}>
-        <Route index element={<Home />} />
 
           <Route
             path="devotions"
@@ -187,7 +116,6 @@ const App: React.FC = () => {
         </Route>
       </>,
     ),
->>>>>>> 3bb50442ea0a9be098fdf4c20257c12809c7e132
   );
 
   return (
