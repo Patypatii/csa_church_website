@@ -143,7 +143,16 @@ export const getModule = (req, res) => {
     if (meta.id === 'choir') {
         const choirOfficials  = BackendDataService.load('officials.json',  []);
         const choirActivities = BackendDataService.load('activities.json', []);
-        const choirInfo = { ...meta, officials: choirOfficials, activities: choirActivities };
+        const choirAnnouncements = BackendDataService.load('announcements.json', []);
+        const choirGallery = BackendDataService.load('choir_gallery.json', []);
+        
+        const choirInfo = { 
+            ...meta, 
+            officials: choirOfficials, 
+            activities: choirActivities,
+            announcements: choirAnnouncements,
+            gallery: choirGallery
+        };
         return res.json(choirInfo);
     }
 

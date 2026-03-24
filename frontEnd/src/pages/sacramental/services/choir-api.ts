@@ -23,19 +23,42 @@ import {
 
 export class ChoirApiService {
     private static baseUrl = '/api';
+    private static hubUrl = '/hub-view/choir';
+    private static cachedData: any = null;
+
+    /**
+     * Fetch all module data at once and cache
+     */
+    private static async fetchHubData() {
+        if (!this.cachedData) {
+            try {
+                const response = await fetch(this.hubUrl, { headers: { 'Accept': 'application/json' } });
+                if (response.ok) {
+                    this.cachedData = await response.json();
+                } else {
+                    this.cachedData = {};
+                }
+            } catch (e) {
+                console.error('Failed to fetch hub data:', e);
+                this.cachedData = {};
+            }
+        }
+        return this.cachedData;
+    }
 
     /**
      * Get choir configuration
      */
     static async getConfig(): Promise<ApiResponse<ChoirConfig>> {
-        try {
-            return {
-                success: true,
-                data: choirConfig
-            };
-        } catch (error) {
-            return { success: false, error: 'Failed to fetch choir configuration' };
-        }
+        const data = await this.fetchHubData();
+        return {
+            success: true,
+            data: {
+                name: data.title || choirConfig.name,
+                description: data.description || choirConfig.description,
+                themeColor: data.color || choirConfig.themeColor
+            }
+        };
     }
 
     /**
@@ -59,75 +82,56 @@ export class ChoirApiService {
      * Get choir officials
      */
     static async getOfficials(): Promise<ApiResponse<ChoirOfficial[]>> {
-        try {
-            const response = await fetch(`${this.baseUrl}/officials`);
-            const data = await response.json();
-            return { success: true, data };
-        } catch (error) {
-            return { success: false, error: 'Failed to fetch officials' };
-        }
+        const data = await this.fetchHubData();
+        return { success: true, data: data.officials || [] };
     }
 
     /**
      * Get practice schedules
      */
     static async getSchedules(): Promise<ApiResponse<PracticeSchedule[]>> {
-        try {
-            return {
-                success: true,
-                data: practiceSchedules.filter(s => s.isActive)
-            };
-        } catch (error) {
-            return { success: false, error: 'Failed to fetch schedules' };
-        }
+        // Fallback to mock data for schedules currently
+        return {
+            success: true,
+            data: practiceSchedules.filter(s => s.isActive)
+        };
     }
 
     /**
      * Get semester activities
      */
     static async getActivities(): Promise<ApiResponse<SemesterActivity[]>> {
-        try {
-            const response = await fetch(`${this.baseUrl}/activities`);
-            const data = await response.json();
-            const mapped = data.map((act: any) => ({
-                ...act,
-                date: new Date(act.date)
-            }));
-            return { success: true, data: mapped };
-        } catch (error) {
-            return { success: false, error: 'Failed to fetch activities' };
-        }
+        const data = await this.fetchHubData();
+        const activities = data.activities || [];
+        const mapped = activities.map((act: any) => ({
+            ...act,
+            date: new Date(act.date)
+        }));
+        return { success: true, data: mapped };
     }
 
     /**
      * Get music classes
      */
     static async getMusicClasses(): Promise<ApiResponse<MusicClass[]>> {
-        try {
-            return {
-                success: true,
-                data: musicClasses
-            };
-        } catch (error) {
-            return { success: false, error: 'Failed to fetch music classes' };
-        }
+        // Fallback to mock data for classes currently
+        return {
+            success: true,
+            data: musicClasses
+        };
     }
 
     /**
      * Get announcements
      */
     static async getAnnouncements(): Promise<ApiResponse<Announcement[]>> {
-        try {
-            const response = await fetch(`${this.baseUrl}/announcements`);
-            const data = await response.json();
-            const mapped = data.map((ann: any) => ({
-                ...ann,
-                date: new Date(ann.date)
-            }));
-            return { success: true, data: mapped };
-        } catch (error) {
-            return { success: false, error: 'Failed to fetch announcements' };
-        }
+        const data = await this.fetchHubData();
+        const announcements = data.announcements || [];
+        const mapped = announcements.map((ann: any) => ({
+            ...ann,
+            date: new Date(ann.date)
+        }));
+        return { success: true, data: mapped };
     }
 
     /**
