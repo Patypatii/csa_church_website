@@ -27,9 +27,10 @@ router.delete('/term/:id', deleteArchivedJumuiyaOfficial);
 
 // Basic CRUD routes for Jumuiya Officials
 router.get('/', getAllJumuiyaOfficials);
+router.get('/list', getAllJumuiyaOfficials);
 router.get('/export', exportJumuiyaOfficials);
-router.get('/:id', getJumuiyaOfficialById);
 router.post('/', upload.single('photo'), createJumuiyaOfficial);
+router.get('/:id', getJumuiyaOfficialById);
 router.put('/:id', upload.single('photo'), updateJumuiyaOfficial);
 router.delete('/:id', deleteJumuiyaOfficial);
 

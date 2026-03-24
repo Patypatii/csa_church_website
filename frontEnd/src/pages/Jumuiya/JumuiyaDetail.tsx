@@ -11,6 +11,7 @@ import NotificationsTab from './components/NotificationsTab';
 import TshirtsTab from './components/TshirtsTab';
 import { FaInfoCircle, FaUserTie, FaUsers, FaCalendarAlt, FaUserPlus, FaShareAlt, FaBars, FaBell, FaTshirt, FaArrowLeft, FaCog } from "react-icons/fa";
 import { useAuth } from '../../context/AuthContext';
+import { useJumuiyaOfficials } from '../../hooks/useJumuiyaOfficials';
 import './JumuiyaDetail.css';
 import AdminPanelEmbed from './admin/AdminPanelEmbed';
 
@@ -37,6 +38,9 @@ const JumuiyaDetail: React.FC = () => {
 
     const jumuiyaId = name ? name.toLowerCase().replace(/[^a-z0-9]/g, '-') : '';
     const jumuiya = getJumuiyaById(jumuiyaId);
+
+    // Fetch dynamic officials from backend
+    const { officials: dynamicOfficials } = useJumuiyaOfficials({ category: jumuiya?.name });
 
     if (!jumuiya) {
         return (
@@ -69,8 +73,22 @@ const JumuiyaDetail: React.FC = () => {
             case 'about':
                 return <AboutTab jumuiya={jumuiya} onNavigateBack={() => navigate('/')} />;
             case 'officials':
+                // Merge dynamic officials with hardcoded ones
+                // If we have dynamic officials, we use them. 
+                // We map dynamic backend officials to the frontend format.
+                const displayedOfficials = (dynamicOfficials && dynamicOfficials.length > 0) 
+                    ? dynamicOfficials.map(doff => ({
+                        id: String(doff.id),
+                        name: doff.name,
+                        position: doff.position,
+                        email: '', // Backend doesn't have email yet, but we can default or handle it
+                        phone: doff.contact || '',
+                        image: doff.photo ? (doff.photo.startsWith('http') ? doff.photo : `${window.location.origin}/${doff.photo}`) : undefined
+                    }))
+                    : jumuiya.officials;
+
                 return <OfficialsTab
-                    officials={jumuiya.officials}
+                    officials={displayedOfficials}
                     termOfOffice={jumuiya.termOfOffice}
                     formerOfficials={jumuiya.formerOfficials}
                     jumuiyaColor={jumuiya.color}
