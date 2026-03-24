@@ -1,5 +1,5 @@
 import React from "react";
-import { FaHome, FaInfoCircle, FaUsers ,FaPrayingHands } from "react-icons/fa";
+import { FaHome, FaInfoCircle, FaUsers, FaPrayingHands } from "react-icons/fa";
 
 import { FiImage } from "react-icons/fi";
 import { HiOutlineMenu, HiOutlineSupport, HiOutlineX } from "react-icons/hi";
