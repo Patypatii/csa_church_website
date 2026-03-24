@@ -111,4 +111,17 @@ app.post("/api/choir/gallery", upload.single("file"), (req, res) => {
 
 
 
+// Error Handler
+app.use((err, req, res, next) => {
+  logger.error(`${err.message} - ${req.method} ${req.url} - ${req.ip}`);
+  if (err.stack) logger.debug(err.stack);
+  
+  const status = err.status || 500;
+  res.status(status).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+    error: process.env.NODE_ENV === "development" ? err.stack : undefined
+  });
+});
+
 export { app };

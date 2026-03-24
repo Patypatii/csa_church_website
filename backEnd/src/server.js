@@ -7,6 +7,10 @@ process.on('uncaughtException', (err) => {
   logger.error('Uncaught Exception:', err);
 });
 
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 
 
 // function that initiate express server , it waits for postgree db and mongo db to connect then runs the server at defined port

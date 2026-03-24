@@ -38,7 +38,7 @@ router.delete('/term', bulkDeleteArchivedOfficials);
 router.delete('/term/:officialId', deleteArchivedOfficial);
 
 // Basic CRUD routes for Officials
-router.get('/list', getAllOfficials); // Use /list to avoid conflict with /:id if not careful
+router.get('/list', getAllOfficials); 
 router.get('/export', exportOfficials);
 router.get('/:id', getOfficialById);
 router.post('/', upload.single('photo'), createOfficial);

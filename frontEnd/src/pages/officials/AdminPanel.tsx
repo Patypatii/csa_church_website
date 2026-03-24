@@ -31,7 +31,7 @@ export default function AdminPanel() {
     terms, currentTerm, archiveOfficials, isArchiving 
   } = useTerms();
 
-  const jumuiyaApi = useJumuiyaOfficials(currentTerm?.id);
+  const jumuiyaApi = useJumuiyaOfficials({ termId: currentTerm?.id });
 
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 

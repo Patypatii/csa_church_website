@@ -8,36 +8,39 @@ export interface JumuiyaOfficial {
   name: string;
   category: string;
   position: string;
-  contact: string;
-  photo: string | null;
-  election_term_id: number | null;
-  term_of_service: string | null;
-  term_name?: string;
-  term_year?: number;
-  status: string;
+  contact?: string;
+  photo?: string;
+  term_of_service?: string;
+  status?: string;
 }
 
-export function useJumuiyaOfficials(termId?: number | null) {
+export function useJumuiyaOfficials(filters: { termId?: number | string; category?: string } = {}) {
   const queryClient = useQueryClient();
   const { token } = useAuth();
+  const { termId, category } = filters;
 
   const officialsQuery = useQuery({
-    queryKey: ['jumuiya_officials', termId],
+    queryKey: ['jumuiya-officials', termId, category],
     queryFn: async () => {
-      const url = termId 
-        ? `${API_JUMUIYA_BASE}/?term_id=${termId}`
-        : `${API_JUMUIYA_BASE}/`;
+      let url = `${API_JUMUIYA_BASE}/list`;
+      const queryParams = new URLSearchParams();
+      if (termId) queryParams.append('term_id', String(termId));
+      if (category) queryParams.append('category', category);
+      
+      const queryString = queryParams.toString();
+      if (queryString) url += `?${queryString}`;
+      
       const res = await fetch(url);
-      if (!res.ok) throw new Error('Failed to fetch jumuiya officials');
+      if (!res.ok) throw new Error('Failed to fetch Jumuiya officials');
       const json = await res.json();
       return json.data as JumuiyaOfficial[];
     },
   });
 
-  const addOfficialMutation = useMutation({
+  const addMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const res = await fetch(API_JUMUIYA_BASE, {
-        method: 'POST',
+      const res = await fetch(API_JUMUIYA_BASE, { 
+        method: 'POST', 
         body: formData,
         headers: {
           'Authorization': `Bearer ${token}`
@@ -45,13 +48,12 @@ export function useJumuiyaOfficials(termId?: number | null) {
       });
       if (!res.ok) {
         const json = await res.json();
-        throw new Error(json.message || 'Failed to add jumuiya official');
+        throw new Error(json.message || 'Failed to add Jumuiya official');
       }
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['jumuiya_officials'] });
-      queryClient.invalidateQueries({ queryKey: ['currentTerm'] });
+      queryClient.invalidateQueries({ queryKey: ['jumuiya-officials'] });
       toast.success('Jumuiya official added successfully!');
     },
     onError: (error: Error) => {
@@ -59,10 +61,10 @@ export function useJumuiyaOfficials(termId?: number | null) {
     },
   });
 
-  const updateOfficialMutation = useMutation({
+  const updateMutation = useMutation({
     mutationFn: async ({ id, formData }: { id: number; formData: FormData }) => {
-      const res = await fetch(`${API_JUMUIYA_BASE}/${id}`, {
-        method: 'PUT',
+      const res = await fetch(`${API_JUMUIYA_BASE}/${id}`, { 
+        method: 'PUT', 
         body: formData,
         headers: {
           'Authorization': `Bearer ${token}`
@@ -70,12 +72,12 @@ export function useJumuiyaOfficials(termId?: number | null) {
       });
       if (!res.ok) {
         const json = await res.json();
-        throw new Error(json.message || 'Failed to update jumuiya official');
+        throw new Error(json.message || 'Failed to update Jumuiya official');
       }
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['jumuiya_officials'] });
+      queryClient.invalidateQueries({ queryKey: ['jumuiya-officials'] });
       toast.success('Jumuiya official updated successfully!');
     },
     onError: (error: Error) => {
@@ -83,9 +85,9 @@ export function useJumuiyaOfficials(termId?: number | null) {
     },
   });
 
-  const deleteOfficialMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`${API_JUMUIYA_BASE}/${id}`, {
+      const res = await fetch(`${API_JUMUIYA_BASE}/${id}`, { 
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -93,40 +95,13 @@ export function useJumuiyaOfficials(termId?: number | null) {
       });
       if (!res.ok) {
         const json = await res.json();
-        throw new Error(json.message || 'Failed to delete jumuiya official');
+        throw new Error(json.message || 'Failed to delete Jumuiya official');
       }
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['jumuiya_officials'] });
+      queryClient.invalidateQueries({ queryKey: ['jumuiya-officials'] });
       toast.success('Jumuiya official deleted successfully!');
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
-  });
-
-  const archiveJumuiyaOfficialsMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const res = await fetch(`${API_JUMUIYA_BASE}/archive`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) {
-        const json = await res.json();
-        throw new Error(json.message || 'Failed to archive jumuiya officials');
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['jumuiya_officials'] });
-      queryClient.invalidateQueries({ queryKey: ['terms'] });
-      queryClient.invalidateQueries({ queryKey: ['currentTerm'] });
-      toast.success('Jumuiya officials archived successfully!');
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -138,14 +113,12 @@ export function useJumuiyaOfficials(termId?: number | null) {
     isLoading: officialsQuery.isLoading,
     isError: officialsQuery.isError,
     error: officialsQuery.error,
-    addOfficial: addOfficialMutation.mutateAsync,
-    isAdding: addOfficialMutation.isPending,
-    updateOfficial: updateOfficialMutation.mutateAsync,
-    isUpdating: updateOfficialMutation.isPending,
-    deleteOfficial: deleteOfficialMutation.mutateAsync,
-    isDeleting: deleteOfficialMutation.isPending,
-    archiveOfficials: archiveJumuiyaOfficialsMutation.mutateAsync,
-    isArchiving: archiveJumuiyaOfficialsMutation.isPending,
-    fetchOfficials: officialsQuery.refetch,
+    refetch: officialsQuery.refetch,
+    addOfficial: addMutation.mutateAsync,
+    isAdding: addMutation.isPending,
+    updateOfficial: updateMutation.mutateAsync,
+    isUpdating: updateMutation.isPending,
+    deleteOfficial: deleteMutation.mutateAsync,
+    isDeleting: deleteMutation.isPending,
   };
 }
