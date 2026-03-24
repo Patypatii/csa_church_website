@@ -52,13 +52,9 @@ export class HubLandingPage {
         const a = document.createElement('a');
         a.className = 'csa-hub-card csa-hub-card--glow';
         
-        // Point to the backend route or specialized frontend route
-        // If it's the choir, we load the choir.html
-        if (mod.id === 'choir') {
-            a.href = './choir.html';
-        } else {
-            a.href = mod.path; 
-        }
+        // Always use the proxied path provided by the backend meta
+        a.href = mod.path; 
+
 
         a.style.setProperty('--card-icon-color', mod.color);
 
