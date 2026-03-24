@@ -17,6 +17,8 @@ import Readings from "./pages/Devotions/pages/Readings";
 import Dashboard from "./pages/Devotions/pages/Dashboard";
 import Layout from "./pages/Devotions/components/Layout";
 import Appadmin from "./pages/Devotions/Adminpage/App"
+import AdminPanel from "./pages/officials/AdminPanel";
+import PublicView from "./pages/officials/PublicView";
 import {
   AboutSection,
   CommunitySection,
@@ -28,6 +30,10 @@ import ProjectsSection from "./pages/Landing/components/sections/projects";
 import OfficialsSection from "./pages/Landing/components/sections/officials";
 import JumuiyaSection from "./pages/Landing/components/sections/jumuiya";
 import ImageSlider from "./pages/Landing/components/ImageSlider";
+import JumuiyaLanding from "./pages/Jumuiya/JumuiyaLanding";
+import JumuiyaDetail from "./pages/Jumuiya/JumuiyaDetail";
+import { DataProvider } from "./pages/Jumuiya/context/DataContext";
+
 import { useAuth } from "./context/AuthContext";
 import { PublicRoute, ProtectedRoute } from "./Regulator";
 
@@ -75,25 +81,32 @@ const App: React.FC = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <Authorisation />
-            </PublicRoute>
-          }
-        >
-          <Route index element={<Login />} />
-          <Route path="reset" element={<Reset />} />
-          <Route path="otp/:reg" element={<ResetPasswordPage />} />
-        </Route>
-        <Route path="/admin/quiz" element={<Appadmin />}/>
+        <Route element={<Pageoulet />}>
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <Authorisation />
+              </PublicRoute>
+            }
+          >
+            <Route index element={<Login />} />
+            <Route path="reset" element={<Reset />} />
+            <Route path="otp/:reg" element={<ResetPasswordPage />} />
+          </Route>
 
-        <Route path="/" element={<Pageoulet />}>
-        <Route index element={<Home />} />
+          <Route index element={<Home />} />
+          <Route path="/officials" element={<PublicView />} />
+          <Route path="/jumuiya">
+            <Route index element={<DataProvider><JumuiyaLanding /></DataProvider>} />
+            <Route path=":name" element={<DataProvider><JumuiyaDetail /></DataProvider>} />
+          </Route>
+
+          <Route path="/admin/quiz" element={<Appadmin />} />
+          <Route path="/admin/officials" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
 
           <Route
-            path="devotions"
+            path="/devotions"
             element={
               <ProtectedRoute>
                 <Layout />
@@ -108,6 +121,7 @@ const App: React.FC = () => {
             <Route path="challenge" element={<Challenge />} />
           </Route>
         </Route>
+
       </>,
     ),
   );

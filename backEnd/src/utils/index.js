@@ -1,4 +1,8 @@
 
+import fs from "fs";
+import  cloudinary  from "../Configs/cloudinaryConfigs.js";
+import { testDb } from "../Configs/dbConfig.js";
+import logger from "../logger/winston.js"
 
 
 export const parseQuestionBlock = (block) => {
@@ -49,7 +53,8 @@ export const parseQuestionBlock = (block) => {
 
 
 export const sansitiseAndParseQuestionBlock = (content)=>{
-     content.split(/(?:\n\s*\n|---)/) // split on blank lines OR ---
+
+   const array =  content.split(/(?:\n\s*\n|---)/) // split on blank lines OR ---
           .map((block, i) => {
             const parsed = parseQuestionBlock(block);
             if (!parsed) {
@@ -60,6 +65,97 @@ export const sansitiseAndParseQuestionBlock = (content)=>{
           })
           .filter(Boolean);
 
-          return content
+          return array
 }
+
+
+// Upload a single file to Cloudinary and save its metadata in the database
+ export async function uploadOneFile(file) {
+  const result = await cloudinary.uploader.upload(file.path, {
+    resource_type: "auto",
+  });
+
+  if (!result || !result.secure_url) {
+    throw new Error("Cloudinary upload failed");
+  }
+
+  // Remove temporary file created by Multer
+  if (fs.existsSync(file.path)) {
+    fs.unlinkSync(file.path);
+  }
+
+  // Insert metadata into database
+  const insertQuery =
+    "INSERT INTO uploads (public_id, url, format, resource_type, created_at) VALUES ($1,$2,$3,$4,$5) RETURNING *";
+  const values = [
+    result.public_id,
+    result.secure_url,
+    result.format,
+    result.resource_type,
+    result.created_at,
+  ];
+
+  const dbResult = await testDb.query(insertQuery, values);
+
+  // Return a structured response for the client
+  return  dbResult.rows[0]
+}
+
+
+// Upload multiple files to Cloudinary and save metadata in DB
+// Includes one retry attempt for failed uploads, then cleans up failed files
+export async function uploadManyFiles(files, retry = false) {
+  // Try uploading all files in parallel
+  const settledResults = await Promise.allSettled(
+    files.map((file) => uploadOneFile(file))
+  );
+
+  const successes = []; // store successful uploads
+  const failures = [];  // store failed uploads
+
+  // Collect results
+  for (const [index, result] of settledResults.entries()) {
+    if (result.status === "fulfilled") {
+      successes.push(result.value);
+    } else {
+      failures.push(files[index]);
+      logger.warn(
+        `Upload failed for ${files[index].originalname}: ${result.reason.message}`
+      );
+    }
+  }
+
+  // Retry once if there are failures and retry flag is false
+  if (failures.length > 0 && !retry) {
+    logger.info(`Retrying ${failures.length} failed upload(s)...`);
+    const retryResults = await uploadManyFiles(failures, true); // retry once to avoid endress looping incae a file never upload successifuly
+    successes.push(...retryResults.successes);
+
+    // Clean up any files that still failed after retry
+    for (const failedFile of retryResults.failures) {
+      if (fs.existsSync(failedFile.path)) {
+        fs.unlinkSync(failedFile.path);
+        logger.info(`Deleted failed file from disk: ${failedFile.originalname}`);
+      }
+    }
+
+    return {
+      success: true,
+      message: "Files uploaded with some retries",
+      count: successes.length,
+      data: successes,
+      failures: retryResults.failures.map((f) => f.originalname),
+    };
+  }
+
+  // Final structured response for client
+  return {
+    success: true,
+    message: failures.length === 0   ? "All files uploaded successfully"  : "Some files failed to upload",
+    count: successes.length,
+    data: successes,
+    failures: failures.map((f) => f.originalname),
+  };
+}
+
 

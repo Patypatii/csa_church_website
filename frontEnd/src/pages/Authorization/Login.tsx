@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios, { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import {  FaHome } from "react-icons/fa";
+import { FaHome } from "react-icons/fa";
 
 interface ErrorResponse {
   message: string;
@@ -20,8 +20,8 @@ const Login: React.FC = () => {
       const response = await axios.post(
         "http://localhost:3001/authentication/v1/login",
         {
-          username,
-          password,
+          user: username,
+          passWord: password,
         }
       );
       console.log("Login response:", response.data);
@@ -55,11 +55,11 @@ const Login: React.FC = () => {
           < FaHome className="w-4 h-4 mr-1" />
           Back to  Home
         </button>
-        
+
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
           Welcome Back
         </h2>
-        
+
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

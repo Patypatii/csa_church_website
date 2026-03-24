@@ -1,5 +1,5 @@
 import React from "react";
-import { FaHome, FaInfoCircle, FaUsers ,FaPrayingHands } from "react-icons/fa";
+import { FaHome, FaInfoCircle, FaUsers, FaPrayingHands } from "react-icons/fa";
 
 import { FiImage } from "react-icons/fi";
 import { HiOutlineMenu, HiOutlineSupport, HiOutlineX } from "react-icons/hi";
@@ -31,12 +31,13 @@ const Headers = () => {
           </Link>
 
           <Link
-            to="/jumuia"
+            to="/jumuiya"
             className="flex flex-row items-center gap-1 px-4 py-2"
           >
             <FaInfoCircle className="inline w-5 h-5" />
-            <li className="font-semibold">Jumuia</li>
+            <li className="font-semibold">Jumuiya</li>
           </Link>
+
 
           <Link
             to="/officials"
@@ -116,12 +117,13 @@ const Headers = () => {
                 <li className="font-semibold">Community Hub</li>
               </Link>
               <Link
-                to="/jumuia"
+                to="/jumuiya"
                 className="flex flex-row items-center gap-1 px-4 py-2"
               >
                 <FaInfoCircle className="inline w-5 h-5" />
-                <li className="font-semibold">Jumuia</li>
+                <li className="font-semibold">Jumuiya</li>
               </Link>
+
               <Link
                 to="/officials"
                 className="flex flex-row items-center gap-1 px-4 py-2"

@@ -13,9 +13,8 @@ const pool = new Pool({
   ssl: process.env.DB_HOST === "localhost" ? false : { rejectUnauthorized: false },
 });
 
-export const testDb = {
-  query: (text, params) => pool.query(text, params),
-};
+export const db = pool; // Alias for backward compatibility
+export const testDb = { query: (text, params) => pool.query(text, params),};
 
 export const connectDb = async () => {
   let client;
@@ -41,7 +40,7 @@ export const connectDb = async () => {
 // Questions can vary in structure (some may have 4 answers, others 5, some with longer explanations). MongoDB's document model makes it easy to store these without rigid table definitions.
 export let dbInstance = undefined;
 
-const connectToMongoDb = async () => {
+  export  const connectToMongoDb = async () => {
   try {
     const connectionInstance = await mongoose.connect(`${process.env.MONGODB_URI}`);
     dbInstance = connectionInstance;
@@ -52,5 +51,6 @@ const connectToMongoDb = async () => {
   }
 };
 
-export default connectToMongoDb;
+
+
 
