@@ -119,6 +119,16 @@ export const getModule = (req, res) => {
         return res.status(404).json({ error: 'Module not found.' });
     }
 
+    // Determine if it's a request for the page or just data
+    if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        if (meta.id === 'choir') {
+            return res.sendFile(path.join(__dirname, '../../../frontEnd/src/pages/sacramental/pages/choir.html'));
+        }
+        // Fallback or other modules can use a shared module.html if it exists
+        // Since we only have choir.html, we'll serve it as the standard TS view for now
+        return res.sendFile(path.join(__dirname, '../../../frontEnd/src/pages/sacramental/pages/choir.html'));
+    }
+
     const fallback = FALLBACKS[meta.id] || {};
 
     const moduleInfo = {
@@ -129,7 +139,7 @@ export const getModule = (req, res) => {
         gallery:       BackendDataService.load(`${meta.id}_gallery.json`,       fallback.gallery       || [])
     };
 
-    // Special case for choir
+    // Special case for choir data
     if (meta.id === 'choir') {
         const choirOfficials  = BackendDataService.load('officials.json',  []);
         const choirActivities = BackendDataService.load('activities.json', []);
@@ -139,4 +149,5 @@ export const getModule = (req, res) => {
 
     res.json(moduleInfo);
 };
+
 
