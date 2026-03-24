@@ -65,8 +65,31 @@ function Navigation() {
           <>
             <ul className="hidden md:flex items-center space-x-8">
               <li>
+                <button
+                  onClick={() => navigate("/community-hub")}
+                  className="flex items-center gap-2 text-gray-600 hover:text-blue-600 hover:scale-105 font-medium transition-all duration-300 transform"
+                >
+                   <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-5 h-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18"
+                    />
+                  </svg>
+                  <span>Community Hub</span>
+                </button>
+              </li>
+              <li>
                 <a
                   href="/#jumuiya"
+
                   className="flex items-center gap-2 text-gray-600 hover:text-blue-600 hover:scale-105 font-medium transition-all duration-300 transform"
                 >
                   <svg
@@ -227,8 +250,31 @@ function Navigation() {
                 </button>
               </li>
               <li>
+                <button
+                  onClick={() => navigate("/community-hub")}
+                  className="flex items-center gap-2 text-gray-600 hover:text-blue-600 hover:scale-105 font-medium transition-all duration-300 transform"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-5 h-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18"
+                    />
+                  </svg>
+                  <span>Community Hub</span>
+                </button>
+              </li>
+              <li>
                 <a
                   href="/#about"
+
                   className={`flex items-center gap-2 font-medium transition-all duration-300 transform hover:scale-105 ${activeSection === "about" ? "text-blue-600" : "text-gray-600 hover:text-blue-600"}`}
                 >
                   <svg
@@ -402,8 +448,34 @@ function Navigation() {
           {user ? (
             <ul className="py-4 px-4 space-y-4">
               <li>
+                <button
+                  onClick={() => {
+                    navigate("/community-hub");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 text-gray-600 hover:text-blue-600 font-medium transition-colors py-2"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-5 h-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18"
+                    />
+                  </svg>
+                  <span>Community Hub</span>
+                </button>
+              </li>
+              <li>
                 <a
                   href="/#jumuiya"
+
                   className="flex items-center gap-3 text-gray-600 hover:text-blue-600 font-medium transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -545,8 +617,34 @@ function Navigation() {
                 </button>
               </li>
               <li>
+                <button
+                  onClick={() => {
+                    navigate("/community-hub");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 text-gray-600 hover:text-blue-600 font-medium transition-colors py-2"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-5 h-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18"
+                    />
+                  </svg>
+                  <span>Community Hub</span>
+                </button>
+              </li>
+              <li>
                 <a
                   href="/#about"
+
                   className={`flex items-center gap-3 font-medium transition-colors py-2 ${activeSection === "about" ? "text-blue-600" : "text-gray-600 hover:text-blue-600"}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

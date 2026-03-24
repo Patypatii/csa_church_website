@@ -33,6 +33,8 @@ import ImageSlider from "./pages/Landing/components/ImageSlider";
 import JumuiyaLanding from "./pages/Jumuiya/JumuiyaLanding";
 import JumuiyaDetail from "./pages/Jumuiya/JumuiyaDetail";
 import { DataProvider } from "./pages/Jumuiya/context/DataContext";
+import CommunityHub from "./pages/sacramental/CommunityHub";
+
 
 import { useAuth } from "./context/AuthContext";
 import { PublicRoute, ProtectedRoute } from "./Regulator";
@@ -101,6 +103,8 @@ const App: React.FC = () => {
             <Route index element={<DataProvider><JumuiyaLanding /></DataProvider>} />
             <Route path=":name" element={<DataProvider><JumuiyaDetail /></DataProvider>} />
           </Route>
+          <Route path="/community-hub" element={<CommunityHub />} />
+
 
           <Route path="/admin/quiz" element={<Appadmin />} />
           <Route path="/admin/officials" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
