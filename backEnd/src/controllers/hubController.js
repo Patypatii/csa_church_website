@@ -97,23 +97,30 @@ const modulesMeta = [
     }
 ];
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export const getIndex = (_req, res) => {
-    res.render('index', { title: 'Community Hub', modules: modulesMeta });
+    // Serve the static TS/CSS version's index.html
+    res.sendFile(path.join(__dirname, '../../../frontEnd/src/pages/sacramental/pages/index.html'));
+};
+
+export const getHubData = (_req, res) => {
+    res.json(modulesMeta);
 };
 
 export const getModule = (req, res) => {
     const meta = modulesMeta.find(m => m.path === `/hub-view${req.path}`);
 
     if (!meta) {
-        return res.status(404).render('module', {
-            title: 'Not Found',
-            module: { title: 'Not Found', description: 'Module not found.' }
-        });
+        return res.status(404).json({ error: 'Module not found.' });
     }
 
     const fallback = FALLBACKS[meta.id] || {};
 
-    // Clone meta and load dynamic data — fallback defaults ensure content never disappears
     const moduleInfo = {
         ...meta,
         officials:     BackendDataService.load(`${meta.id}_officials.json`,     fallback.officials     || []),
@@ -127,8 +134,9 @@ export const getModule = (req, res) => {
         const choirOfficials  = BackendDataService.load('officials.json',  []);
         const choirActivities = BackendDataService.load('activities.json', []);
         const choirInfo = { ...meta, officials: choirOfficials, activities: choirActivities };
-        return res.render('choir', { title: meta.title, module: choirInfo });
+        return res.json(choirInfo);
     }
 
-    res.render('module', { title: meta.title, module: moduleInfo });
+    res.json(moduleInfo);
 };
+
