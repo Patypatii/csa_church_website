@@ -27,6 +27,34 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/hub-view': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/css': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/styles': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/dist': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/components': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+
+
+
     },
   },
 })

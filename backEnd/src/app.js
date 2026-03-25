@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import fs from "fs";
 import cors from "cors";
 import multer from 'multer';
+
 import apiRoutes from "./routers/index.js";
 import { api } from "./routers/api.js";
 import { hubRouter } from "./routers/hubRouter.js";
@@ -45,7 +46,7 @@ const limiter = rateLimit({
   keyGenerator: (req, res) => {
     return req.clientIp;
   },
-  handler: (_, __, ___, options) => {
+  handler: (req, res, next, options) => {
     res.status(options.statusCode || 429).json({
       error: `There are too many requests. You are only allowed ${options.max
         } requests per ${options.windowMs / 60000} minutes`,
@@ -58,21 +59,24 @@ app.use(morganMiddleware);
 
 
 // Static Files
-app.use(express.static(path.join(__dirname, "../../frontEnd/public")));
-app.use(express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental/public")));
-app.use("/community-assets/backend",express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental/dist/backend"),),);
+app.use('/hub-view', express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental")));
+app.use(express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental")));
+
 app.use("/community-assets", express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental")),);
+
 app.use("/localFileUploads", express.static(path.join(process.cwd(), "localFileUploads")));
 app.use("/uploads", express.static(path.join(process.cwd(), "localFileUploads")));
 
 
 // Routes
-app.get('/', (_req, res) => res.redirect('/community-hub'));
+app.get('/', (_req, res) => res.redirect('/hub-view'));
+
 app.use("/authentication", apiRoutes);
 app.use("/api/officials", officialsRouter);
 app.use("/api/jumuiya-officials", jumuiyaOfficialsRouter);
 app.use("/api", api);
-app.use("/community-hub", hubRouter);
+app.use("/hub-view", hubRouter);
+
 app.use("/questions", apiRoutes);
 app.use("/files" , apiRoutes)
 
@@ -107,5 +111,18 @@ app.post("/api/choir/gallery", upload.single("file"), (req, res) => {
 
 
 
+
+// Error Handler
+app.use((err, req, res, next) => {
+  logger.error(`${err.message} - ${req.method} ${req.url} - ${req.ip}`);
+  if (err.stack) logger.debug(err.stack);
+  
+  const status = err.status || 500;
+  res.status(status).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+    error: process.env.NODE_ENV === "development" ? err.stack : undefined
+  });
+});
 
 export { app };

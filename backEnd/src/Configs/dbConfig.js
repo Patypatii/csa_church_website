@@ -11,9 +11,21 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   ssl: process.env.DB_HOST === "localhost" ? false : { rejectUnauthorized: false },
+  max: 10,                      // max connections in pool
+  idleTimeoutMillis: 30000,     // close idle connections after 30s
+  connectionTimeoutMillis: 10000, // fail if can't connect within 10s
 });
 
-export const testDb = { query: (text, params) => pool.query(text, params),};
+// Prevent pool errors from crashing the server
+pool.on('error', (err) => {
+  logger.error('Unexpected PostgreSQL pool error:', err.message);
+});
+
+export const db = pool; // Alias for backward compatibility
+export const testDb = {
+  query: (text, params) => pool.query(text, params),
+  connect: () => pool.connect(),  // needed by controllers for transactions
+};
 
 export const connectDb = async () => {
   let client;
@@ -49,6 +61,7 @@ export let dbInstance = undefined;
     // process.exit(1) removed - server continues
   }
 };
+
 
 
 

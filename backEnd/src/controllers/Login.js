@@ -35,7 +35,7 @@ const Login = async (req, res) => {
       return res.status(401).json({ error: "Invalid username or password" });
     }
 
-    if(!user.email) {
+    if (!user.email) {
       logger.warn(`Login attempt with missing email for user: ${userReg}`);
       return res.status(401).json({ error: "User email not found" });
     }
@@ -49,7 +49,7 @@ const Login = async (req, res) => {
     res.json({
       status: "success",
       message: "Login successful",
-      
+
       token: token,
     });
   } catch (err) {

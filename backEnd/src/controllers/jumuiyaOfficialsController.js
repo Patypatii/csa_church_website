@@ -13,12 +13,12 @@ import {
 import logger from "../logger/winston.js";
 
 export const VALID_JUMUIYAS = [
-  'St. Antony',
+  'St. Anthony',
   'St. Augustine',
   'St. Catherine',
   'St. Dominic',
   'St. Elizabeth',
-  'Maria Gorreti',
+  'St. Maria Goretti',
   'St. Monica'
 ];
 
@@ -39,12 +39,12 @@ export const VALID_ROLES = [
 const JUMUIYA_SORT_SQL = `
 ORDER BY 
   CASE 
-    WHEN o.category = 'St. Antony' THEN 1
+    WHEN o.category = 'St. Anthony' THEN 1
     WHEN o.category = 'St. Augustine' THEN 2
     WHEN o.category = 'St. Catherine' THEN 3
     WHEN o.category = 'St. Dominic' THEN 4
     WHEN o.category = 'St. Elizabeth' THEN 5
-    WHEN o.category = 'Maria Gorreti' THEN 6
+    WHEN o.category = 'St. Maria Goretti' THEN 6
     WHEN o.category = 'St. Monica' THEN 7
     ELSE 8
   END,
@@ -68,6 +68,7 @@ export const getAllJumuiyaOfficials = async (req, res) => {
     const termId = req.query.term_id;
     const includeArchived = req.query.include_archived === 'true';
     const termOfService = req.query.term_of_service;
+    const category = req.query.category;
     
     let query;
     let params = [];
@@ -81,8 +82,14 @@ export const getAllJumuiyaOfficials = async (req, res) => {
         WHERE (o.election_term_id = $1 OR o.status = 'active' OR o.status IS NULL)
         AND (o.status = 'active' OR o.status IS NULL)`;
       params.push(termId);
+      
+      if (category) {
+        query += ` AND o.category = $${params.length + 1}`;
+        params.push(category);
+      }
+      
       if (termOfService) {
-        query += ` AND o.term_of_service = $2`;
+        query += ` AND o.term_of_service = $${params.length + 1}`;
         params.push(termOfService);
       }
       query += ` ${JUMUIYA_SORT_SQL}`;
@@ -91,9 +98,16 @@ export const getAllJumuiyaOfficials = async (req, res) => {
         SELECT o.id, o.name, o.category, o.photo, o.position, o.contact, o.term_of_service, o.created_at, o.status,
                et.name as term_name, et.year as term_year
         FROM jumuiya_officials o
-        LEFT JOIN election_terms et ON o.election_term_id = et.id`;
+        LEFT JOIN election_terms et ON o.election_term_id = et.id
+        WHERE 1=1`;
+      
+      if (category) {
+        query += ` AND o.category = $${params.length + 1}`;
+        params.push(category);
+      }
+      
       if (termOfService) {
-        query += ` WHERE o.term_of_service = $1`;
+        query += ` AND o.term_of_service = $${params.length + 1}`;
         params.push(termOfService);
       }
       query += ` ORDER BY o.status, et.year DESC ${JUMUIYA_SORT_SQL.replace('ORDER BY', ',')}`;
@@ -104,8 +118,14 @@ export const getAllJumuiyaOfficials = async (req, res) => {
         FROM jumuiya_officials o
         LEFT JOIN election_terms et ON o.election_term_id = et.id
         WHERE (o.status = 'active' OR o.status IS NULL)`;
+      
+      if (category) {
+        query += ` AND o.category = $${params.length + 1}`;
+        params.push(category);
+      }
+        
       if (termOfService) {
-        query += ` AND o.term_of_service = $1`;
+        query += ` AND o.term_of_service = $${params.length + 1}`;
         params.push(termOfService);
       }
       query += ` ${JUMUIYA_SORT_SQL}`;
@@ -122,6 +142,9 @@ export const getAllJumuiyaOfficials = async (req, res) => {
 export const getJumuiyaOfficialById = async (req, res) => {
   try {
     const { id } = req.params;
+    if (isNaN(Number(id))) {
+      return res.status(400).json({ success: false, message: "Invalid ID format" });
+    }
     const result = await pool.query('SELECT * FROM jumuiya_officials WHERE id = $1', [id]);
 
     if (result.rows.length === 0) {
@@ -138,13 +161,16 @@ export const getJumuiyaOfficialById = async (req, res) => {
 export const createJumuiyaOfficial = async (req, res) => {
   try {
     const { name, category, position, contact, term_of_service } = req.body;
+    logger.info(`Creating Jumuiya official: ${name}, ${category}, ${position}`);
 
     if (!name || !category || !position) {
+        logger.warn('Missing required fields for Jumuiya official');
         return res.status(400).json({ success: false, message: 'Name, Jumuiya, and Position are required' });
     }
 
     const normalizedContact = normalizePhone(contact);
     if (contact && !isValidPhone(contact)) {
+      logger.warn(`Invalid phone number: ${contact}`);
       return res.status(400).json({ success: false, message: 'Please provide a valid phone number' });
     }
 
@@ -154,15 +180,18 @@ export const createJumuiyaOfficial = async (req, res) => {
         [normalizedContact]
       );
       if (dup.rows.length > 0) {
+        logger.warn(`Contact already in use: ${normalizedContact}`);
         return res.status(409).json({ success: false, message: 'Contact already in use by another official' });
       }
     }
 
     if (!VALID_JUMUIYAS.includes(category)) {
+      logger.warn(`Invalid Jumuiya category: ${category}`);
       return res.status(400).json({ success: false, message: `Invalid Jumuiya. Must be one of: ${VALID_JUMUIYAS.join(', ')}` });
     }
 
     if (!VALID_ROLES.includes(position)) {
+      logger.warn(`Invalid position: ${position}`);
       return res.status(400).json({ success: false, message: `Invalid Role. Must be one of: ${VALID_ROLES.join(', ')}` });
     }
 
@@ -173,6 +202,7 @@ export const createJumuiyaOfficial = async (req, res) => {
     );
 
     if (posDup.rows.length > 0) {
+      logger.warn(`Position already occupied: ${position} in ${category}`);
       return res.status(409).json({
         success: false,
         message: `The position '${position}' for ${category} is already occupied by ${posDup.rows[0].name}`

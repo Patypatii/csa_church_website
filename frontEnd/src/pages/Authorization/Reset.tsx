@@ -102,7 +102,7 @@ const Reset: React.FC = () => {
               placeholder="Enter your email"
             />
           </div>
- 
+
 
 
           <div>

@@ -25,6 +25,7 @@ export function useHistory(filters: { termId?: string; onlyArchived?: boolean; p
 
   const historyQuery = useQuery({
     queryKey: ['history', filters],
+    enabled: !!termId,
     queryFn: async () => {
       let url = getBaseUrl();
       if (termId) {
