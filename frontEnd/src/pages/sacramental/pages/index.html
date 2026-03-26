@@ -12,12 +12,24 @@
   <link rel="stylesheet" href="/hub-view/styles/reset.css">
   <link rel="stylesheet" href="/hub-view/styles/components.css">
   <link rel="stylesheet" href="/hub-view/styles/hub.css">
+  <script>
+    window.onerror = function(msg, url, line, col, error) {
+      if (window.parent) {
+        window.parent.postMessage({
+          type: 'HUB_ERROR',
+          error: msg + ' at ' + url + ':' + line + ':' + col
+        }, '*');
+      }
+      return false;
+    };
+  </script>
 </head>
 
 <body class="csa-hub-module">
   <header class="csa-hub-header">
     <div class="csa-choir-container">
       <h1 class="csa-hub-title">Catholic Community Hub</h1>
+      <p id="debug-hub-status" style="color: white; font-size: 10px; opacity: 0.5;">HUB COMPONENT: LOADED</p>
     </div>
   </header>
 

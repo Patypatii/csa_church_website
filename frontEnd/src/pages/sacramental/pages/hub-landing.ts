@@ -3,7 +3,7 @@
  * TypeScript component implementing the ministry grid
  */
 
-import { ApiResponse } from '../../types.js';
+import { HubMessenger } from '../services/HubMessenger.js';
 
 interface HubModule {
     id: string;
@@ -25,6 +25,9 @@ export class HubLandingPage {
 
     async init(): Promise<void> {
         try {
+            // Notify parent that we are in the main hub grid
+            HubMessenger.notifyModuleLoaded(null);
+
             const response = await fetch(this.baseUrl);
             if (!response.ok) throw new Error('Failed to fetch hub data');
             
@@ -52,8 +55,12 @@ export class HubLandingPage {
         const a = document.createElement('a');
         a.className = 'csa-hub-card csa-hub-card--glow';
         
-        // Always use the proxied path provided by the backend meta
-        a.href = mod.path; 
+        // Instead of immediate navigation in iframe, request the parent to update URL
+        a.href = 'javascript:void(0)';
+        a.onclick = (e) => {
+            e.preventDefault();
+            HubMessenger.requestParentNavigate(mod.id);
+        };
 
 
         a.style.setProperty('--card-icon-color', mod.color);

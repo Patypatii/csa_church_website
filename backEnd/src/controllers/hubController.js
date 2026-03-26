@@ -113,18 +113,25 @@ export const getHubData = (_req, res) => {
 };
 
 export const getModule = (req, res) => {
-    const meta = modulesMeta.find(m => m.path === `/hub-view${req.path}`);
+    // Resolve module by ID from path or params
+    const id = req.params.moduleId || req.path.replace(/^\//, '');
+    console.log(`[HubController] Module resolution attempt: ID="${id}", Path="${req.path}"`);
+
+    const meta = modulesMeta.find(m => m.id === id) || 
+                 modulesMeta.find(m => m.path === `/hub-view${req.path}`) ||
+                 modulesMeta.find(m => m.path === `/hub-view/${id}`);
 
     if (!meta) {
-        return res.status(404).json({ error: 'Module not found.' });
+        console.error(`[HubController] CRITICAL: Module meta NOT found for "${id}"`);
+        return res.status(404).json({ error: `Module "${id}" not found.` });
     }
 
     // Determine if it's a request for the page or just data
     if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        console.log(`[HubController] Serving HTML template for module: ${meta.id}`);
         if (meta.id === 'choir') {
             return res.sendFile(path.join(__dirname, '../../../frontEnd/src/pages/sacramental/pages/choir.html'));
         }
-        // Other modules use the generic module.html which excludes choir-specific UI like registration
         return res.sendFile(path.join(__dirname, '../../../frontEnd/src/pages/sacramental/pages/module.html'));
     }
 

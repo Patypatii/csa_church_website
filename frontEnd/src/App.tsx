@@ -122,6 +122,31 @@ const App: React.FC = () => {
             <Route path="rosary" element={<Rosary />} />
             <Route path="challenge" element={<Challenge />} />
           </Route>
+
+          <Route
+            path="/jumuiya"
+            element={
+              <ProtectedRoute>
+                <DataProvider>
+                  <JumuiyaLanding />
+                </DataProvider>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/jumuiya/:id"
+            element={
+              <ProtectedRoute>
+                <DataProvider>
+                  <JumuiyaDetail />
+                </DataProvider>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/community-hub/:moduleSlug?"
+            element={<CommunityHub />}
+          />
         </Route>
 
       </>,
