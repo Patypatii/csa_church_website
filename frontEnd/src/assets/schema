@@ -1,6 +1,8 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-CREATE TABLE members (
+
+CREATE TABLE  IF NOT EXISTS members (
     member_id VARCHAR(30) PRIMARY KEY NOT NULL,
+    jumuia_id UUID NOT NULL REFERENCES sub_groups(group_id) ,-- scope isolation
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     gender VARCHAR(10),
@@ -11,6 +13,40 @@ CREATE TABLE members (
     password VARCHAR NOT NULL,
     join_date DATE DEFAULT CURRENT_DATE
 );
+
+CREATE TABLE  IF NOT EXISTS roles (
+    role_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    role_name VARCHAR(50) NOT NULL
+);
+CREATE TABLE  IF NOT EXISTS member_roles (
+    member_id VARCHAR(30) REFERENCES members(member_id),
+    role_id uuid REFERENCES roles(role_id),
+    PRIMARY KEY(member_id, role_id)
+);
+
+CREATE TABLE  IF NOT EXISTS permissions (
+    permission_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    resource VARCHAR(50) NOT NULL,   -- e.g. "members", "products"
+    action VARCHAR(50) NOT NULL      -- e.g. "create", "delete", "update"
+);
+
+CREATE TABLE  IF NOT EXISTS role_permissions (
+    role_id UUID REFERENCES roles(role_id),
+    permission_id UUID REFERENCES permissions(permission_id),
+    PRIMARY KEY (role_id, permission_id)
+);
+
+CREATE TABLE audit_logs (
+    audit_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    member_id VARCHAR(30),
+    jumui_id UUID,
+    action VARCHAR(50),
+    resource VARCHAR(50),
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    details JSONB
+);
+
+
 CREATE TABLE password_resets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     member_id VARCHAR(30) REFERENCES members(member_id) ON DELETE CASCADE,
@@ -20,15 +56,8 @@ CREATE TABLE password_resets (
     temp_password TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
-CREATE TABLE roles (
-    role_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    role_name VARCHAR(50) NOT NULL
-);
-CREATE TABLE member_roles (
-    member_id VARCHAR(30) REFERENCES members(member_id),
-    role_id uuid REFERENCES roles(role_id),
-    PRIMARY KEY(member_id, role_id)
-);
+
+
 CREATE TABLE events (
     event_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     event_name VARCHAR(100) NOT NULL,

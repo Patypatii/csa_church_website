@@ -9,7 +9,6 @@ const route = Router()
 
 route.use("/v1" , authRoutes)
 route.use("/v1" , generateQuestions)
-
 route.use("/v1" , uploadMedia)
 
 export default route

@@ -55,9 +55,6 @@ export const parseQuestionBlock = (block) => {
   };
 };
 
-
-
-
 export const sansitiseAndParseQuestionBlock = (content) => {
   const array = content
     .split(/(?:\n\s*\n|---)/) // split on blank lines OR ---
@@ -73,9 +70,6 @@ export const sansitiseAndParseQuestionBlock = (content) => {
 
   return array;
 };
-
-
-
 
 // Upload a single file to Cloudinary and save its metadata in the database
 export async function uploadOneFile(file) {
@@ -110,9 +104,6 @@ export async function uploadOneFile(file) {
   // Return a structured response for the client
   return dbResult.rows[0];
 }
-
-
-
 
 // Upload multiple files to Cloudinary and save metadata in DB
 // Includes one retry attempt for failed uploads, then cleans up failed files

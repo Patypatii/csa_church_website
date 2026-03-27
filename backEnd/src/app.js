@@ -1,9 +1,8 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import fs from "fs";
+import { createServer } from "http";
 import cors from "cors";
-import multer from 'multer';
 import apiRoutes from "./routers/index.js";
 import { api } from "./routers/api.js";
 import { hubRouter } from "./routers/hubRouter.js";
@@ -15,16 +14,34 @@ import { rateLimit } from "express-rate-limit";
 import requestIp from "request-ip";
 import corsOptions from "./Configs/corsConfigs.js";
 import upload from "./Configs/multerStorageConfig.js";
+import cookieParser from "cookieParser"
+import { errorHandler } from "./middleWares/error.middlewares.js";
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Initialize Backend Data Service
-BackendDataService.init();
+// app midlewares
+app.use(express.json({ limit: "16kb" }));
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+app.use(cookieParser());
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// create app using httserver so we can add a socket on top of the serve , unlike the http server
+const httpServer = createServer(app);
+
+const io = new Server(httpServer, {
+  pingTimeout: 60000, //the socket will listen for 6 second of inactivity then only then decleare as not connected
+  cors: {
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+  },
+});
+
+// set the io instance directly to the app object to avoid global use cases cases
+app.set("io", io);
+
 
 // EJS Setup
 app.set("view engine", "ejs");
@@ -48,7 +65,7 @@ const limiter = rateLimit({
   handler: (_, __, ___, options) => {
     res.status(options.statusCode || 429).json({
       error: `There are too many requests. You are only allowed ${options.max
-        } requests per ${options.windowMs / 60000} minutes`,
+      } requests per ${options.windowMs / 60000} minutes`,
     });
   },
 });
@@ -60,27 +77,19 @@ app.use(morganMiddleware);
 // Static Files
 app.use(express.static(path.join(__dirname, "../../frontEnd/public")));
 app.use(express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental/public")));
-app.use("/community-assets/backend",express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental/dist/backend"),),);
-app.use("/community-assets", express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental")),);
-app.use("/localFileUploads", express.static(path.join(process.cwd(), "localFileUploads")));
-app.use("/uploads", express.static(path.join(process.cwd(), "localFileUploads")));
 
 
 // Routes
 app.get('/', (_req, res) => res.redirect('/community-hub'));
-app.use("/authentication", apiRoutes);
 app.use("/api/officials", officialsRouter);
 app.use("/api/jumuiya-officials", jumuiyaOfficialsRouter);
 app.use("/api", api);
 app.use("/community-hub", hubRouter);
+
+
+app.use("/authentication", apiRoutes);
 app.use("/questions", apiRoutes);
 app.use("/files" , apiRoutes)
-
-
-
-
-
-
 
 // Gallery APIs
 app.get("/api/choir/gallery", (_req, res) => {
@@ -105,7 +114,10 @@ app.post("/api/choir/gallery", upload.single("file"), (req, res) => {
 
 
 
+// Initialize Backend Data Service
+BackendDataService.init();
 
 
+app.use(errorHandler)
 
 export { app };
