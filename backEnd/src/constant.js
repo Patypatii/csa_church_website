@@ -9,12 +9,18 @@ export const ChatEventEnum = Object.freeze({//where .freeze is used for predicta
   CONNECTED_EVENT: "connected",
   // ? when user gets disconnected
   DISCONNECT_EVENT: "disconnect",
-  // ? when new Notification is received
-  Notification_RECEIVED_EVENT: "notificationReceived",
+  // ?  when user joins respective jumuia
+  JOIN_INDIVIDUAL_JUMUIA_EVENT:"joinIndividualJumuia",
+  //? event to notify user on csa notification
+  NOTIFY_CSA_ON_NEW_NOTIFICATION_EVENT:"notifyCsa",
+  //? event to notify user on specific Jumui notification
+  NOTIFY_SPECIFIC_JUMUIA_ON_NEW_NOTIFICATION_EVENT:"notifyJumuia",
+  // ? when new Notification is received, 
+  NOTIFICATION_RECEIVED_EVENT: "notificationReceived",
   // ? when there is an error in socket
   SOCKET_ERROR_EVENT: "socketError",
   // ? when Notification is deleted
-  Notification_DELETE_EVENT: "notificationDeleted",
+  NOTIFICATION_DELETE_EVENT: "notificationDeleted",
 });
 
 export const AvailableChatEvents = Object.values(ChatEventEnum);

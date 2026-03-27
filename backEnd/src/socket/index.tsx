@@ -4,10 +4,38 @@ import { ChatEventEnum } from "../constant.js";
 import { ApiError } from "../utils/ApiError.js";
 import { testDb } from "../Configs/dbConfig.js";
 
-/**
- * @description This function is responsible to allow user
- * to join the chat represented by chatId (chatId). event happens when user switches between the chats
- */
+
+
+// handle join to specific jumuia based on the users jumuia  
+const HandleOnSpecificJumuiJoin = (socket, user) => {
+  socket.on(ChatEventEnum.JOIN_INDIVIDUAL_JUMUIA_EVENT, (jumuiaName) => {
+    // Optional: validate that the jumuiaName matches the user’s actual jumuia
+    if (user?.jumuia_name !== jumuiaName) {
+      console.warn(`Unauthorized join attempt by ${socket.id} for ${jumuiaName}`);
+      return;
+    }
+    socket.join(jumuiaName);
+    console.log(`${socket.id} joined Jumuia: ${jumuiaName}`);
+  });
+};
+
+// Handle CSA notifications
+const handleNotifyCSA = (socket, io) => {
+  socket.on(ChatEventEnum, (message) => {
+    io.to('CSA').emit('notification', { group: 'CSA', message });
+    console.log(`CSA notification sent: ${message}`);
+  });
+};
+
+// Handle Jumuia notifications
+const handleNotifyJumuia = (socket, io) => {
+  socket.on('notifyJumuia', ({ jumuiaName, message }) => {
+    io.to(jumuiaName).emit('notification', { group: jumuiaName, message });
+    console.log(`Notification sent to Jumuia ${jumuiaName}: ${message}`);
+  });
+};
+
+
 
 const initializeSocketIO = (io) => {
   return io.on("connection", async (socket) => {
@@ -25,7 +53,6 @@ const initializeSocketIO = (io) => {
 
       const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET); // decode the token
 
-
       const query = ` SELECT m.first_name , m.last_name , m. year_of_study , m.course , sg.name FROM members  AS m
                            JOIN sub_groups AS sg ON m.jumuia_id = sg.group_id WHERE m.member_id =$1`;
 
@@ -34,29 +61,34 @@ const initializeSocketIO = (io) => {
       if (result.rows.length === 0) {
         throw new ApiError(401, "Un-authorized handshake. Token is invalid");
       }
+
       // retrieve the user
-
-      socket.user = result.rows.length[0]; // mount te user object to the socket
-
-      // We are creating a room with user id so that if user is joined but does not have any active chat going on.
-      // still we want to emit some socket events to the user.
-      // so that the client can catch the event and show the notifications.
-      socket.join(result.rows.length[0]?.member_id.toString());
+      const user=result.rows.length[0];
+      // We are creating a room called " CSA_NOTIFICATIONS ", by default we are joining any connected user to the csa notification
+      socket.join("CSA_NOTIFICATIONS");
       socket.emit(ChatEventEnum.CONNECTED_EVENT); // emit the connected event so that client is aware
 
-      console.log(
-        "User connected 🗼. userId: ",
-        result.rows.length[0]?.member_id.toString(),
-      );
+      HandleOnSpecificJumuiJoin(socket , user );
+
+    // Attach notification handlers
+      handleNotifyCSA(socket, io);
+      handleNotifyJumuia(socket, io);
 
       socket.on(ChatEventEnum.DISCONNECT_EVENT, () => {
-        console.log("user has disconnected 🚫. userId: " + socket.user?.member_id);
+        console.log(
+          "user has disconnected 🚫. userId: " + socket.user?.member_id,
+        );
         if (socket.user?.member_id) {
           socket.leave(socket.user.member_id);
         }
       });
     } catch (error) {
-      socket.emit(ChatEventEnum.SOCKET_ERROR_EVENT, error?.message ||  "Something went wrong while connecting to the socket.", );    }
+      socket.emit(
+        ChatEventEnum.SOCKET_ERROR_EVENT,
+        error?.message ||
+          "Something went wrong while connecting to the socket.",
+      );
+    }
   });
 };
 
