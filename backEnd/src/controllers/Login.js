@@ -1,93 +1,61 @@
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
-import { testDb as db } from "../Configs/dbConfig.js";
+import { testDb } from "../Configs/dbConfig.js";
 import logger from "../logger/winston.js";
 import jwt from "jsonwebtoken";
-
+import { token } from "morgan";
 dotenv.config();
 
 const Login = async (req, res) => {
-  const { passWord, user: loginIdentifier, googleEmail } = req.body;
-  logger.info("Login request received", { loginIdentifier, googleEmail });
+  const { userReg, password } = req.body ?? [];
+
+  if (!userReg || !password) {
+    logger.warn("Login attempt with missing credentials");
+    return res.status(400).json({ error: "Username and password required" });
+  }
 
   try {
-    let user;
-    let table = "users";
+    const result = await testDb.query(
+      `SELECT m.member_id,m.password, m.email, r.role_name FROM members m 
+      JOIN member_roles mr ON m.member_id = mr.member_id 
+      JOIN roles r ON mr.role_id = r.role_id WHERE m.member_id =$1`,
+      [userReg],
+    );
 
-    if (loginIdentifier) {
-      // 1. Try to find in users table by username
-      let response = await db.query("SELECT * FROM users WHERE username = $1", [
-        loginIdentifier,
-      ]);
-
-      if (response.rows.length === 0) {
-        // 2. Fallback: Try to find in members table by email
-        response = await db.query("SELECT * FROM members WHERE email = $1", [
-          loginIdentifier,
-        ]);
-        table = "members";
-      }
-
-      if (response.rows.length === 0) {
-        logger.warn("Invalid username or email login attempt", { loginIdentifier });
-        return res.status(401).json({ message: "Invalid username or email" });
-      }
-
-      user = response.rows[0];
-
-      // Compare password
-      const storedPassword = user.password;
-      if (!storedPassword) {
-        logger.warn("Account has no password set", { loginIdentifier });
-        return res.status(401).json({ message: "Account has no password set" });
-      }
-
-      const isMatch = await bcrypt.compare(passWord, storedPassword);
-      if (!isMatch) {
-        logger.warn("Invalid password for user", { loginIdentifier });
-        return res.status(401).json({ message: "Invalid password" });
-      }
-    } else if (googleEmail) {
-      // Google Login usually targets members who have emails
-      const response = await db.query("SELECT * FROM members WHERE email = $1", [
-        googleEmail,
-      ]);
-      if (response.rows.length === 0) {
-        logger.warn("Google email not registered", { googleEmail });
-        return res.status(401).json({ message: "Email not registered" });
-      }
-
-      user = response.rows[0];
-      table = "members";
-    } else {
-      return res.status(400).json({ message: "Missing login credentials" });
+    if (result.rows.length === 0) {
+      logger.warn(`Login attempt with invalid username: ${userReg}`);
+      return res.status(401).json({ error: "Invalid username or password" });
     }
 
-    // Determine ID and Role based on table
-    const id = table === "users" ? user.user_id : user.member_id;
-    const role = table === "users" ? user.role : "member";
+    const user = result.rows[0];
+    const match = await bcrypt.compare(password, user.password);
 
-    // Generate JWT token
+    if (!match) {
+      logger.warn(`Login attempt with invalid password for user: ${userReg}`);
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    if (!user.email) {
+      logger.warn(`Login attempt with missing email for user: ${userReg}`);
+      return res.status(401).json({ error: "User email not found" });
+    }
+
     const token = jwt.sign(
-      { id, role },
-      process.env.SECRET_KEY || "default_secret",
+      { id: user.member_id, role: user.role_name },
+      process.env.JWT_SECRET,
       { expiresIn: "1h" },
     );
 
-    logger.info("Login successful", { id, role });
-    return res.json({
-      token,
+    res.json({
       status: "success",
-      role,
-      user: {
-        user_id: id,
-        username: loginIdentifier || (user.username || googleEmail),
-        role
-      }
+      message: "Login successful",
+
+      token: token,
     });
-  } catch (error) {
-    logger.error("Login error:", error);
-    return res.status(500).json({ message: "Server error" });
+  } catch (err) {
+    logger.error("Error during login process", err);
+    console.error("Login error:", err.message);
+    res.status(500).json({ error: "Server error" });
   }
 };
 

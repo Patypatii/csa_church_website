@@ -16,78 +16,48 @@ import { rateLimit } from "express-rate-limit";
 import requestIp from "request-ip";
 import corsOptions from "./Configs/corsConfigs.js";
 import upload from "./Configs/multerStorageConfig.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Initialize Backend Data Service
-BackendDataService.init();
-
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// EJS Setup
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-
-// this is the best way to to get the actual ip adress of a device even if the server is behind a proxy
-//rather than getting the proxy ip adress , usefull in fare shairing of resorces
-app.use(requestIp.mw());
-
 app.use(cors(corsOptions));
-
-// Rate limiter
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5000,
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: (req, res) => {
-    return req.clientIp;
-  },
-  handler: (req, res, next, options) => {
-    res.status(options.statusCode || 429).json({
-      error: `There are too many requests. You are only allowed ${options.max
-        } requests per ${options.windowMs / 60000} minutes`,
-    });
-  },
-});
-
-app.use(limiter);
+app.use(requestIp.mw());
 app.use(morganMiddleware);
 
+// 1. Hub Router (High priority for dynamic routes)
+app.use("/hub-view", hubRouter);
 
-// Static Files
-app.use(express.static(path.join(__dirname, "../../frontEnd/public")));
-app.use(express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental/public")));
-app.use("/community-assets/backend",express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental/dist/backend"),),);
+// 2. Static Files (Cleanup for files that router didn't catch)
+app.use('/hub-view', express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental")));
+app.use(express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental")));
+
 app.use("/community-assets", express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental")),);
+
 app.use("/localFileUploads", express.static(path.join(process.cwd(), "localFileUploads")));
 app.use("/uploads", express.static(path.join(process.cwd(), "localFileUploads")));
 
-
 // Routes
-app.get('/', (_req, res) => res.redirect('/community-hub'));
+app.get('/', (_req, res) => res.redirect('/hub-view'));
+
 app.use("/authentication", apiRoutes);
 app.use("/api/officials", officialsRouter);
 app.use("/api/jumuiya-officials", jumuiyaOfficialsRouter);
 app.use("/api", api);
-app.use("/community-hub", hubRouter);
+
 app.use("/questions", apiRoutes);
 app.use("/files" , apiRoutes)
-
-
-
-
-
-
 
 // Gallery APIs
 app.get("/api/choir/gallery", (_req, res) => {
   const gallery = BackendDataService.load("choir_gallery.json", []);
   res.json(gallery);
 });
+
 app.post("/api/choir/gallery", upload.single("file"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
   const gallery = BackendDataService.load("choir_gallery.json", []);
@@ -104,9 +74,16 @@ app.post("/api/choir/gallery", upload.single("file"), (req, res) => {
   res.status(201).json(newPhoto);
 });
 
-
-
-
-
+// Error Handler
+app.use((err, req, res, next) => {
+  if (err.stack) console.error(err.stack);
+  
+  const status = err.status || 500;
+  res.status(status).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+    error: process.env.NODE_ENV === "development" ? err.stack : undefined
+  });
+});
 
 export { app };

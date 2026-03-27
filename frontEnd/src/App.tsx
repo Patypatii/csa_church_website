@@ -8,6 +8,9 @@ import {
 // import Authorisation from "./assets/Layouts/Authorisation";
 // import Reset from "./pages/Authorization/Reset";
 // import ResetPasswordPage from "./pages/Authorization/ResetPasswordPage";
+import Authorisation from "./assets/Layouts/Authorisation";
+import Reset from "./pages/Authorization/Reset";
+import ResetPasswordPage from "./pages/Authorization/ResetPasswordPage";
 import Pageoulet from "./assets/Layouts/Pageoulet";
 import Challenge from "./pages/Devotions/pages/Challenge";
 import Rosary from "./pages/Devotions/pages/Rosary";
@@ -35,6 +38,9 @@ import JumuiyaDetail from "./pages/Jumuiya/JumuiyaDetail";
 import CommunityHub from "./pages/sacramental/CommunityHub";
 import { DataProvider } from "./pages/Jumuiya/context/DataContext";
 
+
+
+
 import { useAuth } from "./context/AuthContext";
 import { PublicRoute, ProtectedRoute } from "./Regulator";
 
@@ -48,7 +54,7 @@ const Home: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <div className="bg-gray-50 min-h-screen flex flex-col">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <main className="flex-grow">
         {/* Show landing page content when NOT logged in */}
         {!user && (
@@ -82,32 +88,24 @@ const App: React.FC = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
-        <Route element={<Pageoulet />}>
-          {/* <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <Authorisation />
-              </PublicRoute>
-            }
-          >
-            <Route index element={<Login />} />
-            <Route path="reset" element={<Reset />} />
-            <Route path="otp/:reg" element={<ResetPasswordPage />} />
-          </Route> */}
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Authorisation />
+            </PublicRoute>
+          }
+        >
+          <Route index element={<Login />} />
+          <Route path="reset" element={<Reset />} />
+          <Route path="otp/:reg" element={<ResetPasswordPage />} />
+        </Route>
+        <Route path="/admin/quiz" element={<Appadmin />} />
+        <Route path="/admin/officials" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
+        <Route path="/officials" element={<PublicView />} />
 
+        <Route path="/" element={<Pageoulet />}>
           <Route index element={<Home />} />
-          <Route path="/officials" element={<PublicView />} />
-          <Route path="/jumuiya">
-            <Route index element={<DataProvider><JumuiyaLanding /></DataProvider>} />
-            <Route path=":name" element={<DataProvider><JumuiyaDetail /></DataProvider>} />
-          </Route>
-          <Route path="/sacramental" element={<CommunityHub />} />
-          <Route path="/activities" element={<ActivitiesSection />} />
-
-
-          <Route path="/admin/quiz" element={<Appadmin />} />
-          <Route path="/admin/officials" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
 
           <Route
             path="/devotions"
@@ -124,6 +122,31 @@ const App: React.FC = () => {
             <Route path="rosary" element={<Rosary />} />
             <Route path="challenge" element={<Challenge />} />
           </Route>
+
+          <Route
+            path="/jumuiya"
+            element={
+              <ProtectedRoute>
+                <DataProvider>
+                  <JumuiyaLanding />
+                </DataProvider>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/jumuiya/:id"
+            element={
+              <ProtectedRoute>
+                <DataProvider>
+                  <JumuiyaDetail />
+                </DataProvider>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/community-hub/:moduleSlug?"
+            element={<CommunityHub />}
+          />
         </Route>
 
       </>,

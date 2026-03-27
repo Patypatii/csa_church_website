@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import axios, { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 import { FaHome } from "react-icons/fa";
 
 interface ErrorResponse {
@@ -9,73 +8,77 @@ interface ErrorResponse {
 }
 
 const Login: React.FC = () => {
-  const [username, setUsername] = useState<string>("");
+  const [userReg, setUserReg] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const { login } = useAuth();
+  // const { login } = useAuth();
   const navigate = useNavigate();
 
   const submit = async () => {
-    console.log("Submitting login with:", { username, password });
+    console.log("Submitting login with:", { userReg, password });
     try {
       const response = await axios.post(
-        "/authentication/v1/login",
+        "http://localhost:3001/authentication/v1/login",
         {
-          user: username,
-          passWord: password,
+          userReg,
+          password,
         }
       );
       console.log("Login response:", response.data);
 
       if (response.data.status === "success") {
-        console.log("Full response data keys:", Object.keys(response.data));
-        console.log("User data:", response.data.user);
-        console.log("Token data:", response.data.token);
-        login(response.data.user, response.data.token);
-        navigate("/");
-      } else {
+        localStorage.setItem("token", response.data.token);
+        navigate("/", { state: { Response: true } });
+      }
+      else if (response.data.error == "User email not found") {
+        alert("Login User email not found. Please enter your email and change your password.");
+        localStorage.setItem("token", response.data.token);
+        navigate("reset", { state: { purpose: 'email' } });
+
+      }
+
+      else {
         alert(response.data.message || "Login failed");
       }
     } catch (error: unknown) {
       const axiosError = error as AxiosError;
       console.error("Login error:", error);
-      console.error("Error response:", axiosError.response?.data);
-      console.error("Error status:", axiosError.response?.status);
+
       alert((axiosError.response?.data as ErrorResponse)?.message || "Login failed. Please check your credentials.");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         {/* Back to   FaHome Button */}
         <button
           onClick={() => navigate('/')}
-          className="flex items-center text-sm text-gray-600 hover:text-blue-600 mb-4 transition-colors"
+          className="flex items-center mb-4 text-sm text-gray-600 transition-colors hover:text-blue-600"
         >
           < FaHome className="w-4 h-4 mr-1" />
           Back to  Home
         </button>
 
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
+        <h2 className="mb-6 text-2xl font-bold text-center text-gray-800">
           Welcome Back
         </h2>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Username
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              User Name
             </label>
             <input
               type="text"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
+              value={userReg}
+              onChange={(e) => setUserReg(e.target.value)}
+              placeholder="Enter your userReg"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block mb-1 text-sm font-medium text-gray-700">
               Password
             </label>
             <input
@@ -96,14 +99,14 @@ const Login: React.FC = () => {
 
           <button
             onClick={submit}
-            className="w-full bg-blue-700 text-white py-2 px-4 rounded-md hover:bg-blue-800 transition-colors"
+            className="w-full px-4 py-2 text-white transition-colors bg-blue-700 rounded-md hover:bg-blue-800"
           >
             Sign In
           </button>
 
-          <div className="text-center mt-4">
+          <div className="mt-4 text-center">
             <button
-              onClick={() => navigate('reset')}
+              onClick={() => navigate('reset', { state: { purpose: 'reset password' } })}
               className="text-sm text-blue-600 hover:underline"
             >
               Forgot Password?
@@ -116,3 +119,6 @@ const Login: React.FC = () => {
 };
 
 export default Login;
+
+
+

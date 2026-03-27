@@ -27,7 +27,7 @@ const modulesMeta = [
         id: 'choir',
         title: 'Choir',
         description: 'Join our heavenly voices in praise and worship.',
-        path: '/community-hub/choir',
+        path: '/hub-view/choir',
         color: '#ffffff',
         iconColor: 'var(--theme-primary)',
         icon: 'fas fa-music'
@@ -36,7 +36,7 @@ const modulesMeta = [
         id: 'dancers',
         title: 'Liturgical Dancers',
         description: 'Expressing faith through rhythmic movement and grace.',
-        path: '/community-hub/dancers',
+        path: '/hub-view/dancers',
         color: '#e67e22',
         icon: 'fas fa-person-praying',
         scheduleLabel: 'Training Schedule',
@@ -55,7 +55,7 @@ const modulesMeta = [
         id: 'charismatic',
         title: 'Charismatic Prayer Group',
         description: 'A community of faith, healing, and spiritual growth.',
-        path: '/community-hub/charismatic-prayer-group',
+        path: '/hub-view/charismatic-prayer-group',
         color: '#2ecc71',
         icon: 'fas fa-fire-alt',
         scheduleLabel: 'Meeting Schedule',
@@ -79,7 +79,7 @@ const modulesMeta = [
         id: 'st-francis',
         title: 'St. Francis of Assisi',
         description: 'Building bonds of love and support in our parish family.',
-        path: '/community-hub/st-francis',
+        path: '/hub-view/st-francis',
         color: '#2980b9',
         icon: 'fas fa-dove',
         scheduleLabel: 'Prayer Schedule',
@@ -97,23 +97,46 @@ const modulesMeta = [
     }
 ];
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export const getIndex = (_req, res) => {
-    res.render('index', { title: 'Community Hub', modules: modulesMeta });
+    // Serve the static TS/CSS version's index.html
+    res.sendFile(path.join(__dirname, '../../../frontEnd/src/pages/sacramental/pages/index.html'));
+};
+
+export const getHubData = (_req, res) => {
+    res.json(modulesMeta);
 };
 
 export const getModule = (req, res) => {
-    const meta = modulesMeta.find(m => m.path === `/community-hub${req.path}`);
+    // Resolve module by ID from path or params
+    const id = req.params.moduleId || req.path.replace(/^\//, '');
+    console.log(`[HubController] Module resolution attempt: ID="${id}", Path="${req.path}"`);
+
+    const meta = modulesMeta.find(m => m.id === id) || 
+                 modulesMeta.find(m => m.path === `/hub-view${req.path}`) ||
+                 modulesMeta.find(m => m.path === `/hub-view/${id}`);
 
     if (!meta) {
-        return res.status(404).render('module', {
-            title: 'Not Found',
-            module: { title: 'Not Found', description: 'Module not found.' }
-        });
+        console.error(`[HubController] CRITICAL: Module meta NOT found for "${id}"`);
+        return res.status(404).json({ error: `Module "${id}" not found.` });
+    }
+
+    // Determine if it's a request for the page or just data
+    if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        console.log(`[HubController] Serving HTML template for module: ${meta.id}`);
+        if (meta.id === 'choir') {
+            return res.sendFile(path.join(__dirname, '../../../frontEnd/src/pages/sacramental/pages/choir.html'));
+        }
+        return res.sendFile(path.join(__dirname, '../../../frontEnd/src/pages/sacramental/pages/module.html'));
     }
 
     const fallback = FALLBACKS[meta.id] || {};
 
-    // Clone meta and load dynamic data — fallback defaults ensure content never disappears
     const moduleInfo = {
         ...meta,
         officials:     BackendDataService.load(`${meta.id}_officials.json`,     fallback.officials     || []),
@@ -122,13 +145,24 @@ export const getModule = (req, res) => {
         gallery:       BackendDataService.load(`${meta.id}_gallery.json`,       fallback.gallery       || [])
     };
 
-    // Special case for choir
+    // Special case for choir data
     if (meta.id === 'choir') {
         const choirOfficials  = BackendDataService.load('officials.json',  []);
         const choirActivities = BackendDataService.load('activities.json', []);
-        const choirInfo = { ...meta, officials: choirOfficials, activities: choirActivities };
-        return res.render('choir', { title: meta.title, module: choirInfo });
+        const choirAnnouncements = BackendDataService.load('announcements.json', []);
+        const choirGallery = BackendDataService.load('choir_gallery.json', []);
+        
+        const choirInfo = { 
+            ...meta, 
+            officials: choirOfficials, 
+            activities: choirActivities,
+            announcements: choirAnnouncements,
+            gallery: choirGallery
+        };
+        return res.json(choirInfo);
     }
 
-    res.render('module', { title: meta.title, module: moduleInfo });
+    res.json(moduleInfo);
 };
+
+

@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
-
+import { useNavigate, Link } from "react-router-dom";
 import AdminPanel from "../AdminPanel";
 import { useAuth } from "../../../../context/AuthContext";
 
@@ -10,7 +9,6 @@ function Navigation() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-
   const handleLogout = () => {
     logout();
     navigate("/");
@@ -18,11 +16,11 @@ function Navigation() {
 
   const navLinks = [
     { name: "Home", path: "/" },
-    { name: "officials", path: "/officials" },
+    { name: "Community Hub", path: "/community-hub" },
     { name: "Jumuiya", path: "/jumuiya" },
-    { name: "projects", path: "/sacramental" },
-    { name: "activities", path: "/activities" },
-    { name: "devotion", path: "/devotions" },
+    { name: "Officials", path: "/officials" },
+    { name: "Activities", path: "/activities" },
+    { name: "Devotion", path: "/devotions" },
   ];
 
   return (
@@ -38,7 +36,7 @@ function Navigation() {
           CSA Kirinyaga
         </div>
 
-        {/* Navigation Links */}
+        {/* Desktop Navigation Links */}
         <ul className="hidden md:flex items-center space-x-6">
           {navLinks.map((link) => (
             <li key={link.path}>
@@ -52,7 +50,7 @@ function Navigation() {
           ))}
         </ul>
 
-        {/* Mobile Menu Button & User Actions */}
+        {/* User Actions & Mobile Menu Toggle */}
         <div className="flex items-center space-x-4">
           {user ? (
             <div className="hidden md:flex items-center space-x-4">
@@ -76,13 +74,14 @@ function Navigation() {
             </div>
           ) : (
             <button
-              className="hidden md:block bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-full font-bold shadow-sm transition-all"
+              className="hidden md:block bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-full font-bold shadow-sm transition-all text-sm"
               onClick={() => navigate("/login")}
             >
               Log In
             </button>
           )}
 
+          {/* Mobile Menu Toggle Button */}
           <button
             className="md:hidden text-gray-600 hover:text-blue-600 transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

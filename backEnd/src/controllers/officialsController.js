@@ -1,4 +1,5 @@
 import { testDb as pool } from "../Configs/dbConfig.js";
+import path from 'path';
 import XLSX from 'xlsx';
 import { 
   normalizePhone, 
@@ -464,6 +465,9 @@ export const getAllOfficials = async (req, res) => {
 export const getOfficialById = async (req, res) => {
   try {
     const { id } = req.params;
+    if (isNaN(Number(id))) {
+      return res.status(400).json({ success: false, message: 'Invalid ID format' });
+    }
     const result = await pool.query('SELECT * FROM officials WHERE id = $1', [id]);
 
     if (result.rows.length === 0) {

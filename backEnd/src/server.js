@@ -7,54 +7,37 @@ process.on('uncaughtException', (err) => {
   logger.error('Uncaught Exception:', err);
 });
 
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
 
-// function that initiate express server , it waits for postgree db and mongo db to connect then runs the server at defined port
-// function that initiate express server , it waits for postgres db then attempts mongo
 const initServer = async () => {
+  // Start DB connections in parallel without blocking the app server
   try {
-    await connectDb();
-    await connectToMongoDb();
+    connectDb().catch(err => logger.error("Postgres connection failed (continuing anyway):", err.message));
+    connectToMongoDb().catch(err => logger.error("MongoDB connection failed (continuing anyway):", err.message));
 
     app.listen(serverConfig.PORT, () => {
       logger.info(`⚙️  Server is running on http://localhost:${serverConfig.PORT}`);
     });
-
   } catch (error) {
-    logger.error(
-      "Failed to connect to the database. Server not started. " +
-      error?.message,
-      ` ${error?.stack}`,
-    );
+    logger.error("Failed to start server:", error.message);
   }
 };
 
-
-
-
-// Step 1: Define signals to listen for
 const signals = ["SIGINT", "SIGTERM", "SIGHUP"];
-
-// Step 2: Flag to track shutdown state
 let isShuttingDown = false;
 
-// Step 3: Shutdown handler
 const shutDown = (signal) => {
-  if (isShuttingDown) return; // Prevent multiple calls
+  if (isShuttingDown) return;
   isShuttingDown = true;
   logger.debug(`Received ${signal}. Shutting down gracefully...`);
-  // Close server, release resources, etc.
-  // Example: server.close(() => { ... });
-
-  // Exit with code 0 (success)
   process.exit(0);
 };
-
-// Step 4: Attach listeners for each signal
 
 signals.forEach((sig) => {
   process.on(sig, () => shutDown(sig));
 });
 
 initServer();
-

@@ -1,58 +1,102 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
-import type { Official } from '../data/jumuiyaData';
-import { FaTrash, FaEdit, FaPlus } from 'react-icons/fa';
+import { useJumuiyaOfficials } from '../../../hooks/useJumuiyaOfficials';
+import { FaTrash, FaEdit, FaPlus, FaCamera } from 'react-icons/fa';
+import { resizeImage } from '../../../utils/imageOptimization';
 
 interface AdminOfficialsProps {
     selectedId?: string;
 }
 
 const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
-    const { jumuiyaList, updateOfficials } = useData();
+    const { jumuiyaList } = useData();
     const [selectedJumuiyaId, setSelectedJumuiyaId] = useState(selectedId || jumuiyaList[0]?.id || '');
+
+    const selectedJumuiya = useMemo(() => 
+        jumuiyaList.find((j: any) => j.id === selectedJumuiyaId),
+    [jumuiyaList, selectedJumuiyaId]);
+
+    // Fetch dynamic officials from backend
+    const { officials: dynamicOfficials, addOfficial, updateOfficial, deleteOfficial, isAdding, isUpdating, isDeleting } = useJumuiyaOfficials({ 
+        category: selectedJumuiya?.name 
+    });
 
     // Edit Modal State
     const [isEditing, setIsEditing] = useState(false);
-    const [currentOfficial, setCurrentOfficial] = useState<Partial<Official>>({});
+    const [currentOfficial, setCurrentOfficial] = useState<any>({});
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-    const selectedJumuiya = jumuiyaList.find((j: any) => j.id === selectedJumuiyaId);
-
-    const handleEdit = (official: Official) => {
-        setCurrentOfficial(official);
+    const handleEdit = (official: any) => {
+        setCurrentOfficial({
+            ...official,
+            // Map backend 'contact' to frontend 'phone' for the form if needed, 
+            // but let's just use what's consistent
+            phone: official.contact || ''
+        });
+        setPreviewUrl(official.photo ? (official.photo.startsWith('http') ? official.photo : `/${official.photo}`) : null);
+        setSelectedFile(null);
         setIsEditing(true);
     };
 
     const handleAdd = () => {
-        setCurrentOfficial({ id: Date.now().toString() }); // Simple ID gen
+        setCurrentOfficial({ category: selectedJumuiya?.name });
+        setPreviewUrl(null);
+        setSelectedFile(null);
         setIsEditing(true);
     };
 
-    const handleDelete = (officialId: string) => {
+    const handleDeleteClick = async (officialId: string) => {
         if (window.confirm('Are you sure you want to delete this official?')) {
-            if (selectedJumuiya) {
-                const updatedOfficials = selectedJumuiya.officials.filter((o: any) => o.id !== officialId);
-                updateOfficials(selectedJumuiyaId, updatedOfficials);
+            try {
+                await deleteOfficial(Number(officialId));
+            } catch (err) {
+                console.error('Delete failed:', err);
             }
         }
     };
 
-    const handleSave = (e: React.FormEvent) => {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setSelectedFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (selectedJumuiya && currentOfficial.name) { // Basic validation
-            let updatedOfficials = [...selectedJumuiya.officials];
+        if (!selectedJumuiya || !currentOfficial.name) return;
 
-            // Check if active editing implies updating existing or pushing new
-            const existingIndex = updatedOfficials.findIndex((o: any) => o.id === currentOfficial.id);
+        try {
+            const fd = new FormData();
+            fd.append('name', currentOfficial.name);
+            fd.append('category', selectedJumuiya.name);
+            fd.append('position', currentOfficial.position);
+            if (currentOfficial.phone) fd.append('contact', currentOfficial.phone);
+            if (currentOfficial.term_of_service) fd.append('term_of_service', currentOfficial.term_of_service);
 
-            if (existingIndex >= 0) {
-                updatedOfficials[existingIndex] = currentOfficial as Official;
-            } else {
-                updatedOfficials.push(currentOfficial as Official);
+            if (selectedFile) {
+                const optimizedBlob = await resizeImage(selectedFile, 800, 800);
+                fd.append('photo', optimizedBlob, 'photo.jpg');
             }
 
-            updateOfficials(selectedJumuiyaId, updatedOfficials);
+            if (currentOfficial.id) {
+                await updateOfficial({ id: Number(currentOfficial.id), formData: fd });
+            } else {
+                await addOfficial(fd);
+            }
+
             setIsEditing(false);
             setCurrentOfficial({});
+            setSelectedFile(null);
+            setPreviewUrl(null);
+        } catch (err) {
+            console.error('Save failed:', err);
         }
     };
 
@@ -78,6 +122,7 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
                     <table>
                         <thead>
                             <tr>
+                                <th>Photo</th>
                                 <th>Name</th>
                                 <th>Position</th>
                                 <th>Phone</th>
@@ -85,10 +130,18 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {selectedJumuiya?.officials.map(official => (
+                            {(dynamicOfficials || []).map(official => (
                                 <tr key={official.id}>
+                                    <td>
+                                        <img 
+                                            src={official.photo ? (official.photo.startsWith('http') ? official.photo : `/${official.photo}`) : 'https://via.placeholder.com/40'} 
+                                            alt={official.name} 
+                                            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                                        />
+                                    </td>
                                     <td>{official.name}</td>
                                     <td>{official.position}</td>
+<<<<<<< HEAD
                                     <td>{official.phone}</td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '8px' }}>
@@ -107,9 +160,36 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
                                                 <FaTrash />
                                             </button>
                                         </div>
+=======
+                                    <td>{official.contact}</td>
+                                    <td style={{ display: 'flex', gap: '8px' }}>
+                                        <button
+                                            onClick={() => handleEdit(official)}
+                                            className="action-btn edit-btn"
+                                            title="Edit"
+                                            disabled={isUpdating}
+                                        >
+                                            <FaEdit />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteClick(String(official.id))}
+                                            className="action-btn delete-btn-icon"
+                                            title="Delete"
+                                            disabled={isDeleting}
+                                        >
+                                            <FaTrash />
+                                        </button>
+>>>>>>> cb20466854b1ca624ae0d1895bc78baacc4512dd
                                     </td>
                                 </tr>
                             ))}
+                            {(!dynamicOfficials || dynamicOfficials.length === 0) && (
+                                <tr>
+                                    <td colSpan={5} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-secondary)' }}>
+                                        No officials found for this Jumuiya.
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -118,17 +198,39 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
                     className="btn-primary"
                     style={{ marginTop: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}
                     onClick={handleAdd}
+                    disabled={isAdding}
                 >
-                    <FaPlus /> Add Official
+                    <FaPlus /> {isAdding ? 'Adding...' : 'Add Official'}
                 </button>
             </div>
 
             {/* Edit/Add Modal */}
             {isEditing && (
+<<<<<<< HEAD
                 <div className="modal-overlay">
                     <div className="modal-content animate-slide-up">
                         <h3>{currentOfficial.id ? 'Edit Official' : 'Add Official'}</h3>
+=======
+                <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                    <div className="modal-content" style={{ background: 'white', padding: '32px', borderRadius: '20px', width: '90%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto', boxShadow: 'var(--shadow-xl)' }}>
+                        <h3 style={{ marginTop: 0, marginBottom: '24px', fontSize: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
+                            {currentOfficial.id ? 'Edit Official' : 'Add Official'}
+                        </h3>
+>>>>>>> cb20466854b1ca624ae0d1895bc78baacc4512dd
                         <form onSubmit={handleSave}>
+                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+                                <div style={{ position: 'relative' }}>
+                                    <img 
+                                        src={previewUrl || 'https://via.placeholder.com/100'} 
+                                        alt="Preview" 
+                                        style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--jumuiya-color)' }}
+                                    />
+                                    <label style={{ position: 'absolute', bottom: 0, right: 0, background: 'var(--jumuiya-color)', color: 'white', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-md)' }}>
+                                        <FaCamera size={14} />
+                                        <input type="file" onChange={handleFileChange} style={{ display: 'none' }} accept="image/*" />
+                                    </label>
+                                </div>
+                            </div>
                             <div className="form-group">
                                 <label>Name</label>
                                 <input
@@ -144,6 +246,7 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
                                     value={currentOfficial.position || ''}
                                     onChange={(e) => setCurrentOfficial({ ...currentOfficial, position: e.target.value })}
                                     required
+<<<<<<< HEAD
                                     placeholder="e.g., Chairperson"
                                 />
                             </div>
@@ -154,6 +257,9 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
                                     value={currentOfficial.email || ''}
                                     onChange={(e) => setCurrentOfficial({ ...currentOfficial, email: e.target.value })}
                                     placeholder="email@example.com"
+=======
+                                    placeholder="e.g. Chairperson"
+>>>>>>> cb20466854b1ca624ae0d1895bc78baacc4512dd
                                 />
                             </div>
                             <div className="form-group">
@@ -161,18 +267,26 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
                                 <input
                                     value={currentOfficial.phone || ''}
                                     onChange={(e) => setCurrentOfficial({ ...currentOfficial, phone: e.target.value })}
+<<<<<<< HEAD
                                     placeholder="+254..."
+=======
+                                    placeholder="e.g. 0712345678"
+>>>>>>> cb20466854b1ca624ae0d1895bc78baacc4512dd
                                 />
                             </div>
                             <div className="form-group">
-                                <label>Image URL</label>
+                                <label>Term of Service</label>
                                 <input
-                                    value={currentOfficial.image || ''}
-                                    onChange={(e) => setCurrentOfficial({ ...currentOfficial, image: e.target.value })}
-                                    placeholder="https://..."
+                                    value={currentOfficial.term_of_service || ''}
+                                    onChange={(e) => setCurrentOfficial({ ...currentOfficial, term_of_service: e.target.value })}
+                                    placeholder="e.g. 2024-2026"
                                 />
                             </div>
+<<<<<<< HEAD
                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px' }}>
+=======
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+>>>>>>> cb20466854b1ca624ae0d1895bc78baacc4512dd
                                 <button
                                     type="button"
                                     onClick={() => setIsEditing(false)}
@@ -181,7 +295,17 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
                                 >
                                     Cancel
                                 </button>
+<<<<<<< HEAD
                                 <button type="submit" className="btn-primary">Save Official</button>
+=======
+                                <button 
+                                    type="submit" 
+                                    className="btn-primary"
+                                    disabled={isAdding || isUpdating}
+                                >
+                                    {isAdding || isUpdating ? 'Saving...' : 'Save Official'}
+                                </button>
+>>>>>>> cb20466854b1ca624ae0d1895bc78baacc4512dd
                             </div>
                         </form>
                     </div>

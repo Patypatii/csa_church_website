@@ -40,8 +40,10 @@
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-lg:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl:
+    0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
   /* Transitions */
   --t-fast: 0.15s ease;
@@ -64,12 +66,16 @@
   }
 
   body {
-    font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+    font-family:
+      "Outfit",
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
   }
 
   p {
-    @apply m-0 text-base;
-    color: var(--text-secondary);
+    @apply m-0 text-sm text-teal-950;
   }
 }
 
@@ -168,7 +174,6 @@
   input {
     @apply pl-2 font-semibold bg-slate-100 outline-none rounded-lg border-2 ml-2 mb-6;
   }
-
   /* Main layout container */
   .main-container {
     @apply min-h-screen bg-gray-50;
@@ -195,9 +200,9 @@
   }
 
   /* Primary button styling (e.g., Log In) */
-  .btn-primary {
+  /* .btn-primary {
     @apply bg-blue-600 text-white px-6 py-2.5 rounded-full font-semibold shadow-md hover:bg-blue-700 hover:shadow-lg transition-all duration-200;
-  }
+  } */
 
   /* Content area container */
   .content-container {

@@ -1,4 +1,4 @@
-// this is the structure of  a single question based on the model described below 
+// this is the structure of  a single question based on the model described below
 // {
 //   "_id": "65f1c2a9e4b0f123456789ab",
 //   "questionText": "What does the parable of the Prodigal Son teach us?",
@@ -29,19 +29,18 @@ const QuestionSchema = new mongoose.Schema({
   answers: [
     {
       option: { type: String, required: true },
-      text: { type: String, required: true },   
-    }
+      text: { type: String, required: true },
+    },
   ],
   correctAnswer: {
-    option: { type: String, required: true },  
-    text: { type: String, required: true },    
+    option: { type: String, required: true },
+    text: { type: String, required: true },
     explanation: { type: String, required: true },
   },
   createdAt: {
     type: Date,
     default: Date.now, // timestamp when the question is created
-  }
-,
+  },
   questionText: { type: String, required: true },
   answers: [
     {
@@ -49,13 +48,16 @@ const QuestionSchema = new mongoose.Schema({
       text: { type: String, required: true },
     },
   ],
- correctAnswer: {
-  option: { type: String, required: true },
-  text: { type: String, required: true, default: "Answer not provided" },
-  explanation: { type: String, required: true, default: "Explanation not provided" },
-},
+  correctAnswer: {
+    option: { type: String, required: true },
+    text: { type: String, required: true, default: "Answer not provided" },
+    explanation: {
+      type: String,
+      required: true,
+      default: "Explanation not provided",
+    },
+  },
   createdAt: { type: Date, default: Date.now },
- 
 });
 
 // Create the model
@@ -67,14 +69,14 @@ export default Question;
 // This runs once when the DB connection is open.
 // It creates a TTL index on the "createdAt" field that expires documents after 3 days (259200 seconds).
 // This means any question document will be automatically deleted 3 days after its creation time, helping to manage storage and ensure questions are fresh for users.
-// insteade of directly writing a crone job , the mongodb provide the clone job by default 
+// insteade of directly writing a crone job , the mongodb provide the clone job by default
 mongoose.connection.once("open", async () => {
   try {
-      await mongoose.connection.db.collection("questions").createIndex(
+    await mongoose.connection.db.collection("questions").createIndex(
       { createdAt: 1 },
-      { expireAfterSeconds: 259200 } // 3 days
+      { expireAfterSeconds: 259200 }, // 3 days
     );
-    logger.debug("TTL index created: questions will auto-delete after 3 days")
+    logger.debug("TTL index created: questions will auto-delete after 3 days");
   } catch (err) {
     logger.error("Error creating TTL index:", err);
   }
