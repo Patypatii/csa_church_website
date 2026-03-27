@@ -70,10 +70,12 @@ const AdminLayout: React.FC = () => {
             {/* Main Content */}
             <main className="admin-main">
                 <header className="admin-header">
-                    <button className="menu-toggle" onClick={() => setIsSidebarOpen(true)}>
-                        <FaBars />
-                    </button>
-                    <h1>Dashboard</h1>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <button className="menu-toggle" onClick={() => setIsSidebarOpen(true)}>
+                            <FaBars />
+                        </button>
+                        <h1>Admin Dashboard</h1>
+                    </div>
                     <Link to="/" className="view-site-btn" target="_blank">
                         View Site
                     </Link>

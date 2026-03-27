@@ -57,16 +57,15 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
     };
 
     return (
-        <div style={{ '--admin-theme-color': selectedJumuiya?.color } as React.CSSProperties}>
+        <div className="admin-page-container" style={{ '--admin-theme-color': selectedJumuiya?.color } as React.CSSProperties}>
             <div className="admin-card">
-                <div className="admin-header-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-                    <h2 style={{ margin: 0, border: 'none', padding: 0 }}>Manage Officials</h2>
+                <div className="admin-header-actions">
+                    <h2>Manage Officials</h2>
                     {!selectedId && (
                         <select
                             value={selectedJumuiyaId}
                             onChange={(e) => setSelectedJumuiyaId(e.target.value)}
                             className="jumuiya-select"
-                            style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border-color)', minWidth: '200px', background: 'white' }}
                         >
                             {jumuiyaList.map((j: any) => (
                                 <option key={j.id} value={j.id}>{j.name}</option>
@@ -91,21 +90,23 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
                                     <td>{official.name}</td>
                                     <td>{official.position}</td>
                                     <td>{official.phone}</td>
-                                    <td style={{ display: 'flex', gap: '8px' }}>
-                                        <button
-                                            onClick={() => handleEdit(official)}
-                                            className="action-btn edit-btn"
-                                            title="Edit"
-                                        >
-                                            <FaEdit />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(official.id)}
-                                            className="action-btn delete-btn-icon"
-                                            title="Delete"
-                                        >
-                                            <FaTrash />
-                                        </button>
+                                    <td>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <button
+                                                onClick={() => handleEdit(official)}
+                                                className="action-btn edit-btn"
+                                                title="Edit"
+                                            >
+                                                <FaEdit />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(official.id)}
+                                                className="action-btn delete-btn-icon"
+                                                title="Delete"
+                                            >
+                                                <FaTrash />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -124,11 +125,9 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
 
             {/* Edit/Add Modal */}
             {isEditing && (
-                <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-                    <div className="modal-content" style={{ background: 'white', padding: '32px', borderRadius: '20px', width: '90%', maxWidth: '500px', boxShadow: 'var(--shadow-xl)' }}>
-                        <h3 style={{ marginTop: 0, marginBottom: '24px', fontSize: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
-                            {currentOfficial.id ? 'Edit Official' : 'Add Official'}
-                        </h3>
+                <div className="modal-overlay">
+                    <div className="modal-content animate-slide-up">
+                        <h3>{currentOfficial.id ? 'Edit Official' : 'Add Official'}</h3>
                         <form onSubmit={handleSave}>
                             <div className="form-group">
                                 <label>Name</label>
@@ -136,6 +135,7 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
                                     value={currentOfficial.name || ''}
                                     onChange={(e) => setCurrentOfficial({ ...currentOfficial, name: e.target.value })}
                                     required
+                                    placeholder="Enter full name"
                                 />
                             </div>
                             <div className="form-group">
@@ -144,13 +144,16 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
                                     value={currentOfficial.position || ''}
                                     onChange={(e) => setCurrentOfficial({ ...currentOfficial, position: e.target.value })}
                                     required
+                                    placeholder="e.g., Chairperson"
                                 />
                             </div>
                             <div className="form-group">
                                 <label>Email</label>
                                 <input
+                                    type="email"
                                     value={currentOfficial.email || ''}
                                     onChange={(e) => setCurrentOfficial({ ...currentOfficial, email: e.target.value })}
+                                    placeholder="email@example.com"
                                 />
                             </div>
                             <div className="form-group">
@@ -158,6 +161,7 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
                                 <input
                                     value={currentOfficial.phone || ''}
                                     onChange={(e) => setCurrentOfficial({ ...currentOfficial, phone: e.target.value })}
+                                    placeholder="+254..."
                                 />
                             </div>
                             <div className="form-group">
@@ -168,15 +172,16 @@ const AdminOfficials: React.FC<AdminOfficialsProps> = ({ selectedId }) => {
                                     placeholder="https://..."
                                 />
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px' }}>
                                 <button
                                     type="button"
                                     onClick={() => setIsEditing(false)}
-                                    style={{ padding: '12px 24px', border: '1px solid var(--border-color)', background: 'white', borderRadius: '12px', cursor: 'pointer', fontWeight: '600', color: 'var(--text-secondary)' }}
+                                    className="btn-secondary"
+                                    style={{ padding: '12px 24px', border: '1px solid #e2e8f0', background: 'white', borderRadius: '14px', cursor: 'pointer', fontWeight: '700', color: '#64748b' }}
                                 >
                                     Cancel
                                 </button>
-                                <button type="submit" className="btn-primary">Save</button>
+                                <button type="submit" className="btn-primary">Save Official</button>
                             </div>
                         </form>
                     </div>
