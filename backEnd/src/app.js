@@ -16,6 +16,7 @@ import corsOptions from "./Configs/corsConfigs.js";
 import upload from "./Configs/multerStorageConfig.js";
 import cookieParser from "cookieParser"
 import { errorHandler } from "./middleWares/error.middlewares.js";
+import { initializeSocketIO } from "./socket/index.js";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -39,7 +40,7 @@ const io = new Server(httpServer, {
   },
 });
 
-// set the io instance directly to the app object to avoid global use cases cases
+// set the io instance directly to the app object to avoid global use cases as follows req.app.get("io")
 app.set("io", io);
 
 
@@ -73,24 +74,18 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(morganMiddleware);
 
-
+app.use("/authentication", apiRoutes);
+app.use("/questions", apiRoutes);
+app.use("/files" , apiRoutes)
 // Static Files
 app.use(express.static(path.join(__dirname, "../../frontEnd/public")));
 app.use(express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental/public")));
-
-
 // Routes
 app.get('/', (_req, res) => res.redirect('/community-hub'));
 app.use("/api/officials", officialsRouter);
 app.use("/api/jumuiya-officials", jumuiyaOfficialsRouter);
 app.use("/api", api);
 app.use("/community-hub", hubRouter);
-
-
-app.use("/authentication", apiRoutes);
-app.use("/questions", apiRoutes);
-app.use("/files" , apiRoutes)
-
 // Gallery APIs
 app.get("/api/choir/gallery", (_req, res) => {
   const gallery = BackendDataService.load("choir_gallery.json", []);
@@ -113,11 +108,12 @@ app.post("/api/choir/gallery", upload.single("file"), (req, res) => {
 });
 
 
-
 // Initialize Backend Data Service
 BackendDataService.init();
 
 
+
+initializeSocketIO(io)
 app.use(errorHandler)
 
 export { app };

@@ -1,8 +1,8 @@
+import type { AxiosResponse } from "axios";
+import type { ChurchAPISuccessResponseInterface } from "../interface/api";
+
 // Check if the code is running in a browser environment
 export const isBrowser = typeof window !== "undefined";
-
-
-// 
 export class LocalStorage {
   // Get a value from local storage by key
   static get(key: string) {
@@ -37,3 +37,34 @@ export class LocalStorage {
     localStorage.clear();
   }
 }
+
+export const requestHandler = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  api: () => Promise<AxiosResponse<ChurchAPISuccessResponseInterface, any>>,
+  setLoading: ((loading: boolean) => void) | null,
+  onSuccess: (data: ChurchAPISuccessResponseInterface) => void,
+  onError: (error: string) => void
+) => {
+  // Show loading state if setLoading function is provided
+  setLoading && setLoading(true);
+  try {
+    // Make the API request
+    const response = await api();
+    const { data } = response;
+    if (data?.success) {
+      // Call the onSuccess callback with the response data
+      onSuccess(data);
+    }
+  } catch (error: any) {
+    // Handle error cases, including unauthorized and forbidden cases
+    if ([401, 403].includes(error?.response.data?.statusCode)) {
+      localStorage.clear(); // Clear local storage on authentication issues
+      if (isBrowser) window.location.href = "/login"; // Redirect to login page
+    }
+    onError(error?.response?.data?.message || "Something went wrong");
+  } finally {
+    // Hide loading state if setLoading function is provided
+    setLoading && setLoading(false);
+  }
+};
+
