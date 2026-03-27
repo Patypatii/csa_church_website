@@ -1,0 +1,101 @@
+import { Router } from "express";
+import {
+  getTableData,
+  createRecord,
+  deleteRecord,
+  getAllData,
+} from "../controllers/ApiController.js";
+import logger from "../logger/winston.js";
+import { BackendDataService } from "../services/backend-data.js";
+
+export const api = Router();
+
+// Allowed tables for security
+const allowedTables = [
+  "members",
+  "events",
+  "contributions",
+  "officials",
+  "projects",
+  "activities",
+  "gallery",
+  "jumuiya",\n  "users",\n  "semester",\n  "weekly",\n];
+
+// Middleware to validate table name
+const validateTable = (req, res, next) => {
+  const tableName = req.params.table;
+  if (!allowedTables.includes(tableName)) {
+    logger.warn(`Invalid table name: ${tableName}`);
+    return res.status(400).json({ error: `Invalid table name: ${tableName}` });
+  }
+  logger.info(`valid table name: ${tableName}`);
+  next();
+};
+
+// GET /api/weekly - weekly activities
+api.get("/weekly", (req, res) => {
+  res.json(BackendDataService.load("weekly.json", []));
+});
+
+// GET /api/semester - semester events
+api.get("/semester", (req, res) => {\n  res.json(BackendDataService.load("semester.json", []));\n});\n\napi.post("/semester", async (req, res) => {\n  try {\n    const currentData = BackendDataService.load("semester.json", []);\n    const maxId = currentData.length > 0 ? Math.max(...currentData.map((d: any) => d.id)) : 0;\n    const newEvent = {\n      id: maxId + 1,\n      ...req.body\n    };\n    const updatedData = [...currentData, newEvent];\n    BackendDataService.save("semester.json", updatedData);\n    res.status(201).json(newEvent);\n  } catch (error) {\n    logger.error(`Error adding semester event: ${error.message}`);\n    res.status(500).json({ error: error.message });\n  }\n});\n\napi.delete("/semester/:id", async (req, res) => {\n  try {\n    let data = BackendDataService.load("semester.json", []);\n    const id = parseInt(req.params.id);\n    const initialLength = data.length;\n    data = data.filter((d: any) => d.id !== id);\n    if (data.length === initialLength) {\n      return res.status(404).json({ error: "Event not found" });\n    }\n    BackendDataService.save("semester.json", data);\n    res.json({ success: true });\n  } catch (error) {\n    logger.error(`Error deleting semester event: ${error.message}`);\n    res.status(500).json({ error: error.message });\n  }\n});
+
+// GET all data from all tables (must be before /:table route)
+api.get("/all/data", async (req, res) => {
+  try {
+    const data = await getAllData();
+logger.debug(`received data ${data} from route '/all/data'`)
+    return res.json(data);
+  } catch (error) {
+    logger.error(`${error.message}  from route '/all/data'`);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET all records from a table
+api.get("/:table", validateTable, async (req, res) => {
+  try {
+    const { table } = req.params;
+    const data = await getTableData(table);
+    logger.debug(`received data ${data} from route '/:table'`);
+    return res.json(data);
+  } catch (error) {
+    logger.error(`${error.message}  from route '/:table'`);
+
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// POST create a new record in a table
+api.post("/:table", validateTable, async (req, res) => {
+  try {
+    const { table } = req.params;
+    const newRecord = await createRecord(table, req.body);
+    logger.debug(`newRecord cretaed ${newRecord} from route '/:table'`);
+
+    return res.status(201).json(newRecord);
+  } catch (error) {
+    logger.error(`${error.message}  from route '/:table'`);
+
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE a record from a table
+api.delete("/:table/:id", validateTable, async (req, res) => {
+  try {
+    const { table, id } = req.params;
+    const deleted = await deleteRecord(table, id);
+    if (!deleted) {
+      logger.warn(
+        `${(table, id)}  from route '/:table' method delete failed to resolve`,
+      );
+      return res.status(404).json({ error: "Record not found" });
+    }
+    res.json(deleted);
+  } catch (error) {
+    logger.error(`${error.message}  from route '/:table' delete table route`);
+
+    res.status(500).json({ error: error.message });
+  }
+});
