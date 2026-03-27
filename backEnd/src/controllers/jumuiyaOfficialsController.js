@@ -341,13 +341,14 @@ export const exportJumuiyaOfficials = async (req, res) => {
         SELECT o.id, o.name, o.category, o.position, o.contact, o.created_at, et.name as term_name, et.year as term_year, o.term_of_service
         FROM jumuiya_officials o
         LEFT JOIN election_terms et ON o.election_term_id = et.id
-        WHERE (o.status = 'active' OR o.status IS NULL)
-        ${JUMUIYA_SORT_SQL}`;
+        WHERE (o.status = 'active' OR o.status IS NULL)`;
+    
     let params = [];
     if (termOfService) {
-      query = query.replace('${JUMUIYA_SORT_SQL}', `AND o.term_of_service = $1 ${JUMUIYA_SORT_SQL}`);
+      query += ` AND o.term_of_service = $1`;
       params.push(termOfService);
     }
+    query += ` ${JUMUIYA_SORT_SQL}`;
 
     const result = await pool.query(query, params);
 
