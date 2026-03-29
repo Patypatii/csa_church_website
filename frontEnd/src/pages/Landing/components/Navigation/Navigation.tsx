@@ -19,7 +19,11 @@ function Navigation() {
     { name: "Community Hub", path: "/community-hub" },
     { name: "Jumuiya", path: "/jumuiya" },
     { name: "Officials", path: "/officials" },
-    { name: "Activities", path: "/activities" },
+    ...(user ? [
+      { name: "Projects", path: "/#projects" },
+      { name: "Activities", path: "/#activities" },
+    ] : []),
+    { name: "Gallery", path: "/#gallery" },
     { name: "Devotion", path: "/devotions" },
   ];
 
@@ -40,12 +44,21 @@ function Navigation() {
         <ul className="hidden md:flex items-center space-x-6">
           {navLinks.map((link) => (
             <li key={link.path}>
-              <Link
-                to={link.path}
-                className="text-gray-600 hover:text-blue-600 font-medium transition-colors text-sm whitespace-nowrap"
-              >
-                {link.name}
-              </Link>
+              {link.path.includes("#") ? (
+                <a
+                  href={link.path}
+                  className="text-gray-600 hover:text-blue-600 font-medium transition-colors text-sm whitespace-nowrap"
+                >
+                  {link.name}
+                </a>
+              ) : (
+                <Link
+                  to={link.path}
+                  className="text-gray-600 hover:text-blue-600 font-medium transition-colors text-sm whitespace-nowrap"
+                >
+                  {link.name}
+                </Link>
+              )}
             </li>
           ))}
         </ul>
@@ -99,13 +112,23 @@ function Navigation() {
           <ul className="py-4 px-4 space-y-2">
             {navLinks.map((link) => (
               <li key={link.path}>
-                <Link
-                  to={link.path}
-                  className="block py-2 text-gray-600 hover:text-blue-600 font-medium transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.name}
-                </Link>
+                {link.path.includes("#") ? (
+                  <a
+                    href={link.path}
+                    className="block py-2 text-gray-600 hover:text-blue-600 font-medium transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.name}
+                  </a>
+                ) : (
+                  <Link
+                    to={link.path}
+                    className="block py-2 text-gray-600 hover:text-blue-600 font-medium transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                )}
               </li>
             ))}
             <li className="pt-4 border-t border-gray-50">

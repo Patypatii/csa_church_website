@@ -19,7 +19,7 @@ import { FaTimes } from 'react-icons/fa';
 type TabType = 'about' | 'officials' | 'registration' | 'channels' | 'members' | 'activities' | 'tshirts' | 'admin';
 
 const JumuiyaDetail: React.FC = () => {
-    const { name } = useParams<{ name: string }>();
+    const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<TabType>('about');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -39,7 +39,7 @@ const JumuiyaDetail: React.FC = () => {
     // The previous getJumuiyaByName did: jumuiyaList.find(j => j.id === name.toLowerCase().replace(/\s+/g, '-'));
     // Let's implement that simple logic here using the list if we had it, or just pass the transformed name to getById
 
-    const jumuiyaId = name ? name.toLowerCase().replace(/[^a-z0-9]/g, '-') : '';
+    const jumuiyaId = id ? id.toLowerCase().replace(/[^a-z0-9]/g, '-') : '';
     const jumuiya = getJumuiyaById(jumuiyaId);
 
     // Fetch dynamic officials from backend
