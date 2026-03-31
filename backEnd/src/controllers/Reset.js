@@ -70,9 +70,9 @@ export const Reset = async (req, res) => {
     );
 
     await sendMail(
-      email,
       "Reset OTP",
       `Your OTP is ${OTP}. It expires in 10 minutes.`,
+      email,
     );
 
     logger.info(`OTP sent to ${email}`);

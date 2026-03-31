@@ -3,7 +3,7 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   RouterProvider,
-  Route,
+  Route
 } from "react-router-dom";
 // import Authorisation from "./assets/Layouts/Authorisation";
 // import Reset from "./pages/Authorization/Reset";
