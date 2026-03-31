@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { FaUserCircle, FaCheckCircle , FaUsers } from "react-icons/fa";
 import { generateAndSaveQuestions } from "../../../api/axiosInstace";
+import type { Member } from "../../../interface/api";
 
 const members = [
   { id: 1, jumuiaName: "St. Augustin" },
@@ -333,10 +334,7 @@ function Carousel() {
    )
 }
 
-interface Member {
-  id: number;
-  jumuiaName: string;
-}
+
 
 function MemberProfile({ member }: { member: Member }) {
   return (

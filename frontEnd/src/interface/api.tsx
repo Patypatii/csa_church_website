@@ -51,3 +51,10 @@ export interface JumuiyaStats {
 export interface DashboardProps {
   jumuiyaId: string;
 }
+
+
+// imported at church_website\frontEnd\src\pages\Devotions\Adminpage\App.tsx
+ export interface Member {
+  id: number;
+  jumuiaName: string;
+}
