@@ -3,7 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import cors from "cors";
-import multer from 'multer';
+import multer from "multer";
 
 import apiRoutes from "./routers/index.js";
 import { api } from "./routers/api.js";
@@ -26,6 +26,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
+<<<<<<< HEAD
 app.use(requestIp.mw());
 app.use(morganMiddleware);
 
@@ -44,13 +45,69 @@ app.use("/uploads", express.static(path.join(process.cwd(), "localFileUploads"))
 // Routes
 app.get('/', (_req, res) => res.redirect('/hub-view'));
 
+=======
+
+// Rate limiter
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5000,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req, res) => {
+    return req.clientIp;
+  },
+  handler: (req, res, next, options) => {
+    res.status(options.statusCode || 429).json({
+      error: `There are too many requests. You are only allowed ${
+        options.max
+      } requests per ${options.windowMs / 60000} minutes`,
+    });
+  },
+});
+
+app.use(limiter);
+app.use(morganMiddleware);
+
+// Static Files
+app.use(express.static(path.join(__dirname, "../../frontEnd/public")));
+app.use(
+  express.static(
+    path.join(__dirname, "../../frontEnd/src/pages/sacramental/public"),
+  ),
+);
+app.use(
+  "/community-assets/backend",
+  express.static(
+    path.join(__dirname, "../../frontEnd/src/pages/sacramental/dist/backend"),
+  ),
+);
+app.use(
+  "/community-assets",
+  express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental")),
+);
+app.use(
+  "/localFileUploads",
+  express.static(path.join(process.cwd(), "localFileUploads")),
+);
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "localFileUploads")),
+);
+
+// Routes
+app.get("/", (_req, res) => res.redirect("/community-hub"));
+>>>>>>> login_features
 app.use("/authentication", apiRoutes);
 app.use("/api/officials", officialsRouter);
 app.use("/api/jumuiya-officials", jumuiyaOfficialsRouter);
 app.use("/api", api);
 
 app.use("/questions", apiRoutes);
+<<<<<<< HEAD
 app.use("/files" , apiRoutes)
+=======
+app.use("/files", apiRoutes);
+>>>>>>> login_features
 
 // Gallery APIs
 app.get("/api/choir/gallery", (_req, res) => {
@@ -74,6 +131,7 @@ app.post("/api/choir/gallery", upload.single("file"), (req, res) => {
   res.status(201).json(newPhoto);
 });
 
+<<<<<<< HEAD
 // Error Handler
 app.use((err, req, res, next) => {
   if (err.stack) console.error(err.stack);
@@ -86,4 +144,6 @@ app.use((err, req, res, next) => {
   });
 });
 
+=======
+>>>>>>> login_features
 export { app };

@@ -18,7 +18,11 @@ const Login: React.FC = () => {
       const response = await axios.post(
         "http://localhost:3001/authentication/v1/login",
         {
+<<<<<<< HEAD
           userReg,
+=======
+          userReg: username,
+>>>>>>> login_features
           password,
         }
       );
@@ -26,8 +30,12 @@ const Login: React.FC = () => {
 
       if (response.data.status === "success") {
         localStorage.setItem("token", response.data.token);
+<<<<<<< HEAD
         alert(`${response.data.name} welcome to our site`)
         navigate("/", { state: { Response: true } });
+=======
+        navigate("/", { state: { response: true } });
+>>>>>>> login_features
       }
       else if (response.data.error == "User email not found") {
         alert("Login User email not found. Please enter your email and change your password.");

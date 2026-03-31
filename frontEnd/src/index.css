@@ -79,6 +79,15 @@
   }
 }
 
+<<<<<<< HEAD
+=======
+{
+    @apply m-0 text-base;
+    color: var(--text-secondary);
+  }
+
+
+>>>>>>> login_features
 /* Animations */
 @keyframes fadeIn {
   from {
