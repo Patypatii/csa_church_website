@@ -1,5 +1,5 @@
 import { testDb as pool } from "../Configs/dbConfig.js";
-import XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import path from 'path';
 import fs from 'fs';
 import { 
@@ -341,13 +341,14 @@ export const exportJumuiyaOfficials = async (req, res) => {
         SELECT o.id, o.name, o.category, o.position, o.contact, o.created_at, et.name as term_name, et.year as term_year, o.term_of_service
         FROM jumuiya_officials o
         LEFT JOIN election_terms et ON o.election_term_id = et.id
-        WHERE (o.status = 'active' OR o.status IS NULL)
-        ${JUMUIYA_SORT_SQL}`;
+        WHERE (o.status = 'active' OR o.status IS NULL)`;
+    
     let params = [];
     if (termOfService) {
-      query = query.replace('${JUMUIYA_SORT_SQL}', `AND o.term_of_service = $1 ${JUMUIYA_SORT_SQL}`);
+      query += ` AND o.term_of_service = $1`;
       params.push(termOfService);
     }
+    query += ` ${JUMUIYA_SORT_SQL}`;
 
     const result = await pool.query(query, params);
 
@@ -364,27 +365,29 @@ export const exportJumuiyaOfficials = async (req, res) => {
       return obj;
     });
 
-    const wb = XLSX.utils.book_new();
-    const wsData = [headers];
-    data.forEach(row => {
-      const rowData = selectedFields.map(field => row[field] || '');
-      wsData.push(rowData);
-    });
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Jumuiya Officials');
 
-    const colWidths = selectedFields.map((field, idx) => {
+    worksheet.columns = selectedFields.map((field, idx) => ({
+      header: headers[idx],
+      key: field
+    }));
+
+    data.forEach(row => {
+      worksheet.addRow(row);
+    });
+
+    worksheet.columns.forEach((column, idx) => {
+      const field = selectedFields[idx];
       const headerLength = headers[idx].length;
       const maxContentLength = Math.max(...data.map(row => String(row[field] || '').length), headerLength);
-      const width = Math.max(maxContentLength + 2, 15);
-      return { wch: width };
+      column.width = Math.max(maxContentLength + 2, 15);
     });
-    ws['!cols'] = colWidths;
-
-    XLSX.utils.book_append_sheet(wb, ws, 'Jumuiya Officials');
-    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename="jumuiya_officials.xlsx"');
+    
+    const buffer = await workbook.xlsx.writeBuffer();
     res.send(buffer);
   } catch (error) {
     logger.error('Error exporting jumuiya officials: ' + error.message);
@@ -429,27 +432,29 @@ export const exportArchivedJumuiyaOfficials = async (req, res) => {
       return obj;
     });
 
-    const wb = XLSX.utils.book_new();
-    const wsData = [headers];
-    data.forEach(row => {
-      const rowData = selectedFields.map(field => row[field] || '');
-      wsData.push(rowData);
-    });
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Archived Jumuiya Officials');
 
-    const colWidths = selectedFields.map((field, idx) => {
+    worksheet.columns = selectedFields.map((field, idx) => ({
+      header: headers[idx],
+      key: field
+    }));
+
+    data.forEach(row => {
+      worksheet.addRow(row);
+    });
+
+    worksheet.columns.forEach((column, idx) => {
+      const field = selectedFields[idx];
       const headerLength = headers[idx].length;
       const maxContentLength = Math.max(...data.map(row => String(row[field] || '').length), headerLength);
-      const width = Math.max(maxContentLength + 2, 15);
-      return { wch: width };
+      column.width = Math.max(maxContentLength + 2, 15);
     });
-    ws['!cols'] = colWidths;
-
-    XLSX.utils.book_append_sheet(wb, ws, 'Archived Jumuiya Officials');
-    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename="archived_jumuiya_officials.xlsx"');
+    
+    const buffer = await workbook.xlsx.writeBuffer();
     res.send(buffer);
   } catch (error) {
     logger.error('Error exporting archived jumuiya officials: ' + error.message);

@@ -38,23 +38,24 @@ const AdminAbout: React.FC<AdminAboutProps> = ({ selectedId }) => {
     const selectedJumuiya = jumuiyaList.find((j: any) => j.id === selectedJumuiyaId);
 
     return (
-        <div style={{ '--admin-theme-color': selectedJumuiya?.color } as React.CSSProperties}>
+        <div className="admin-page-container" style={{ '--admin-theme-color': selectedJumuiya?.color } as React.CSSProperties}>
             <div className="admin-card">
                 <h2>Manage About Section</h2>
 
                 <div className="form-group">
                     {!selectedId && (
-                        <>
+                        <div style={{ marginBottom: '24px' }}>
                             <label>Select Jumuiya to Edit</label>
                             <select
                                 value={selectedJumuiyaId}
                                 onChange={(e) => setSelectedJumuiyaId(e.target.value)}
+                                className="jumuiya-select"
                             >
                                 {jumuiyaList.map((j: any) => (
                                     <option key={j.id} value={j.id}>{j.name}</option>
                                 ))}
                             </select>
-                        </>
+                        </div>
                     )}
                 </div>
 

@@ -68,6 +68,7 @@
     import { RegistrationForm } from '/hub-view/dist/sacramental/components/registration-form.js';
     import { Sidebar } from '/hub-view/dist/sacramental/components/Sidebar.js';
     import { Gallery } from '/hub-view/dist/sacramental/components/gallery.js';
+    import { HubMessenger } from '/hub-view/dist/sacramental/services/HubMessenger.js';
 
     // Initialize sidebar only if not in an iframe
     if (window.self === window.top) {
@@ -77,11 +78,22 @@
       // Hide sidebar container if in iframe
       document.getElementById('choir-sidebar-container').style.display = 'none';
       document.body.classList.add('is-embedded');
+
+      // Add a Back to Hub button for iframe view
+      const backBtn = document.createElement('a');
+      backBtn.className = 'csa-choir-btn csa-choir-btn--secondary csa-hub-back-btn';
+      backBtn.innerHTML = '<i class="fas fa-chevron-left"></i> Back to Hub';
+      backBtn.style.margin = '1rem';
+      backBtn.onclick = () => HubMessenger.requestParentNavigate('');
+      document.body.prepend(backBtn);
     }
 
     // Initialize landing page
     const landingPage = new ChoirLandingPage();
     landingPage.init();
+
+    // Notify parent that choir is loaded
+    HubMessenger.notifyModuleLoaded('choir');
 
     // Initialize registration form separately
     const registrationForm = new RegistrationForm(
