@@ -10,7 +10,6 @@ interface ErrorResponse {
 const Login: React.FC = () => {
   const [userReg, setUserReg] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  // const { login } = useAuth();
   const navigate = useNavigate();
 
   const submit = async () => {
@@ -27,6 +26,7 @@ const Login: React.FC = () => {
 
       if (response.data.status === "success") {
         localStorage.setItem("token", response.data.token);
+        alert(`${response.data.name} welcome to our site`)
         navigate("/", { state: { Response: true } });
       }
       else if (response.data.error == "User email not found") {
