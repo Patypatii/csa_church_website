@@ -1,6 +1,7 @@
-import { logger } from "../logger/winston.js";
+import  logger  from "../logger/winston.js";
 
 export const requestLogger = (req, res, next) => {
+  const start = Date.now();
   logger.info(`📥 ${req.method} ${req.originalUrl} - ${req.ip}`);
 
   // Hook into response finish

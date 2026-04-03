@@ -87,12 +87,10 @@ CREATE TABLE notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(100),
     message VARCHAR(255),
-    is_read BOOLEAN DEFAULT FALSE,
-    posted_by UUID REFERENCES users(id),
     posted_at TIMESTAMP DEFAULT NOW(),
     posted_to VARCHAR(100) NOT NULL,
     member_id VARCHAR(30) REFERENCES members(member_id),
-    status VARCHAR(100) DEFAULT 'normal' CHECK (status IN ('normal', 'urgent', 'info'))
+    status VARCHAR(100) DEFAULT 'normal' CHECK (status IN ('normal', 'urgent'))
 );
 CREATE TABLE IF NOT EXISTS uploads (
     id SERIAL PRIMARY KEY,
@@ -101,4 +99,11 @@ CREATE TABLE IF NOT EXISTS uploads (
     format TEXT,
     resource_type TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE notification_uploads (
+    id SERIAL PRIMARY KEY,
+    notification_id UUID REFERENCES notifications(id) ON DELETE CASCADE,
+    upload_id INTEGER REFERENCES uploads(id) ON DELETE CASCADE
 );

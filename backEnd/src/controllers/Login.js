@@ -14,7 +14,7 @@ const Login = async (req, res) => {
   }
 
   try {
-    const result = await testDb.query(
+    const result = await testDb?.query(
       `SELECT m.member_id,m.password,m.jumui_id m.email, r.role_name FROM members m 
       JOIN member_roles mr ON m.member_id = mr.member_id 
       JOIN roles r ON mr.role_id = r.role_id WHERE m.member_id =$1`,

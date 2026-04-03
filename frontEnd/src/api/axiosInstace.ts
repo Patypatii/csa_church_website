@@ -1,6 +1,8 @@
 
 import axios from "axios";
 import { LocalStorage } from "../utils";
+import type { fileUpload } from "../interface/api";
+import { normalizeFiles } from "../pages/Devotions/utitlty";
 
 // Create an Axios instance for API requests
 const apiClient = axios.create({
@@ -49,39 +51,73 @@ apiClient.interceptors.response.use(
   }
 );
 
-
-
 // API functions for refresh both access and refresh token
 export const refreshAccessAndRefreshToken = ()=>{
-  return apiClient.post("/api/auth/refresh")
+  return apiClient.post("/authentication/refresh")
 }
 
 // API functions for generating and saving question to the database
  export const generateAndSaveQuestions = (data: { topic: string }) => {
-  return apiClient.post("/questions/v1", data);
+  return apiClient.post("/questions", data);
 };
 
 // Api for fetching comparison data for the 7 jumuiyas
 export const  fetchJumuiyaComparisonData = () =>{
-  return apiClient.get("/csa/v1/jumuiya-comparison");
+  return apiClient.get("/csa/jumuiya-comparison");
 }
 
 // Api for fetching user specific progress data
 export const memberProgressData = ()=>{
- return apiClient.get("/member/v1/progress");
+ return apiClient.get("/member/:id/progress");
 }
 
 // Api for fetching user specific summary data of the progress
 export const memberSummaryData = ()=>{
-  return apiClient.get("/member/v1/summary")
+  return apiClient.get("/member/:id/summary")
 }
 
 // Api for fetching user specific progress data
-export const individualJumuiAttemptsData =( jumuiyaId : string)=>{
+export const individualJumuiAttemptsData =( jumuiyaId : number)=>{
   return apiClient.get(`/attempts/jumuiya/${jumuiyaId}`)
 }
 
 // Api for fetching notification data either at csa or jumuiya level
 export const fetchNotifications = (jumuiyaId: number) =>{
-  return apiClient.get( `/api/notifications?jumuiyaId=${jumuiyaId}`)
+  return apiClient.get( `/notifications?jumuiyaId=${jumuiyaId}&posted_to=csa`)
 } 
+// http://localhost:3001/api/v1//notifications/jumuiya=123abc&posted_to=csa
+
+export const createNotificationEventApi= (payload: { title: string; message: string; images?: fileUpload[]; posted_To?: string; status?: string;}) => {
+  return apiClient.post("/notifications", payload);
+};
+
+// http://localhost:3001/api/v1//notifications
+
+
+// Api for uploading one or many files this may include images and videos, 
+export const uploadFile = (files: File[] | File) => {
+  const formData = new FormData();
+  normalizeFiles(files).forEach((file) => formData.append("files", file));
+
+  return apiClient.post("/files", formData, {headers: {"Content-Type": "multipart/form-data", },
+  });
+};
+
+
+// ?api to handle fetching all uploaded files this
+//  is useful for the admin to view all the uploaded files and manage them if needed
+export const fetchAllUploadedFiles = () => {
+  return apiClient.post("/files");
+};
+
+
+
+// Delete one or many files by publicId(s)
+export const deleteOneOrMoreFiles = (publicIds: string | string[]) => {
+  const ids = Array.isArray(publicIds) ? publicIds : [publicIds];
+  return apiClient.delete("/files", {
+    data: { publicIds: ids }, 
+  });
+};
+
+

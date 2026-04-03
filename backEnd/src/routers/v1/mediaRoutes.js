@@ -8,11 +8,8 @@ import {uploadMiddleware  } from "../../middleWares/uploadMiddleware.js"
 const route = express.Router()
 
 route.get("/" , getAllfiles)
-route.post("/upload" , uploadMiddleware , createFile)
-route.delete("/delete", deleteFile);
-
-
-
+route.post("/" , uploadMiddleware , createFile)
+route.delete("/", deleteFile);
 
 
 

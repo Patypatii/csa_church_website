@@ -1,10 +1,12 @@
 
 import {Router} from "express"
-import { getMemberProgress } from "../../controllers/member/index.js";
+import { getMemberProgress , getMemberSummary } from "../../controllers/member/index.js";
+
 
 const router = Router()
 
-router.use("/progress", getMemberProgress);
+router.get("/progress", getMemberProgress);
+router.get("/summary", getMemberSummary);
 
 
 export default router;

@@ -1,25 +1,19 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FaBell, FaPlus } from "react-icons/fa";
+import { CiWifiOff } from "react-icons/ci";
 import { MdEvent } from "react-icons/md";
 import type { Event, fileUpload, SocketError } from "../../../interface/api";
 import { useSocket } from "../../../context/SocketContext";
 import { useAuth } from "../../../context/AuthContext";
-import { fetchNotifications } from "../../../api/axiosInstace";
+import {
+  createNotificationEventApi,
+  fetchNotifications,
+} from "../../../api/axiosInstace";
 import NotificationModal from "../components/NotificationModal";
 
-const jumuiyaColors = [
-  "bg-green-100 border-green-500",
-  "bg-purple-100 border-purple-500",
-  "bg-orange-100 border-orange-500",
-  "bg-teal-100 border-teal-500",
-  "bg-pink-100 border-pink-500",
-  "bg-yellow-100 border-yellow-500",
-  "bg-red-100 border-red-500",
-];
-
 const Notifications: React.FC = () => {
-  // we will fetch from useauth to determine if user is admin  and has permission or not and show add button accordingly
-  const isAdmin = true;
+  const { socket } = useSocket(); //help us connect to the socket server and listen for events
+  const { user } = useAuth(); //help us get the user info and determine which jumuiya they belong to and join the correct room for notifications
 
   const [activeCategory, setActiveCategory] = useState<
     "csa" | "jumuiya" | null
@@ -32,8 +26,20 @@ const Notifications: React.FC = () => {
   const [socketError, setSocketError] = useState<any>(null);
   const [isReadyForNotifications, setIsReadyForNotifications] = useState(false);
 
-  const { socket } = useSocket(); //help us connect to the socket server and listen for events
-  const { user } = useAuth(); //help us get the user info and determine which jumuiya they belong to and join the correct room for notifications
+  // Get roles from user context
+
+  //reason for using memo is to avoid unnecessary re-computation of roles array on every render,
+  // it will only recompute when user.role changes. This is important because roles are used in
+  //  multiple places (like determining if user is admin and controlling access to the modal) and
+  // we want to ensure that those checks are efficient and only update when necessary.
+  const roles = useMemo(() => user?.role ?? [], [user?.role]);
+
+  // Determine if user is admin (can post to CSA and/or Jumuiya)
+  // A user is considered an admin if they have either the "CSA_LEADER" or "JUMUIA_LEADER" role
+  // This will control access to the notification creation modal and the ability to post notifications
+  //users without this titles will just be able to read the notifications
+  // const isAdmin = roles.includes("CSA_LEADER") || roles.includes("JUMUIA_LEADER");
+  const isAdmin = true;
 
   //  Event constants (MUST match backend exactly)
   const CONNECTED_EVENT = "connected";
@@ -44,7 +50,6 @@ const Notifications: React.FC = () => {
   const NOTIFICATION_UPDATED_EVENT = "notificationUpdated";
   const NOTIFICATION_DELETE_EVENT = "notificationDelete";
   const SOCKET_ERROR_EVENT = "socketError";
-
 
   // 1. onConnect
   const onConnect = useCallback(() => {
@@ -92,36 +97,48 @@ const Notifications: React.FC = () => {
 
   // 6. onErrorHandler
   const onErrorHandler = useCallback((error: SocketError) => {
-    console.error("Socket error occurred:", error);
+    console.error("Socket error occurred:", error.message || error);
     setSocketError(error);
   }, []);
 
-const createNotification = useCallback(
-    async ({ title, message, images }: { title: string; message: string; images?: fileUpload[] }) => {
-      if (!user || !socket) return;
+  const createNotification = useCallback( async ({title, message, images, status ,  posted_to }: {title: string;   message: string;  images?: fileUpload[];  status: string; posted_to:string }) => {
+      // if (!user || !socket) return;
+      if (!socket) return;
 
       const payload = {
         title,
         message,
-        posted_by: user.username,
-        member_id: user.user_id,
-        status: "active",
         images,
+        status,
+        posted_to,
       };
 
-      if (user.role === "csa_admin") {
-        socket.emit(NOTIFY_CSA_ON_NEW_NOTIFICATION_EVENT, {...payload, posted_to: "csa",});
-      } else {
-        socket.emit(NOTIFY_SPECIFIC_JUMUIA_ON_NEW_NOTIFICATION_EVENT, {
-          jumuiaName: user.jumuiya_id,
-          message: {
+      try {
+        // 1. Save to DB via your backend API
+        console.log("api calling starting with ", payload);
+        const res = await createNotificationEventApi(payload);
+        console.log("Notification created in DB:", res.data);
+
+        // 2. Emit socket event with saved notification
+        if (roles.includes("CSA_LEADER")) {
+          socket.emit(NOTIFY_CSA_ON_NEW_NOTIFICATION_EVENT, {
             ...payload,
-            posted_to: user.jumuiya_id,
-          },
-        });
+            posted_to: "csa",
+          });
+        } else {
+          socket.emit(NOTIFY_SPECIFIC_JUMUIA_ON_NEW_NOTIFICATION_EVENT, {
+            jumuiaName: user?.jumuiya_id,
+            message: {
+              ...payload,
+              posted_to: user?.jumuiya_id,
+            },
+          });
+        }
+      } catch (error) {
+        console.error("Failed to create notification:", error);
       }
     },
-    [user, socket],
+    [user, socket, roles],
   );
 
   //  Function: getNotifications
@@ -150,18 +167,16 @@ const createNotification = useCallback(
 
   //  Attach socket listeners only when ready
   useEffect(() => {
-    if (!socket || !isReadyForNotifications) return;
+    if (!socket) return;
 
+    // csaNotification
     // listen for Connection
     socket.on(CONNECTED_EVENT, onConnect);
     socket.on(DISCONNECT_EVENT, onDisconnect);
 
     // listen for New notifications
-    socket.on(NOTIFY_CSA_ON_NEW_NOTIFICATION_EVENT, handleNewNotification);
-    socket.on(
-      NOTIFY_SPECIFIC_JUMUIA_ON_NEW_NOTIFICATION_EVENT,
-      handleNewNotification,
-    );
+    socket.on("csaNotification", handleNewNotification);
+    socket.on(NOTIFY_SPECIFIC_JUMUIA_ON_NEW_NOTIFICATION_EVENT, handleNewNotification);
     //  listen for Updates event from the server
     socket.on(NOTIFICATION_UPDATED_EVENT, handleUpdateNotification);
     // listen for delete event from the server
@@ -215,155 +230,175 @@ const createNotification = useCallback(
     : [];
 
   return (
-    <div className="p-6 max-w-3xl mx-auto ">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold flex items-center gap-2 relative">
-          <FaBell />
-          Notifications
-          {totalUnread > 0 && (
-            <span className="absolute -top-2 -right-3 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-              {totalUnread}
-            </span>
-          )}
-        </h1>
-      </div>
-
-      {/* this shows the connection status to the serve for receiving notification */}
-      <div className="mb-4">
-        {isConnected ? (
-          <div className="flex items-center gap-2 bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded-lg shadow-sm">
-            <span className="text-lg">✅</span>
-            <span className="font-medium">
-              Connected to notification server
-            </span>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 py-5 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-2xl shadow-sm p-5 flex justify-between items-center border border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-blue-100 rounded-xl text-blue-600 text-xl">
+              <FaBell />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-800">Notifications</h1>
+              <p className="text-sm text-gray-500">Stay updated in real-time</p>
+            </div>
           </div>
-        ) : (
-          <div className="flex items-center gap-2 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-lg shadow-sm">
-            <span className="text-lg">⚠️</span>
-            <span className="font-medium">Disconnected from server</span>
+
+          {totalUnread > 0 && (
+            <div className="bg-red-500 text-white text-sm font-semibold px-3 py-1 rounded-full shadow-sm animate-pulse">
+              {totalUnread} New
+            </div>
+          )}
+        </div>
+
+        {/* Connection Status */}
+        {!isConnected && (
+          <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl  mt-4">
+            <CiWifiOff className="text-xl" />
+            <span className="text-sm font-medium">
+              You’re offline. Updates will sync once you're back online.
+            </span>
           </div>
         )}
-      </div>
 
-      {/* Category Counters */}
-      <div className="flex gap-6 mb-6">
+        {/* Loading */}
         {loadingNotifications && (
-          <div className="flex items-center justify-center gap-3 bg-blue-50 border border-blue-300 text-blue-700 px-4 py-3 rounded-lg shadow-sm mb-4 animate-pulse">
-            <svg
-              className="w-5 h-5 animate-spin text-blue-600"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
+          <div className="flex items-center justify-center gap-3 bg-blue-50 border border-blue-200 text-blue-600 px-4 py-3 rounded-xl">
+            <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24">
               <circle
-                className="opacity-25"
                 cx="12"
                 cy="12"
                 r="10"
                 stroke="currentColor"
                 strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"
-              ></path>
+                className="opacity-25"
+              />
             </svg>
-            <span className="font-medium">
-              Loading notifications, please wait...
+            <span className="text-sm font-medium">
+              Fetching latest notifications...
             </span>
           </div>
         )}
 
-        {/* indicate if there was an error when getting the notification , error such as no socket connection */}
+        {/* Error */}
         {socketError && (
-          <div className="flex items-center gap-3 bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg shadow-sm mb-4">
-            <span className="text-xl">🚫</span>
+          <div className="flex gap-3 bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl">
+            <span className="text-xl">⚠️</span>
             <div>
-              <p className="font-semibold">
-                We’re having trouble connecting to the notification server.
-              </p>
+              <p className="font-semibold">Connection problem</p>
               <p className="text-sm">
-                {socketError.message ||
-                  "Please check your internet connection or try again shortly."}
+                {socketError.message || "Unable to reach notification server."}
               </p>
             </div>
           </div>
         )}
 
-        <button
-          onClick={() => openCategory("csa")}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-        >
-          CSA{" "}
-          {unreadCSA > 0 && (
-            <span className="bg-white text-blue-600 px-2 rounded-full">
-              {unreadCSA}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => openCategory("jumuiya")}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
-        >
-          Jumuiya{" "}
-          {unreadJumuiya > 0 && (
-            <span className="bg-white text-green-600 px-2 rounded-full">
-              {unreadJumuiya}
-            </span>
-          )}
-        </button>
-      </div>
+        {/* Category Selector */}
+        <div className="flex gap-3 bg-white p-3 rounded-2xl shadow-sm border border-gray-200 w-fit mt-3 mb-3 ">
+          <button
+            onClick={() => openCategory("csa")}
+            className={`px-5 py-2 rounded-full font-medium transition ${
+              activeCategory === "csa"
+                ? "bg-blue-600 text-white shadow-sm"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            📘 CSA
+            {unreadCSA > 0 && (
+              <span className="ml-2 text-xs bg-white text-blue-600 px-2 py-0.5 rounded-full">
+                {unreadCSA}
+              </span>
+            )}
+          </button>
 
-      {/* Default view if no category chosen */}
-      {!activeCategory && (
-        <div className="text-center p-10 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg shadow-md">
-          <FaBell className="text-5xl text-blue-600 mb-4" />
-          <h2 className="text-xl font-bold text-gray-700">
-            Your Notifications
-          </h2>
-          <p className="text-gray-500">Choose CSA or Jumuiya to view details</p>
+          <button
+            onClick={() => openCategory("jumuiya")}
+            className={`px-5 py-2 rounded-full font-medium transition ${
+              activeCategory === "jumuiya"
+                ? "bg-green-600 text-white shadow-sm"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            🏡 Jumuiya
+            {unreadJumuiya > 0 && (
+              <span className="ml-2 text-xs bg-white text-green-600 px-2 py-0.5 rounded-full">
+                {unreadJumuiya}
+              </span>
+            )}
+          </button>
         </div>
-      )}
 
-      {/* Events List */}
-      {activeCategory && filteredEvents.length === 0 ? (
-        <div className="text-center p-10 bg-red-100 rounded-lg shadow-md">
-          <MdEvent className="text-5xl text-red-600 mb-4" />
-          <h2 className="text-xl font-bold text-red-700">No Notifications</h2>
-          <p className="text-gray-600">You’re all caught up!</p>
-        </div>
-      ) : (
+        {/* No Category Selected */}
+        {!activeCategory && (
+          <div className="text-center rounded-2xl p-10 bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-100 shadow-sm">
+            <div className="flex justify-center mb-5">
+              <FaBell className="text-4xl text-blue-500 animate-[pulse_2s_infinite]" />
+            </div>
+
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              Choose a Category
+            </h2>
+
+            <p className="text-sm text-gray-600 max-w-md mx-auto mb-4">
+              Select <span className="font-medium text-blue-600">CSA</span> or{" "}
+              <span className="font-medium text-green-600">Jumuiya</span> to
+              view updates.
+            </p>
+
+            <p className="text-xs text-gray-500">
+              Notifications are grouped to help you stay organized.
+            </p>
+          </div>
+        )}
+
+        {/* Empty Category */}
+        {activeCategory && filteredEvents.length === 0 && (
+          <div className="text-center rounded-2xl p-10 bg-gray-50 border border-gray-200 shadow-sm">
+            <div className="flex justify-center mb-5">
+              <MdEvent className="text-5xl text-gray-400 animate-[pulse_2s_infinite]" />
+            </div>
+
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              No notifications yet
+            </h2>
+
+            <p className="text-sm text-gray-600 max-w-md mx-auto">
+              You're all caught up. New updates will appear here when available.
+            </p>
+          </div>
+        )}
+
+        {/* Notifications List */}
         <div className="space-y-4">
-          {filteredEvents.map((event, idx) => {
-            const jumuiyaStyle =
-              event.category === "jumuiya"
-                ? jumuiyaColors[idx % jumuiyaColors.length]
-                : "bg-blue-100 border-blue-500";
+          {filteredEvents.map((event) => {
+            const isJumuiya = event.category === "jumuiya";
 
             return (
               <div
                 key={event.id}
-                className={`p-4 rounded-lg shadow-md ${jumuiyaStyle}`}
+                className={`bg-white rounded-2xl shadow-sm p-5 border-l-4 ${
+                  isJumuiya ? "border-green-500" : "border-blue-500"
+                } hover:shadow-md transition`}
               >
-                <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-semibold">{event.text}</h2>
-                  <span className="text-sm text-gray-500">
+                <div className="flex justify-between items-start">
+                  <h2 className="font-semibold text-gray-800">{event.text}</h2>
+                  <span className="text-xs text-gray-400">
                     {new Date(event.createdAt).toLocaleString()}
                   </span>
                 </div>
-                <p className="text-xs text-gray-600 mt-2">
-                  Posted by: {event.posted_by}
+
+                <p className="text-xs text-gray-500 mt-2">
+                  Posted by {event.posted_by}
                 </p>
-                {event.images && event.images.length > 0 && (
-                  <div className="flex gap-2 mt-3">
+
+                {Array.isArray(event.images) && event.images.length > 0 && (
+                  <div className="flex gap-2 mt-4">
                     {event.images.slice(0, 3).map((img, i) => (
                       <img
                         key={i}
                         src={img}
                         alt="event"
-                        className="w-24 h-24 object-cover rounded-lg shadow"
+                        className="w-20 h-20 object-cover rounded-xl shadow-sm hover:scale-105 transition"
                       />
                     ))}
                   </div>
@@ -372,24 +407,26 @@ const createNotification = useCallback(
             );
           })}
         </div>
-      )}
 
-      {/* Admin Add Button */}
-      {isAdmin && (
-        <div className="mt-10 flex justify-center">
+        {/* Floating Admin Button */}
+        {isAdmin && (
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 shadow-lg"
+            className="fixed bottom-6 right-6 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg transition hover:scale-110"
           >
-            <FaPlus /> Add Notification
+            <FaPlus />
           </button>
-        </div>
-      )}
+        )}
 
-      {/* Modal */}
-      {showModal && (
-        <NotificationModal createNotification={createNotification} onClose={() => setShowModal(false)} />    
-      )}
+        {/* Modal */}
+        {showModal && (
+          <NotificationModal
+            roles={roles} // pass roles to modal
+            createNotification={createNotification}
+            onClose={() => setShowModal(false)}
+          />
+        )}
+      </div>
     </div>
   );
 };

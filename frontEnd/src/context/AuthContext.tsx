@@ -1,11 +1,18 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
-// Define the shape of the context data
+// Update the user type: role is now an array of strings
+interface UserType {
+  user_id: number;
+  username: string;
+  role: string[];  // <-- multiple roles
+  jumuiya_id: number;
+}
+
 interface AuthContextType {
-  user: { user_id: number; username: string; role: string; jumuiya_id:number} | null;
+  user: UserType | null;
   token: string | null;
-  login: (userData: { user_id: number; username: string; role: string; jumuiya_id:number}, token: string) => void;
+  login: (userData: UserType, token: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
   getAuthToken: () => string | null;
@@ -16,7 +23,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Create the provider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<{ user_id: number; username: string; role: string; jumuiya_id:number } | null>(null); 
+  const [user, setUser] = useState<UserType | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
   // Check for stored user/token on initial load
@@ -32,7 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const login = (userData: { user_id: number; username: string; role: string ;  jumuiya_id:number}, authToken: string) => {
+  const login = (userData: UserType, authToken: string) => {
     console.log("AuthContext login called with:", userData, authToken);
     setUser(userData);
     setToken(authToken);
@@ -52,7 +59,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return token || localStorage.getItem('token');
   };
 
-  // Compute isAuthenticated based on user state
   const isAuthenticated = !!user && !!token;
 
   return (
@@ -71,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Create a custom hook for easy access to the context
+// Custom hook
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

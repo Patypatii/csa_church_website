@@ -8,7 +8,7 @@ import { getJumuiComparison } from "../../controllers/jumuyiaComparison/index.js
 
 const router = Router()
 
-router.use("/jumui-comparison", getJumuiComparison);
+router.get("/jumuiya-comparison", getJumuiComparison);
 
 
 export default router;

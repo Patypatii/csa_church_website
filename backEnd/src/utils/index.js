@@ -2,6 +2,7 @@ import fs from "fs";
 import cloudinary from "../Configs/cloudinaryConfigs.js";
 import { testDb } from "../Configs/dbConfig.js";
 import logger from "../logger/winston.js";
+import  ApiError  from "./ApiError.js";
 
 export const parseQuestionBlock = (block) => {
   const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
@@ -71,14 +72,15 @@ export const sansitiseAndParseQuestionBlock = (content) => {
   return array;
 };
 
+
 // Upload a single file to Cloudinary and save its metadata in the database
 export async function uploadOneFile(file) {
   const result = await cloudinary.uploader.upload(file.path, {
-    resource_type: "auto", // this ensures the resource is directrly detected instead of use saying the resource is either a video or a url
+    resource_type: "auto", // this ensures the resource is directrly detected instead of us saying the resource is either a video or a url
   });
 
   if (!result || !result.secure_url) {
-    throw new Error("Cloudinary upload failed");
+    throw new ApiError( 502 ,"Cloudinary upload failed")
   }
 
   // Remove temporary file created by Multer to clean up disk storage , remeber this file "localfileuploads"
@@ -105,6 +107,7 @@ export async function uploadOneFile(file) {
   return dbResult.rows[0];
 }
 
+
 // Upload multiple files to Cloudinary and save metadata in DB
 // Includes one retry attempt for failed uploads, then cleans up failed files
 // this function liks to the uploadOnefile as an abstraction for claen code structure as indicated in line 130
@@ -127,13 +130,13 @@ export async function uploadManyFiles(files, retry = false) {
   // Collect results though iteration
   //.entries property gives us an array of [key ,  value] pairs
   //where we are interating through each entrie distructuring each key and value pair and there attributes to help us indetify pas or failed uploade file
-  for (const [index, result] of settledResults.entries()) {
+  for (const [index, result] of settledResults?.entries()) {
     if (result.status === "fulfilled") {
       successesUploadedFiles.push(result.value);
     } else {
       faildeToUploadFiles.push(files[index]);
       logger.warn(
-        `Upload failed for ${files[index].originalname}: ${result.reason.message}`,
+        `Upload failed for ${files[index].originalname}: ${result.reason.error}`,
       );
     }
   }
@@ -143,11 +146,11 @@ export async function uploadManyFiles(files, retry = false) {
   if (faildeToUploadFiles.length > 0 && !retry) {
     logger.info(`Retrying ${faildeToUploadFiles.length} failed upload(s)...`);
     const retryResults = await uploadManyFiles(faildeToUploadFiles, true); // retry once to avoid endress looping incase a file never upload successifuly
-    successesUploadedFiles.push(...retryResults.successesUploadedFiles);
+    successesUploadedFiles.push(...retryResults?.successesUploadedFiles);
 
 
     // Clean up any files that still failed after retry
-    for (const failedFile of retryResults.faildeToUploadFiles) {
+    for (const failedFile of retryResults?.faildeToUploadFiles) {
       if (fs.existsSync(failedFile.path)) {
         fs.unlinkSync(failedFile.path);
         logger.info(
@@ -179,7 +182,7 @@ export async function uploadManyFiles(files, retry = false) {
   };
 }
 
-//  * **For example:**
+//  * * *For example:**
 //  * * This can occur when product is created.
 //  * * In product creation process the images are getting uploaded before product gets created.
 //  * * Once images are uploaded and if there is an error creating a product, the uploaded images are unused.

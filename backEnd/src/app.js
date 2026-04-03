@@ -76,14 +76,7 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(morganMiddleware);
 
-app.use("/authentication", apiRoutes);
-app.use("/questions", apiRoutes);
-app.use("/files" , apiRoutes)
-app.use("/member"  , apiRoutes)
-app.use("/csa"  , apiRoutes)
-
-
-
+app.use("/api", apiRoutes)
 
 // Static Files
 app.use(express.static(path.join(__dirname, "../../frontEnd/public")));
@@ -123,7 +116,12 @@ BackendDataService.init();
 
 initializeSocketIO(io)
 setSocketInstance(io);
-app.use(requestLogger);
-app.use(errorHandler)
+// app.use(requestLogger);
+// app.use(errorHandler)
 
-export { app };
+app.use(( err ,req , res , next)=>{
+ console.log("error ", err , err.message , err.Stack )
+ next();
+})
+
+export { httpServer };
