@@ -5,6 +5,9 @@ import {
   RouterProvider,
   Route,
 } from "react-router-dom";
+// import Authorisation from "./assets/Layouts/Authorisation";
+// import Reset from "./pages/Authorization/Reset";
+// import ResetPasswordPage from "./pages/Authorization/ResetPasswordPage";
 import Authorisation from "./assets/Layouts/Authorisation";
 import Reset from "./pages/Authorization/Reset";
 import ResetPasswordPage from "./pages/Authorization/ResetPasswordPage";
@@ -17,6 +20,8 @@ import Readings from "./pages/Devotions/pages/Readings";
 import Dashboard from "./pages/Devotions/pages/Dashboard";
 import Layout from "./pages/Devotions/components/Layout";
 import Appadmin from "./pages/Devotions/Adminpage/App"
+import AdminPanel from "./pages/officials/AdminPanel";
+import PublicView from "./pages/officials/PublicView";
 import {
   AboutSection,
   CommunitySection,
@@ -28,6 +33,14 @@ import ProjectsSection from "./pages/Landing/components/sections/projects";
 import OfficialsSection from "./pages/Landing/components/sections/officials";
 import JumuiyaSection from "./pages/Landing/components/sections/jumuiya";
 import ImageSlider from "./pages/Landing/components/ImageSlider";
+import JumuiyaLanding from "./pages/Jumuiya/JumuiyaLanding";
+import JumuiyaDetail from "./pages/Jumuiya/JumuiyaDetail";
+import CommunityHub from "./pages/sacramental/CommunityHub";
+import { DataProvider } from "./pages/Jumuiya/context/DataContext";
+
+
+
+
 import { useAuth } from "./context/AuthContext";
 import { PublicRoute, ProtectedRoute } from "./Regulator";
 
@@ -41,7 +54,7 @@ const Home: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <div className="bg-gray-50 min-h-screen flex flex-col">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <main className="flex-grow">
         {/* Show landing page content when NOT logged in */}
         {!user && (
@@ -87,13 +100,15 @@ const App: React.FC = () => {
           <Route path="reset" element={<Reset />} />
           <Route path="otp/:reg" element={<ResetPasswordPage />} />
         </Route>
-        <Route path="/admin/quiz" element={<Appadmin />}/>
+        <Route path="/admin/quiz" element={<Appadmin />} />
+        <Route path="/admin/officials" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
+        <Route path="/officials" element={<PublicView />} />
 
         <Route path="/" element={<Pageoulet />}>
-        <Route index element={<Home />} />
+          <Route index element={<Home />} />
 
           <Route
-            path="devotions"
+            path="/devotions"
             element={
               <ProtectedRoute>
                 <Layout />
@@ -107,7 +122,33 @@ const App: React.FC = () => {
             <Route path="rosary" element={<Rosary />} />
             <Route path="challenge" element={<Challenge />} />
           </Route>
+
+          <Route
+            path="/jumuiya"
+            element={
+              <ProtectedRoute>
+                <DataProvider>
+                  <JumuiyaLanding />
+                </DataProvider>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/jumuiya/:id"
+            element={
+              <ProtectedRoute>
+                <DataProvider>
+                  <JumuiyaDetail />
+                </DataProvider>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/community-hub/:moduleSlug?"
+            element={<CommunityHub />}
+          />
         </Route>
+
       </>,
     ),
   );

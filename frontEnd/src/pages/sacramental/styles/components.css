@@ -111,6 +111,19 @@
     width: 100%;
 }
 
+/* Hub Back Button (for embedded view) */
+.csa-hub-back-btn {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1000;
+    opacity: 0.8;
+}
+
+.csa-hub-back-btn:hover {
+    opacity: 1;
+}
+
 /* Badge */
 .csa-choir-badge {
     display: inline-block;

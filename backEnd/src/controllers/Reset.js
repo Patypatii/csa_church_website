@@ -1,52 +1,73 @@
 import crypto from "crypto";
 import sendMail from "../Configs/emailConfig.js";
 import bcrypt from "bcrypt";
-import { testDb } from "../Configs/dbConfig.js";
+// import { db, testDb } from "../Configs/dbConfig.js";
 import logger from "../logger/winston.js";
 
 export const Reset = async (req, res) => {
-  try {
-    const { userName, email, password } = req.body;
+  const { email, password, purpose } = req.body;
 
-    // ✅ Validate inputs individually
-    if (!userName || !email || !password) {
-      logger.warn("Reset attempt with missing fields");
-      return res
-        .status(400)
-        .json({ error: "userName, email, and password are required" });
+  logger.debug("Received reset request for user: " + userName);
+
+  if (!email || !password || !purpose) {
+    logger.warn("Reset attempt with missing fields");
+    return res.status(400).send("Email, password, and purpose are required");
+  }
+
+  try {
+    //   Check if user exists
+
+    let userName = null;
+
+    if (purpose === "email") {
+      userName = req.body.userReg;
+      const emailCheck = await testDb.query(
+        `SELECT 1 FROM members WHERE email = $1`,
+        [email],
+      );
+      if (emailCheck.rows.length > 0) {
+        return res.status(400).json({ error: "Email already in use" });
+      }
+    } else if (purpose === "password") {
+      const userCheck = await testDb.query(
+        `SELECT * FROM members WHERE email = $1`,
+        [email],
+      );
+      if (userCheck.rows.length === 0) {
+        logger.warn(`Password reset attempt for non-existent email: ${email}`);
+        return res.status(404).send("User not found");
+      }
     }
 
-    // ✅ Check if user exists before updating
-    const existingUser = await testDb.query(
-      `SELECT member_id FROM members WHERE member_id = $1 AND email = $2`,
-      [userName, email],
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedOtp = crypto.createHash("sha256").update(OTP).digest("hex");
+
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    //   Insert or update password_resets
+    await testDb.query(
+      `INSERT INTO password_resets (member_id, email, otp, otp_expires, temp_password)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (member_id) DO UPDATE 
+       SET email = EXCLUDED.email,
+           otp = EXCLUDED.otp,
+           otp_expires = EXCLUDED.otp_expires,
+           temp_password = EXCLUDED.temp_password`,
+      [
+        userName,
+        email || existingUser.email,
+        hashedOtp,
+        expiresAt,
+        hashedPassword,
+      ],
     );
 
     if (existingUser.rowCount === 0) {
       logger.warn(`Reset attempt for non-existent user: ${userName}`);
       return res.status(404).json({ error: "User not found" });
     }
-
-    // ✅ Hash password securely
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    // ✅ Generate OTP securely
-    const OTP = crypto.randomInt(100000, 999999).toString();
-    const hashedOtp = crypto.createHash("sha256").update(OTP).digest("hex");
-
-    // ✅ Configurable expiry
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-
-    // ✅ Update only reset fields, not email blindly
-    await testDb.query(
-      `UPDATE members 
-       SET reset_otp = $1, reset_otp_expires = $2, password = $3
-       WHERE member_id = $4 AND email = $5`,
-      [hashedOtp, expiresAt, hashedPassword, userName, email],
-    );
-
-    // ✅ Send OTP securely
-    await sendMail("Password Reset OTP", `Your OTP is: ${OTP}`, email);
 
     logger.info(`Password reset OTP sent to ${email} for user: ${userName}`);
     return res
@@ -64,7 +85,7 @@ export const OTPverification = async (req, res) => {
 
   const hashedInputOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
-  const client = await testDb.connect();
+  const client = await db.connect();
 
   try {
     await client.query("BEGIN");
@@ -120,5 +141,4 @@ export const OTPverification = async (req, res) => {
   } finally {
     client.release();
   }
-  
 };
