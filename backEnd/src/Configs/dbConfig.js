@@ -22,7 +22,7 @@ export const connectDb = async () => {
     logger.info("Connected to postgree database successfully!");
   } catch (error) {
     logger.error("Failed to connect postgree database:", error.message, { stack: error.stack });
-    process.exit(1)
+    // process.exit(1)
   }
 };
 
@@ -43,7 +43,7 @@ export const connectToMongoDb = async () => {
     logger.info(`☘️  MongoDB Connected! Db host: ${connectionInstance.connection.host}`);
   } catch (error) {
     logger.error("MongoDB connection error: ", error);
-    process.exit(1)
+    // process.exit(1)
   }
 };
 
