@@ -17,7 +17,6 @@
 // handle errors using logger function , 
 // create sepaarate function for updating an image , deleting an image , creating an image
 import { v2 as cloudinary } from "cloudinary";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
 
 // Configure Cloudinary
 cloudinary.config({
@@ -26,17 +25,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: "church_officials",
-    allowed_formats: ["jpg", "jpeg", "png", "gif", "mp4", "mov", "avi"],
-    public_id: (req, file) => {
-      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-      return file.fieldname + "-" + uniqueSuffix;
-    },
-  },
-});
 
 export default cloudinary;
 
