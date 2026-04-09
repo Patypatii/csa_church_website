@@ -24,22 +24,32 @@ const CommunityHub: React.FC = () => {
       if (event.data?.type === 'HUB_ERROR') {
         process.env.NODE_ENV === 'development' && console.error('Community Hub Iframe ERROR:', event.data.error);
       }
+      // Listen for resize messages
+      if (event.data?.type === 'HUB_RESIZE') {
+        const iframe = document.getElementById('community-iframe');
+        if (iframe) {
+          iframe.style.height = `${Math.max(event.data.height, 600)}px`;
+        }
+      }
     };
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [navigate]);
-  console.log(moduleSlug);
+
   const iframeSrc = moduleSlug ? `/community-view/${moduleSlug}` : '/community-view/';
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 pt-20">
+    <div className="w-full bg-gray-50 pt-10 pb-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden" style={{ height: '80vh' }}>
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden w-full">
           <iframe 
+            id="community-iframe"
             src={iframeSrc}
-            className="w-full h-full border-none"
+            className="w-full border-none"
+            style={{ minHeight: '100vh', width: '100%', transition: 'height 0.3s ease-in-out' }}
             title="Community"
+            scrolling="no"
           />
         </div>
       </div>
