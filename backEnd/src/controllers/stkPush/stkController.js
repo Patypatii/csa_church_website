@@ -1,7 +1,5 @@
-import { testDb } from "../../Configs/dbConfig.js";
+import { testDb, client } from "../../Configs/dbConfig.js";
 import axios from "axios";
-
-const db = testDb;
 
 export const initiateSTK = async (userId, phoneNumber, amount) => {
   const consumerKey = process.env.CONSUMER_KEY;
@@ -66,7 +64,7 @@ export const initiateSTK = async (userId, phoneNumber, amount) => {
   const checkoutId = stkRes.data.CheckoutRequestID;
 
   // Save as pending
-  await db.query(
+  await testDb.query(
     `INSERT INTO mpesa_request (checkout_id, user_id, amount, status)
      VALUES ($1, $2, $3, 'pending')`,
     [checkoutId, userId, amount],
@@ -76,13 +74,14 @@ export const initiateSTK = async (userId, phoneNumber, amount) => {
 };
 
 export const callback = async (req, res) => {
-  const client = await db.connect();
+  // const client = await db.connect();
 
   try {
     await client.query("BEGIN");
 
     if (req.method === "POST") {
       const { Body } = req.body;
+      console.log("Received callback:", Body);
 
       //  Invalid structure
       if (!Body || !Body.stkCallback) {
@@ -102,7 +101,7 @@ export const callback = async (req, res) => {
 
       //  If payment failed
       if (ResultCode !== 0) {
-        await client.query(
+        await testDb.query(
           `UPDATE mpesa_request SET status='failed' WHERE checkout_id=$1`,
           [CheckoutRequestID],
         );
@@ -126,7 +125,7 @@ export const callback = async (req, res) => {
       };
 
       //  Find matching request
-      const results = await client.query(
+      const results = await testDb.query(
         `SELECT user_id, amount, checkout_id , status FROM mpesa_request WHERE checkout_id = $1`,
         [CheckoutRequestID],
       );
@@ -151,7 +150,9 @@ export const callback = async (req, res) => {
 
       await client.query("COMMIT");
 
-      console.log("✅ Payment processed:", paymentDetails);
+      return checkout_id;
+    } else if (req.method === "GET") {
+      res.status(200).json({ message: "MPESA Callback endpoint is live" });
       return;
     }
 
@@ -172,33 +173,40 @@ export const callback = async (req, res) => {
 };
 
 export const waitForPaymentResult = (checkoutId, timeout = 60000) => {
+  console.log(`⏳ Waiting for payment result of ${checkoutId}...`);
+
   return new Promise((resolve, reject) => {
-    const interval = 3000; // check every 3 sec
+    const interval = 3000;
     let elapsed = 0;
 
     const timer = setInterval(async () => {
-      elapsed += interval;
+      try {
+        elapsed += interval;
 
-      const result = await db.query(
-        `SELECT status FROM mpesa_request WHERE checkout_id = $1`,
-        [checkoutId],
-      );
+        const result = await testDb.query(
+          `SELECT status FROM mpesa_request WHERE checkout_id = $1`,
+          [checkoutId],
+        );
 
-      const status = result.rows[0]?.status;
+        const status = result.rows[0]?.status;
 
-      if (status === "paid") {
+        if (status === "paid") {
+          clearInterval(timer);
+          return resolve({ status: "success" });
+        }
+
+        if (status === "failed") {
+          clearInterval(timer);
+          return resolve({ status: "failed" });
+        }
+
+        if (elapsed >= timeout) {
+          clearInterval(timer);
+          return reject(new Error("Timeout waiting for payment"));
+        }
+      } catch (err) {
         clearInterval(timer);
-        resolve({ status: "success" });
-      }
-
-      if (status === "failed") {
-        clearInterval(timer);
-        resolve({ status: "failed" });
-      }
-
-      if (elapsed >= timeout) {
-        clearInterval(timer);
-        reject(new Error("Timeout waiting for payment"));
+        return reject(err); // THIS prevents unhandled rejection
       }
     }, interval);
   });
