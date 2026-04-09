@@ -73,6 +73,8 @@ export function useOfficials() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['officials'] });
+      queryClient.invalidateQueries({ queryKey: ['currentTerm'] });
+      queryClient.invalidateQueries({ queryKey: ['terms'] });
       toast.success('Official updated successfully!');
     },
     onError: (error: Error) => {
@@ -96,6 +98,8 @@ export function useOfficials() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['officials'] });
+      queryClient.invalidateQueries({ queryKey: ['currentTerm'] });
+      queryClient.invalidateQueries({ queryKey: ['terms'] });
       toast.success('Official deleted successfully!');
     },
     onError: (error: Error) => {

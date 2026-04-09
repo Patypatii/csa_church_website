@@ -108,11 +108,18 @@ app.post("/api/choir/gallery", upload.single("file"), (req, res) => {
   BackendDataService.save("choir_gallery.json", gallery);
   res.status(201).json(newPhoto);
 });
-app.use((err ,req ,res ,next)=>{
-  console.log(err);
-  console.log(err.message)
-  console.log(err.stack)
-  next()
-})
+// ERROR HANDLER
+app.use((err, req, res, next) => {
+  logger.error(`${err.message}\n${err.stack}`);
+  
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'An unexpected error occurred';
+  
+  res.status(statusCode).json({
+    success: false,
+    message: message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
+});
 
 export { app };

@@ -170,12 +170,23 @@ export function EditOfficialModal({
               className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none ${termMismatch ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white'}`} 
             />
             {officialsExist && displayTerm && (
-              <p className={`text-[10px] mt-1 font-bold italic flex items-center gap-1 ${termMismatch ? 'text-red-600' : 'text-blue-600 dark:text-blue-400'}`}>
-                {termMismatch 
-                  ? `Error: Term must match active records (${displayTerm})`
-                  : `Active year cycle: ${displayTerm}`
-                }
-              </p>
+              <div className="flex items-center justify-between gap-1 mt-1">
+                <p className={`text-[10px] font-bold italic flex items-center gap-1 ${termMismatch ? 'text-red-600' : 'text-blue-600 dark:text-blue-400'}`}>
+                  {termMismatch 
+                    ? `Error: Must match ${displayTerm}`
+                    : `Active year cycle: ${displayTerm}`
+                  }
+                </p>
+                {termMismatch && (
+                  <button 
+                    type="button"
+                    onClick={() => setTermOfService(displayTerm)}
+                    className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full hover:bg-red-600 transition-colors"
+                  >
+                    FIX
+                  </button>
+                )}
+              </div>
             )}
           </div>
 

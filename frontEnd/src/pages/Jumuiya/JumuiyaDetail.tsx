@@ -12,6 +12,7 @@ import TshirtsTab from './components/TshirtsTab';
 import { FaInfoCircle, FaUserTie, FaUsers, FaCalendarAlt, FaUserPlus, FaShareAlt, FaBars, FaBell, FaTshirt, FaArrowLeft, FaCog } from "react-icons/fa";
 import { useAuth } from '../../context/AuthContext';
 import { useJumuiyaOfficials } from '../../hooks/useJumuiyaOfficials';
+import { useTerms } from '../../hooks/useTerms';
 import './JumuiyaDetail.css';
 import AdminPanelEmbed from './admin/AdminPanelEmbed';
 import { FaTimes } from 'react-icons/fa';
@@ -44,6 +45,30 @@ const JumuiyaDetail: React.FC = () => {
 
     // Fetch dynamic officials from backend
     const { officials: dynamicOfficials } = useJumuiyaOfficials({ category: jumuiya?.name });
+    const { currentTerm } = useTerms();
+
+    // Derive term info dynamically
+    const dynamicTerm = (() => {
+        // Preference 1: Explicitly set term in the first official's record from backend
+        const recordWithTerm = dynamicOfficials?.find(o => !!o.term_of_service);
+        if (recordWithTerm?.term_of_service) {
+             const parts = recordWithTerm.term_of_service.split('-');
+             return { 
+                 startYear: parts[0] || recordWithTerm.term_of_service, 
+                 endYear: parts[1] || '' 
+             };
+        }
+        // Preference 2: Use the global current term from backend
+        if (currentTerm?.year) {
+             const parts = currentTerm.year.split('-');
+             return { 
+                 startYear: parts[0] || currentTerm.year, 
+                 endYear: parts[1] || '' 
+             };
+        }
+        // Fallback: use hardcoded if nothing else available
+        return jumuiya?.termOfOffice;
+    })();
 
     if (!jumuiya) {
         return (
@@ -91,7 +116,7 @@ const JumuiyaDetail: React.FC = () => {
 
                 return <OfficialsTab
                     officials={displayedOfficials}
-                    termOfOffice={jumuiya.termOfOffice}
+                    termOfOffice={dynamicTerm}
                     formerOfficials={jumuiya.formerOfficials}
                     jumuiyaColor={jumuiya.color}
                     isAdmin={isAdmin}

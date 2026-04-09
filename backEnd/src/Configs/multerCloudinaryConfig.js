@@ -1,36 +1,33 @@
 import multer from "multer";
 import path from "path";
-import fs from "fs";
+import CloudinaryStorage from "multer-storage-cloudinary";
+import cloudinary from "./cloudinaryConfigs.js";
 import logger from "../logger/winston.js";
 
-// Ensure upload folder exists
-function ensureUploadsFolder(uploadPath) {
-  if (!fs.existsSync(uploadPath)) {
-    fs.mkdirSync(uploadPath, { recursive: true });
-  }
+// Safety check for Cloudinary credentials
+const isCloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME && 
+                               process.env.CLOUDINARY_API_KEY && 
+                               process.env.CLOUDINARY_API_SECRET;
+
+if (!isCloudinaryConfigured) {
+  logger.warn('Cloudinary credentials missing in .env. Photo uploads will fail until configured.');
 }
 
-// Storage config
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    try {
-      const uploadPath = "localFileUploads/";
-      ensureUploadsFolder(uploadPath);
-      cb(null, uploadPath);
-    } catch (err) {
-      logger.error("Failed to set upload destination", err);
-      cb(err);
+// Cloudinary Storage config
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: async (req, file) => {
+    // If credentials are missing, throw an error that the global handler will catch
+    if (!isCloudinaryConfigured) {
+      throw new Error('Cloudinary credentials missing. Please configure CLOUDINARY_CLOUD_NAME, API_KEY, and API_SECRET in your .env file.');
     }
-  },
-
-  filename: (req, file, cb) => {
-    try {
-      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-      cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
-    } catch (err) {
-      logger.error("Failed to generate filename", err);
-      cb(err);
-    }
+    
+    return {
+      folder: "church_officials",
+      allowed_formats: ["jpg", "png", "jpeg", "gif", "mp4", "mov", "avi"],
+      resource_type: "auto",
+      public_id: file.fieldname + "-" + Date.now() + "-" + Math.round(Math.random() * 1e9)
+    };
   },
 });
 
