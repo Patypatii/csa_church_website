@@ -100,19 +100,46 @@ const JumuiyaDetail: React.FC = () => {
             case 'about':
                 return <AboutTab jumuiya={jumuiya} onNavigateBack={() => navigate('/')} />;
             case 'officials':
-                // Merge dynamic officials with hardcoded ones
-                // If we have dynamic officials, we use them. 
-                // We map dynamic backend officials to the frontend format.
-                const displayedOfficials = (dynamicOfficials && dynamicOfficials.length > 0) 
-                    ? dynamicOfficials.map(doff => ({
-                        id: String(doff.id),
-                        name: doff.name,
-                        position: doff.position,
-                        email: '', // Backend doesn't have email yet, but we can default or handle it
-                        phone: doff.contact || '',
-                        image: doff.photo ? (doff.photo.startsWith('http') ? doff.photo : `${window.location.origin}/${doff.photo}`) : undefined
-                    }))
-                    : jumuiya.officials;
+                const displayedOfficials = useMemo(() => {
+                    if (dynamicOfficials && dynamicOfficials.length > 0) {
+                        return dynamicOfficials.map(doff => ({
+                            id: String(doff.id),
+                            name: doff.name,
+                            position: doff.position,
+                            email: '',
+                            phone: doff.contact || '',
+                            image: doff.photo ? (doff.photo.startsWith('http') ? doff.photo : `${window.location.origin}/${doff.photo}`) : undefined
+                        }));
+                    }
+
+                    // Generate placeholders using Patron Saint image
+                    return [
+                        {
+                            id: 'p1',
+                            name: 'Pending Election',
+                            position: 'Chairperson',
+                            email: '',
+                            phone: '',
+                            image: jumuiya?.saintImage
+                        },
+                        {
+                            id: 'p2',
+                            name: 'Pending Election',
+                            position: 'Secretary',
+                            email: '',
+                            phone: '',
+                            image: jumuiya?.saintImage
+                        },
+                        {
+                            id: 'p3',
+                            name: 'Pending Election',
+                            position: 'Treasurer',
+                            email: '',
+                            phone: '',
+                            image: jumuiya?.saintImage
+                        }
+                    ];
+                }, [dynamicOfficials, jumuiya?.saintImage]);
 
                 return <OfficialsTab
                     officials={displayedOfficials}

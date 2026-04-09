@@ -118,32 +118,7 @@ export const jumuiyaList: JumuiyaData[] = [
             time: '2:00 PM - 4:00 PM',
             venue: 'LH 24'
         },
-        officials: [
-            {
-                id: '1',
-                name: 'John Kariuki',
-                position: 'Chairperson',
-                email: 'john.kariuki@email.com',
-                phone: '+254 712 345 678',
-                image: 'https://randomuser.me/api/portraits/men/11.jpg'
-            },
-            {
-                id: '2',
-                name: 'Mary Wanjiku',
-                position: 'Secretary',
-                email: 'mary.wanjiku@email.com',
-                phone: '+254 723 456 789',
-                image: 'https://randomuser.me/api/portraits/women/12.jpg'
-            },
-            {
-                id: '3',
-                name: 'Peter Mwangi',
-                position: 'Treasurer',
-                email: 'peter.mwangi@email.com',
-                phone: '+254 734 567 890',
-                image: 'https://randomuser.me/api/portraits/men/13.jpg'
-            }
-        ],
+        officials: [],
         termOfOffice: { startYear: '2024', endYear: '2026' },
         formerOfficials: [
             { id: 'f1', name: 'Anthony Maina', position: 'Chairperson', yearsServed: '2022–2024', image: 'https://randomuser.me/api/portraits/men/14.jpg' },
@@ -228,32 +203,7 @@ export const jumuiyaList: JumuiyaData[] = [
             time: '6:00 PM - 8:00 PM',
             venue: 'Parish Library'
         },
-        officials: [
-            {
-                id: '1',
-                name: 'James Kamau',
-                position: 'Chairperson',
-                email: 'james.kamau@email.com',
-                phone: '+254 745 678 901',
-                image: 'https://randomuser.me/api/portraits/men/21.jpg'
-            },
-            {
-                id: '2',
-                name: 'Grace Njeri',
-                position: 'Secretary',
-                email: 'grace.njeri@email.com',
-                phone: '+254 756 789 012',
-                image: 'https://randomuser.me/api/portraits/women/22.jpg'
-            },
-            {
-                id: '3',
-                name: 'Simon Ochieng',
-                position: 'Treasurer',
-                email: 'simon.ochieng@email.com',
-                phone: '+254 767 890 123',
-                image: 'https://randomuser.me/api/portraits/men/23.jpg'
-            }
-        ],
+        officials: [],
         termOfOffice: { startYear: '2024', endYear: '2026' },
         formerOfficials: [
             { id: 'f1', name: 'Daniel Odhiambo', position: 'Chairperson', yearsServed: '2022–2024', image: 'https://randomuser.me/api/portraits/men/24.jpg' },
@@ -339,32 +289,7 @@ export const jumuiyaList: JumuiyaData[] = [
             time: '5:30 PM - 7:30 PM',
             venue: 'Parish Garden'
         },
-        officials: [
-            {
-                id: '1',
-                name: 'Catherine Akinyi',
-                position: 'Chairperson',
-                email: 'catherine.akinyi@email.com',
-                phone: '+254 778 901 234',
-                image: 'https://randomuser.me/api/portraits/women/31.jpg'
-            },
-            {
-                id: '2',
-                name: 'Rose Wambui',
-                position: 'Secretary',
-                email: 'rose.wambui@email.com',
-                phone: '+254 789 012 345',
-                image: 'https://randomuser.me/api/portraits/women/32.jpg'
-            },
-            {
-                id: '3',
-                name: 'David Kibet',
-                position: 'Treasurer',
-                email: 'david.kibet@email.com',
-                phone: '+254 790 123 456',
-                image: 'https://randomuser.me/api/portraits/men/33.jpg'
-            }
-        ],
+        officials: [],
         termOfOffice: { startYear: '2024', endYear: '2026' },
         formerOfficials: [
             { id: 'f1', name: 'George Murithi', position: 'Chairperson', yearsServed: '2022–2024', image: 'https://randomuser.me/api/portraits/men/34.jpg' },
@@ -450,32 +375,7 @@ export const jumuiyaList: JumuiyaData[] = [
             time: '6:30 PM - 8:30 PM',
             venue: 'Parish Conference Room'
         },
-        officials: [
-            {
-                id: '1',
-                name: 'Dominic Mutua',
-                position: 'Chairperson',
-                email: 'dominic.mutua@email.com',
-                phone: '+254 701 234 567',
-                image: 'https://randomuser.me/api/portraits/men/41.jpg'
-            },
-            {
-                id: '2',
-                name: 'Faith Chebet',
-                position: 'Secretary',
-                email: 'faith.chebet@email.com',
-                phone: '+254 712 345 678',
-                image: 'https://randomuser.me/api/portraits/women/42.jpg'
-            },
-            {
-                id: '3',
-                name: 'Paul Otieno',
-                position: 'Treasurer',
-                email: 'paul.otieno@email.com',
-                phone: '+254 723 456 789',
-                image: 'https://randomuser.me/api/portraits/men/43.jpg'
-            }
-        ],
+        officials: [],
         termOfOffice: { startYear: '2024', endYear: '2026' },
         formerOfficials: [
             { id: 'f1', name: 'Jane Achieng', position: 'Chairperson', yearsServed: '2022–2024', image: 'https://randomuser.me/api/portraits/women/44.jpg' },
@@ -561,32 +461,7 @@ export const jumuiyaList: JumuiyaData[] = [
             time: '3:00 PM - 5:00 PM',
             venue: 'Community Center'
         },
-        officials: [
-            {
-                id: '1',
-                name: 'Elizabeth Nyambura',
-                position: 'Chairperson',
-                email: 'elizabeth.nyambura@email.com',
-                phone: '+254 734 567 890',
-                image: 'https://randomuser.me/api/portraits/women/51.jpg'
-            },
-            {
-                id: '2',
-                name: 'Anne Wairimu',
-                position: 'Secretary',
-                email: 'anne.wairimu@email.com',
-                phone: '+254 745 678 901',
-                image: 'https://randomuser.me/api/portraits/women/52.jpg'
-            },
-            {
-                id: '3',
-                name: 'Joseph Kimani',
-                position: 'Treasurer',
-                email: 'joseph.kimani@email.com',
-                phone: '+254 756 789 012',
-                image: 'https://randomuser.me/api/portraits/men/53.jpg'
-            }
-        ],
+        officials: [],
         termOfOffice: { startYear: '2024', endYear: '2026' },
         formerOfficials: [
             { id: 'f1', name: 'Mark Njoroge', position: 'Chairperson', yearsServed: '2022–2024', image: 'https://randomuser.me/api/portraits/men/54.jpg' },
@@ -672,32 +547,7 @@ export const jumuiyaList: JumuiyaData[] = [
             time: '2:00 PM - 4:00 PM',
             venue: 'Youth Center'
         },
-        officials: [
-            {
-                id: '1',
-                name: 'Maria Njoki',
-                position: 'Chairperson',
-                email: 'maria.njoki@email.com',
-                phone: '+254 767 890 123',
-                image: 'https://randomuser.me/api/portraits/women/61.jpg'
-            },
-            {
-                id: '2',
-                name: 'Sarah Muthoni',
-                position: 'Secretary',
-                email: 'sarah.muthoni@email.com',
-                phone: '+254 778 901 234',
-                image: 'https://randomuser.me/api/portraits/women/62.jpg'
-            },
-            {
-                id: '3',
-                name: 'Michael Waweru',
-                position: 'Treasurer',
-                email: 'michael.waweru@email.com',
-                phone: '+254 789 012 345',
-                image: 'https://randomuser.me/api/portraits/men/63.jpg'
-            }
-        ],
+        officials: [],
         termOfOffice: { startYear: '2024', endYear: '2026' },
         formerOfficials: [
             { id: 'f1', name: 'Patricia Auma', position: 'Chairperson', yearsServed: '2022–2024', image: 'https://randomuser.me/api/portraits/women/64.jpg' },
@@ -783,32 +633,7 @@ export const jumuiyaList: JumuiyaData[] = [
             time: '5:00 PM - 7:00 PM',
             venue: 'Prayer Chapel'
         },
-        officials: [
-            {
-                id: '1',
-                name: 'Monica Wangari',
-                position: 'Chairperson',
-                email: 'monica.wangari@email.com',
-                phone: '+254 790 123 456',
-                image: 'https://randomuser.me/api/portraits/women/71.jpg'
-            },
-            {
-                id: '2',
-                name: 'Ruth Mwikali',
-                position: 'Secretary',
-                email: 'ruth.mwikali@email.com',
-                phone: '+254 701 234 567',
-                image: 'https://randomuser.me/api/portraits/women/72.jpg'
-            },
-            {
-                id: '3',
-                name: 'Samuel Gitau',
-                position: 'Treasurer',
-                email: 'samuel.gitau@email.com',
-                phone: '+254 712 345 678',
-                image: 'https://randomuser.me/api/portraits/men/73.jpg'
-            }
-        ],
+        officials: [],
         termOfOffice: { startYear: '2024', endYear: '2026' },
         formerOfficials: [
             { id: 'f1', name: 'Simon Kamau', position: 'Chairperson', yearsServed: '2022–2024', image: 'https://randomuser.me/api/portraits/men/74.jpg' },
