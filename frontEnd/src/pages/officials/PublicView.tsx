@@ -156,6 +156,26 @@ export default function PublicView(){
             </section>
           ))
         )}
+
+        {/* View Past Officials Button */}
+        <div className="mt-20 mb-12 flex flex-col items-center">
+           <div className="w-full max-w-lg h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mb-8"></div>
+           <p className="text-gray-400 text-sm font-medium mb-6">Want to see our leadership history?</p>
+           <button
+             onClick={() => navigate('/officials/history')}
+             className="group flex items-center gap-3 px-8 py-4 bg-white border border-gray-200 text-gray-800 rounded-2xl shadow-sm hover:shadow-xl hover:border-purple-200 hover:-translate-y-1 transition-all duration-300 font-bold"
+           >
+             <div className="p-2 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+             </div>
+             <span>View Past Officials History</span>
+             <svg className="w-5 h-5 text-gray-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+             </svg>
+           </button>
+        </div>
       </div>
     </div>
   )

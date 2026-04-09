@@ -87,7 +87,7 @@ const JumuiyaDetail: React.FC = () => {
         return [
             {
                 id: 'p1',
-                name: 'Pending Election',
+                name: 'Awaiting Upload',
                 position: 'Chairperson',
                 email: '',
                 phone: '',
@@ -95,7 +95,7 @@ const JumuiyaDetail: React.FC = () => {
             },
             {
                 id: 'p2',
-                name: 'Pending Election',
+                name: 'Awaiting Upload',
                 position: 'Secretary',
                 email: '',
                 phone: '',
@@ -103,7 +103,7 @@ const JumuiyaDetail: React.FC = () => {
             },
             {
                 id: 'p3',
-                name: 'Pending Election',
+                name: 'Awaiting Upload',
                 position: 'Treasurer',
                 email: '',
                 phone: '',
