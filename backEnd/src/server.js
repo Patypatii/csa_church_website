@@ -10,9 +10,10 @@ import { runMigration } from "./migrations/scripts/index.js";
 // function that initiate express server , it waits for postgres db then attempts mongo
 const initServer = async () => {
   try {
-    await connectDb();
-    //  await connectToMongoDb();
-    await runMigration();
+    // await connectDb();
+    //  await connectToMongoDb(;
+    // await runMigration();
+
 
     httpServer.listen(serverConfig.PORT, () => {
       logger.info(`⚙️  Server is running on http://localhost:${serverConfig.PORT}`);

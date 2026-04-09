@@ -61,6 +61,12 @@ export const refreshAccessAndRefreshToken = ()=>{
   return apiClient.post("/questions", data);
 };
 
+// Api for fetching daily questions with a limit
+export const fetchDailyQuestions = (limit: number = 10) => {
+  return apiClient.get(`/questions/?limit=${limit}`);
+};
+
+
 // Api for fetching comparison data for the 7 jumuiyas
 export const  fetchJumuiyaComparisonData = () =>{
   return apiClient.get("/csa/jumuiya-comparison");

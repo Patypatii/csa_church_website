@@ -198,4 +198,118 @@
 
 
 
+
+-- -- Add the new column jumuia_id if it doesn't exist
+-- ALTER TABLE members
+-- ADD COLUMN jumuia_id UUID;
+
+-- -- Add the foreign key constraint to reference sub_groups(group_id)
+-- ALTER TABLE members
+-- ADD CONSTRAINT fk_members_jumuia
+-- FOREIGN KEY (jumuia_id) REFERENCES sub_groups(group_id);
+
+-- Add saint profile picture column (foreign key to uploads table)
+-- ALTER TABLE sub_groups
+-- ADD COLUMN saint_profile_picture INT;
+
+-- ALTER TABLE sub_groups
+-- ADD CONSTRAINT fk_subgroups_uploads
+-- FOREIGN KEY (saint_profile_picture) REFERENCES uploads(id);
+
+
+
+-- -- Add registered_members column
+-- ALTER TABLE sub_groups
+-- ADD COLUMN jumuiya_name VARCHAR(50) NOT NULL;
+
+
+-- INSERT INTO sub_groups (jumuiya_name)
+-- VALUES
+--     ('St Antony'),
+--     ('St Augustine'),
+--     ('St Cathline'),
+--     ('St Dominic'),
+--     ('St Elizabeth'),
+--     ('St Mariaghoriti'),
+--     ('St Monica');
+
+-- -- 1. Add the column as nullable first
+-- ALTER TABLE sub_groups
+-- ADD COLUMN jumuiya_name VARCHAR(50);
+
+-- -- 2. Backfill existing rows with placeholder or actual names
+-- UPDATE sub_groups
+-- SET jumuiya_name = 'Unknown'
+-- WHERE jumuiya_name IS NULL;
+
+-- -- Or, if you know the actual names for each group_id, update them directly:
+-- -- UPDATE sub_groups SET jumuiya_name = 'St Antony' WHERE group_id = 'uuid-here';
+
+-- -- 3. Enforce NOT NULL once all rows have values
+-- ALTER TABLE sub_groups
+-- ALTER COLUMN jumuiya_name SET NOT NULL;
+
+-- 4. Optionally enforce uniqueness
+-- ALTER TABLE sub_groups
+-- ADD CONSTRAINT uq_jumuiya_name UNIQUE (jumuiya_name);
+
+
+
+-- Ensure the "Member" role exists
+-- INSERT INTO roles (role_name) VALUES ('Member')
+-- ON CONFLICT (role_name) DO NOTHING;
+
+-- -- Trigger function to assign default role
+-- CREATE OR REPLACE FUNCTION assign_default_role()
+-- RETURNS TRIGGER AS $$
+-- DECLARE
+--     default_role UUID;
+-- BEGIN
+--     -- Get the role_id for 'Member'
+--     SELECT role_id INTO default_role FROM roles WHERE role_name = 'Member';
+
+--     -- Insert into member_roles
+--     INSERT INTO member_roles (member_id, role_id)
+--     VALUES (NEW.member_id, default_role);
+
+--     RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
+
+-- -- Attach trigger to members table
+-- CREATE TRIGGER trg_assign_default_role
+-- AFTER INSERT ON members
+-- FOR EACH ROW
+-- EXECUTE FUNCTION assign_default_role();
+
+
+-- ALTER TABLE members
+-- drop column jumuia_id;
+
+
+
+
+
+-- -- Strengthen constraints on existing columns
+-- ALTER TABLE members
+-- ALTER COLUMN member_id SET NOT NULL,
+-- ALTER COLUMN first_name SET NOT NULL,
+-- ALTER COLUMN last_name SET NOT NULL,
+-- ALTER COLUMN email SET NOT NULL,
+-- ALTER COLUMN password SET NOT NULL,
+-- ALTER COLUMN jumuiya_id SET NOT NULL,
+-- ALTER COLUMN join_date SET NOT NULL;
+
+-- -- Optional: enforce gender values
+-- ALTER TABLE members
+-- ADD CONSTRAINT gender_check CHECK (gender IN ('male','female'));
+
+-- -- Optional: enforce year_of_study to be numeric string
+-- ALTER TABLE members
+-- ADD CONSTRAINT year_of_study_check CHECK (year_of_study ~ '^[0-9]+$');
+
+-- -- Add semester registration flags (all default false, not null)
+
+
+
 -- COMMIT;

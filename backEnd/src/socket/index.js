@@ -37,31 +37,31 @@ const initializeSocketIO = (io) => {
   return io.on("connection", async (socket) => {
     try {
       // parse the cookies from the handshake headers (This is only possible if client has `withCredentials: true`)
-      // const cookies = cookie.parse(socket.handshake.headers?.cookie || "");
+      const cookies = cookie.parse(socket.handshake.headers?.cookie || "");
       // // cookie.parse not that nessesary here because on our entry point we used the cookieParser middleware ,but to  make it 100% sure for the parse i intentionally used it here
 
-      // let token = cookies?.accessToken || socket.handshake.auth?.token; // get the accessToken
+      let token = cookies?.accessToken || socket.handshake.auth?.token; // get the accessToken
 
-      // if (!token) {
-      //   // Token is required for the socket to work
-      //   throw new ApiError(401, "Un-authorized handshake. Token is missing");
-      // }
+      if (!token) {
+        // Token is required for the socket to work
+        throw new ApiError(401, "Un-authorized handshake. Token is missing");
+      }
 
-      // const { member_id, jumuia_id } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET); // decode the token
+      const { member_id, jumuia_id } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET); // decode the token
       // // reason why we are checking the database is to really indentify 
       // // the user and also to make sure that the token is not tampered with , because if the token is tampered with it will be decoded but the user will not be found in the database thus we can reject the connection  
       // // and be able to remove the disconnected socket from the room from the disconect event handler
       // // we are only checking the member_id and jumuia_id because those are the only two things we need to identify the user and also to make sure that the token is not tampered with 
       // // because if the token is tampered with it will be decoded but the user will not be found in the database thus we can reject the connection
-      // const query = ` SELECT member_id FROM members WHERE member_id =$1 AND jumuia_id =$2`;
+      const query = ` SELECT member_id FROM members WHERE member_id =$1 AND jumuia_id =$2`;
 
-      // const result = await testDb.query(query, [member_id, jumuia_id]);
+      const result = await testDb.query(query, [member_id, jumuia_id]);
 
-      // if (result.rows.length === 0) {
-      //   throw new ApiError(401, "Un-authorized handshake. Token is invalid");
-      // }
+      if (result.rows.length === 0) {
+        throw new ApiError(401, "Un-authorized handshake. Token is invalid");
+      }
 
-      // socket.user = result.rows[0];
+      socket.user = result.rows[0];
 
       // We are creating a room called " CSA_NOTIFICATIONS ", by default we are joining any authenticated user
       //  to it , this will handle or csa based notifications
@@ -93,7 +93,6 @@ const initializeSocketIO = (io) => {
 };
 
 /**
- * @param {import("express").Request} req - Request object to access the `io` instance set at the entry point
  * @param {string} roomId - Room where the event should be emitted note this can be either the jumui room / only jumui memebers specific to that room  can see , or the whole csa room where in regards to the jumuia  you are can see this
  * @param {AvailableChatEvents[0]} event - Event that should be emitted
  * @param {any} payload - Data that should be sent when emitting the event

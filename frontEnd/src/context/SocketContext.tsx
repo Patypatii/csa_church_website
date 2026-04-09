@@ -1,7 +1,7 @@
 
 
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 import socketio from "socket.io-client";
 import { LocalStorage } from "../utils/index.ts";
@@ -24,15 +24,8 @@ const useSocket = () => useContext(SocketContext);
 
 // SocketProvider component to manage the socket instance and provide it through context
 const SocketProvider: React.FC<{ children: React.ReactNode }> = ({children,}) => {
-  // State to store the socket instance
-  const [socket, setSocket] = useState<ReturnType<typeof socketio> | null>(
-    null
-  );
 
-  // Set up the socket connection when the component mounts
-  useEffect(() => {
-    setSocket(getSocket()); //TODO:check how to solve the problem
-  }, []);
+   const [socket] = useState<ReturnType<typeof socketio> | null>(() => getSocket());
 
   return (
     // Provide the socket instance through context to its children

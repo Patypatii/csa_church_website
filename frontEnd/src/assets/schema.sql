@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 CREATE TABLE  IF NOT EXISTS members (
     member_id VARCHAR(30) PRIMARY KEY NOT NULL,
-    jumuia_id UUID NOT NULL REFERENCES sub_groups(group_id) ,-- scope isolation
+    jumuiaya_id UUID NOT NULL REFERENCES sub_groups(group_id) ,-- scope isolation
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     gender VARCHAR(10),
@@ -82,18 +82,15 @@ CREATE TABLE password_resets (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-
-CREATE TABLE events (
-    event_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    event_name VARCHAR(100) NOT NULL,
-    event_date DATE NOT NULL,
-    location VARCHAR(100),
-    description TEXT
-);
 CREATE TABLE sub_groups (
     group_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    jumuiya_name VARCHAR(50) NOT NULL
+    jumuiya_name VARCHAR(50) NOT NULL,
+    saint_profile_picture INT REFERENCES uploads(id), -- link to uploads table
+    description TEXT,
+    registered_members INT DEFAULT 0
 );
+
+
 CREATE TABLE event_subgroup_attendance (
     event_id UUID REFERENCES events(event_id) ON DELETE CASCADE,
     group_id UUID REFERENCES sub_groups(group_id) ON DELETE CASCADE,

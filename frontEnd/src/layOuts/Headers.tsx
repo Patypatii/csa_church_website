@@ -12,11 +12,11 @@ const Headers = () => {
     <>
       <div className="hidden flex-row items-center justify-between px-[8%] py-4 bg-white shadow-md md:flex ">
         <div className="flex items-center gap-2">
-          <img
+          {/* <img
             src="../src/assets/Images/church.png"
             alt="CSA Kirinyaga Logo"
             className="h-10 w-10 object-contain"
-          />
+          /> */}
         </div>
 
         <ul className="flex flex-row gap-2 lg:gap-8">

@@ -15,52 +15,71 @@ import  ApiError  from "../utils/ApiError.js";
  *
  * @description This middleware is responsible to catch the errors from any request handler wrapped inside the {@link asyncHandler}
  */
-    
+
+// Helper: classify error type and return status + message
+function classifyError(err) {
+  // Default values
+  let statusCode = 500;
+  let message = err.message || "Something went wrong";
+
+  // ApiError already has everything
+  if (err instanceof ApiError) {
+    return { statusCode: err.statusCode, message: err.message };
+  }
+
+  // Mongoose validation or cast errors
+  if (err instanceof mongoose.Error) {
+    return { statusCode: 400, message: "Database validation error" };
+  }
+
+  // Multer upload errors
+  if (err instanceof multer.MulterError) {
+    statusCode = 400;
+    switch (err.code) {
+      case "LIMIT_FILE_SIZE":
+        message = "File too large. Max size is 10MB.";
+        break;
+      case "LIMIT_FILE_COUNT":
+        message = "Too many files uploaded.";
+        break;
+      case "LIMIT_UNEXPECTED_FILE":
+        message = `Unexpected file field: ${err.field}. Allowed fields are 'file' or 'files'.`;
+        break;
+      default:
+        message = "File upload error.";
+    }
+    return { statusCode, message };
+  }
+
+  // Fallback: generic error
+  return { statusCode, message };
+}
 
 const errorHandler = (err, req, res, next) => {
-  let error = err;
+  // Normalize error into ApiError
+  const { statusCode, message } = classifyError(err);
+  const error = err instanceof ApiError
+    ? err
+    : new ApiError(statusCode, message, err.errors || [], err.stack);
 
-  // Check if the error is an instance of an ApiError class which extends native Error class
-  if (!(error instanceof ApiError)) {
-
-   // check if the instance of mongoose error or UploadError which also extend the native error class
-    // create a new ApiError instance to keep the consistency
-    //error.status code comes form errors that have the status code , err,code comes from multe error since they are not numbers but they are strings e.g LIMIT_EXCEDED , else the rest will be either 400 or 500
-    const statusCode = error.statusCode || err.code  || error instanceof mongoose.Error  || err instanceof UploadError? 400 :  500 ;
-    // const statusCode = error.statusCode || 500 ;
-
-    // check if the instance of multer error
-    if (err instanceof multer.MulterError){
-       let friendlyMessage = "multer error";
-      switch (err.code) {
-        case "LIMIT_FILE_SIZE":
-          friendlyMessage = "File too large. Max size is 10MB.";
-          break;
-        case "LIMIT_FILE_COUNT":
-          friendlyMessage = "Too many files uploaded.";
-          break;
-        case "LIMIT_UNEXPECTED_FILE":
-               friendlyMessage = `Unexpected file field: ${err.field}. Allowed fields are 'file' or 'files'.`;
-          break;
-        default:
-           error.message = friendlyMessage ;
-    }
-  }
-    // assign an appropriate status code
-    // set a message from native Error instance or a custom one
-    const message = error.message || "Something went wrong";
-    error = new ApiError(statusCode, message, error?.errors || [], err.stack);
-  }
-
-  // Now we are sure that the `error` variable will be an instance of ApiError class
-  const response = {...error , message: error.message, ...(process.env.NODE_ENV === "development" ? { stack: error.stack } : {}),// Error stack traces should be visible in development for debugging
+  // Build safe response
+  const response = {
+    statusCode: error.statusCode,
+    message: error.message,
+    ...(process.env.NODE_ENV === "development" ? { stack: error.stack } : {})
   };
 
-  logger.error(`${error.message}`);
+  // Log and cleanup
+  logger.error(error.message);
+  try {
+    removeUnusedMulterImageFilesOnError(req);
+  } catch (cleanupErr) {
+    logger.warn("Failed to clean up multer files", cleanupErr);
+  }
 
-  removeUnusedMulterImageFilesOnError(req);
-  // Send error response
+  // Send response
   return res.status(error.statusCode).json(response);
 };
+
 
 export { errorHandler }

@@ -95,7 +95,7 @@ const App: React.FC = () => {
         <Route path="/admin/officials" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>}/>
         <Route path="/officials" element={<PublicView />} />
         <Route path="/notification" element={<NotificationPage  />} />
-        <Route path="/jumuiyaStatus" element={<JumuiyaDashboard  jumuiyaId= "20" />} />
+        <Route path="/jumuiyaStatus" element={<JumuiyaDashboard  jumuiyaId= {20} />} />
 
         <Route path="/" element={<Pageoulet />}>
           <Route index element={<Home />} />
