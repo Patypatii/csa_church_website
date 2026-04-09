@@ -7,7 +7,6 @@ import multer from "multer";
 
 import apiRoutes from "./routers/index.js";
 import { api } from "./routers/api.js";
-import { hubRouter } from "./routers/hubRouter.js";
 import officialsRouter from "./routers/officialsRouter.js";
 import jumuiyaOfficialsRouter from "./routers/jumuiyaOfficialsRouter.js";
 import { BackendDataService } from "./services/backend-data.js";
@@ -45,7 +44,7 @@ const limiter = rateLimit({
   },
 });
 
-app.use(limiter);
+// app.use(limiter);
 app.use(morganMiddleware);
 
 // Static Files
@@ -75,7 +74,7 @@ app.use(
 );
 
 // Routes
-app.get("/", (_req, res) => res.redirect("/community-hub"));
+app.get("/", (_req, res) => res.redirect("/community"));
 app.use("/authentication", apiRoutes);
 app.use("/api/officials", officialsRouter);
 app.use("/api/jumuiya-officials", jumuiyaOfficialsRouter);
@@ -83,6 +82,11 @@ app.use("/api", api);
 
 app.use("/questions", apiRoutes);
 app.use("/files", apiRoutes);
+app.use(
+  "/community-view",
+  express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental")),
+);
+app.use("/community-view", apiRoutes);
 
 // Gallery APIs
 app.get("/api/choir/gallery", (_req, res) => {
@@ -104,6 +108,19 @@ app.post("/api/choir/gallery", upload.single("file"), (req, res) => {
   gallery.push(newPhoto);
   BackendDataService.save("choir_gallery.json", gallery);
   res.status(201).json(newPhoto);
+});
+// ERROR HANDLER
+app.use((err, req, res, next) => {
+  logger.error(`${err.message}\n${err.stack}`);
+  
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'An unexpected error occurred';
+  
+  res.status(statusCode).json({
+    success: false,
+    message: message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
 });
 
 export { app };

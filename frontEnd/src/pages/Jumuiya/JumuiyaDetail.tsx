@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useData } from './context/DataContext';
 import AboutTab from './components/AboutTab';
@@ -12,6 +12,7 @@ import TshirtsTab from './components/TshirtsTab';
 import { FaInfoCircle, FaUserTie, FaUsers, FaCalendarAlt, FaUserPlus, FaShareAlt, FaBars, FaBell, FaTshirt, FaArrowLeft, FaCog } from "react-icons/fa";
 import { useAuth } from '../../context/AuthContext';
 import { useJumuiyaOfficials } from '../../hooks/useJumuiyaOfficials';
+import { useTerms } from '../../hooks/useTerms';
 import './JumuiyaDetail.css';
 import AdminPanelEmbed from './admin/AdminPanelEmbed';
 import { FaTimes } from 'react-icons/fa';
@@ -44,6 +45,72 @@ const JumuiyaDetail: React.FC = () => {
 
     // Fetch dynamic officials from backend
     const { officials: dynamicOfficials } = useJumuiyaOfficials({ category: jumuiya?.name });
+    const { currentTerm } = useTerms();
+
+    // Derive term info dynamically
+    const dynamicTerm = (() => {
+        // Preference 1: Explicitly set term in the first official's record from backend
+        const recordWithTerm = dynamicOfficials?.find(o => !!o.term_of_service);
+        if (recordWithTerm?.term_of_service) {
+             const parts = recordWithTerm.term_of_service.split('-');
+             return { 
+                 startYear: parts[0] || recordWithTerm.term_of_service, 
+                 endYear: parts[1] || '' 
+             };
+        }
+        // Preference 2: Use the global current term from backend
+        if (currentTerm?.year) {
+             const parts = currentTerm.year.split('-');
+             return { 
+                 startYear: parts[0] || currentTerm.year, 
+                 endYear: parts[1] || '' 
+             };
+        }
+        // Fallback: use hardcoded if nothing else available
+        return jumuiya?.termOfOffice;
+    })();
+
+    // officials to display
+    const displayedOfficials = useMemo(() => {
+        if (dynamicOfficials && dynamicOfficials.length > 0) {
+            return dynamicOfficials.map(doff => ({
+                id: String(doff.id),
+                name: doff.name,
+                position: doff.position,
+                email: '',
+                phone: doff.contact || '',
+                image: doff.photo ? (doff.photo.startsWith('http') ? doff.photo : `${window.location.origin}/${doff.photo}`) : undefined
+            }));
+        }
+
+        // Generate placeholders using Patron Saint image
+        return [
+            {
+                id: 'p1',
+                name: 'Awaiting Upload',
+                position: 'Chairperson',
+                email: '',
+                phone: '',
+                image: jumuiya?.saintImage
+            },
+            {
+                id: 'p2',
+                name: 'Awaiting Upload',
+                position: 'Secretary',
+                email: '',
+                phone: '',
+                image: jumuiya?.saintImage
+            },
+            {
+                id: 'p3',
+                name: 'Awaiting Upload',
+                position: 'Treasurer',
+                email: '',
+                phone: '',
+                image: jumuiya?.saintImage
+            }
+        ];
+    }, [dynamicOfficials, jumuiya?.saintImage]);
 
     if (!jumuiya) {
         return (
@@ -75,23 +142,10 @@ const JumuiyaDetail: React.FC = () => {
             case 'about':
                 return <AboutTab jumuiya={jumuiya} onNavigateBack={() => navigate('/')} />;
             case 'officials':
-                // Merge dynamic officials with hardcoded ones
-                // If we have dynamic officials, we use them. 
-                // We map dynamic backend officials to the frontend format.
-                const displayedOfficials = (dynamicOfficials && dynamicOfficials.length > 0) 
-                    ? dynamicOfficials.map(doff => ({
-                        id: String(doff.id),
-                        name: doff.name,
-                        position: doff.position,
-                        email: '', // Backend doesn't have email yet, but we can default or handle it
-                        phone: doff.contact || '',
-                        image: doff.photo ? (doff.photo.startsWith('http') ? doff.photo : `${window.location.origin}/${doff.photo}`) : undefined
-                    }))
-                    : jumuiya.officials;
 
                 return <OfficialsTab
                     officials={displayedOfficials}
-                    termOfOffice={jumuiya.termOfOffice}
+                    termOfOffice={dynamicTerm}
                     formerOfficials={jumuiya.formerOfficials}
                     jumuiyaColor={jumuiya.color}
                     isAdmin={isAdmin}

@@ -1,6 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Download, Share2, History, LayoutDashboard, Search, Archive } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useState, useMemo } from 'react';
+import { Download, Share2, History, LayoutDashboard, Search, Archive, Check } from 'lucide-react';
 
 import { useOfficials } from '../../hooks/useOfficials';
 import type { Official } from '../../hooks/useOfficials';
@@ -66,12 +65,14 @@ export default function AdminPanel() {
   const isListUpdating = adminMode === 'csa' ? isUpdating : jumuiyaApi.isUpdating;
 
   const displayTerm = useMemo(() => {
-    if (activeOfficialsList.length > 0) {
-      const termStrings = Array.from(new Set(activeOfficialsList.map(o => o.term_of_service).filter(Boolean)));
+    // Combine both lists to find the most recent term of service
+    const allAdded = [...officials, ...(jumuiyaApi.officials as Official[])];
+    if (allAdded.length > 0) {
+      const termStrings = Array.from(new Set(allAdded.map(o => o.term_of_service).filter(Boolean)));
       if (termStrings.length > 0) return termStrings[0];
     }
-    return currentTerm?.year || currentTerm?.name;
-  }, [activeOfficialsList, currentTerm]);
+    return currentTerm?.year || currentTerm?.name || '';
+  }, [officials, jumuiyaApi.officials, currentTerm]);
 
   const jumuiyaCountMap = useMemo(() => {
     if (adminMode !== 'jumuiya') return {};
@@ -215,17 +216,22 @@ export default function AdminPanel() {
               />
             </div>
             
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="grid grid-cols-2 sm:flex sm:items-center gap-x-4 gap-y-2 mr-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 xl:gap-8 bg-gray-50/50 dark:bg-gray-900/30 p-3 rounded-xl border border-gray-100 dark:border-gray-700/50">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                 {Object.entries(downloadFields).map(([key, value]) => (
-                  <label key={key} className="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
-                    <input 
-                      type="checkbox" 
-                      checked={value} 
-                      onChange={e => setDownloadFields({...downloadFields, [key]: e.target.checked})}
-                      className="w-4 h-4 text-blue-600 dark:text-blue-500 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500" 
-                    />
-                    <span className="text-[10px] sm:text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tighter group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">{key}</span>
+                  <label key={key} className="flex items-center gap-2.5 cursor-pointer group select-none">
+                    <div className="relative flex items-center">
+                      <input 
+                        type="checkbox" 
+                        checked={value} 
+                        onChange={e => setDownloadFields({...downloadFields, [key]: e.target.checked})}
+                        className="peer w-5 h-5 opacity-0 absolute cursor-pointer" 
+                      />
+                      <div className="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 peer-checked:bg-blue-600 peer-checked:border-blue-600 transition-all flex items-center justify-center">
+                        <Check className="w-3.5 h-3.5 text-white scale-0 peer-checked:scale-100 transition-transform" />
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">{key}</span>
                   </label>
                 ))}
               </div>

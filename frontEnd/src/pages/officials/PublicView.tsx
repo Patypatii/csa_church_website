@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { FaPhoneAlt, FaWhatsapp } from 'react-icons/fa'
 
 const API_BASE = '/api/officials/list'
 const UPLOAD_BASE = '' // Photos are served relatively from /api or static routes
@@ -126,17 +127,25 @@ export default function PublicView(){
                         {off.position || off.category}
                       </p>
 
-                      {/* Contact Button */}
+                      {/* Contact Actions */}
                       {off.contact && (
-                        <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
+                        <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100 flex justify-center gap-3">
                           <a
                             href={`tel:${off.contact.replace(/[^+0-9]/g,'')}`}
-                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r ${CATEGORY_COLORS[cat] || 'from-gray-600 to-gray-700'} text-white font-medium text-xs sm:text-sm hover:shadow-lg transition-shadow`}
+                            className="w-10 h-10 rounded-xl bg-gray-50 text-gray-600 hover:text-white relative overflow-hidden group flex items-center justify-center transition-all shadow-sm"
+                            title="Call Official"
                           >
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773c.418 1.738 1.707 3.027 3.445 3.445l.773-1.548a1 1 0 011.06-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 4 14.18 4 9.5S7.82 2 12.5 2h2a1 1 0 011 1v2.153z"></path>
-                            </svg>
-                            Call
+                            <div className={`absolute inset-0 bg-gradient-to-r ${CATEGORY_COLORS[cat] || 'from-gray-600 to-gray-700'} opacity-0 group-hover:opacity-100 transition-opacity z-0`}></div>
+                            <FaPhoneAlt size={14} className="z-10 relative" />
+                          </a>
+                          <a
+                            href={`https://wa.me/${off.contact.replace(/[^+0-9]/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-10 h-10 rounded-xl bg-gray-50 text-[#25D366] hover:bg-[#25D366] hover:text-white flex items-center justify-center transition-all shadow-sm z-10"
+                            title="WhatsApp"
+                          >
+                            <FaWhatsapp size={18} />
                           </a>
                         </div>
                       )}
@@ -147,6 +156,26 @@ export default function PublicView(){
             </section>
           ))
         )}
+
+        {/* View Past Officials Button */}
+        <div className="mt-20 mb-12 flex flex-col items-center">
+           <div className="w-full max-w-lg h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mb-8"></div>
+           <p className="text-gray-400 text-sm font-medium mb-6">Want to see our leadership history?</p>
+           <button
+             onClick={() => navigate('/officials/history')}
+             className="group flex items-center gap-3 px-8 py-4 bg-white border border-gray-200 text-gray-800 rounded-2xl shadow-sm hover:shadow-xl hover:border-purple-200 hover:-translate-y-1 transition-all duration-300 font-bold"
+           >
+             <div className="p-2 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+             </div>
+             <span>View Past Officials History</span>
+             <svg className="w-5 h-5 text-gray-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+             </svg>
+           </button>
+        </div>
       </div>
     </div>
   )
