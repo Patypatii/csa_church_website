@@ -10,24 +10,27 @@ const pool = new Pool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  ssl: process.env.DB_HOST === "localhost" ? false : { rejectUnauthorized: false },
+  ssl:
+    process.env.DB_HOST === "localhost" ? false : { rejectUnauthorized: false },
 });
 
 export const db = pool;
 
-let client = undefined
+export let client = undefined;
 export const connectDb = async () => {
   try {
     client = await pool.connect();
     logger.info("Connected to postgree database successfully!");
   } catch (error) {
-    logger.error("Failed to connect postgree database:", error.message, { stack: error.stack });
+    logger.error("Failed to connect postgree database:", error.message, {
+      stack: error.stack,
+    });
     // process.exit(1)
   }
 };
 
 // this function should use the client not the pool , singleton desing pattern one instance alone
-export const testDb = { query: (text, params) => pool.query(text, params) };
+export const testDb = { query: (text, params) => client.query(text, params) };
 
 // momgodb connection this will be used for storing questions
 // this is the reason for this
@@ -38,15 +41,15 @@ export let dbInstance = undefined;
 
 export const connectToMongoDb = async () => {
   try {
-    const connectionInstance = await mongoose.connect(`${process.env.MONGODB_URI}`);
+    const connectionInstance = await mongoose.connect(
+      `${process.env.MONGODB_URI}`,
+    );
     dbInstance = connectionInstance;
-    logger.info(`☘️  MongoDB Connected! Db host: ${connectionInstance.connection.host}`);
+    logger.info(
+      `☘️  MongoDB Connected! Db host: ${connectionInstance.connection.host}`,
+    );
   } catch (error) {
     logger.error("MongoDB connection error: ", error);
     // process.exit(1)
   }
 };
-
-
-
-

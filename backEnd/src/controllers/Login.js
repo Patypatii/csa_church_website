@@ -7,7 +7,9 @@ import { token } from "morgan";
 dotenv.config();
 
 export const Login = async (req, res) => {
-  const { userReg, password } = req.body ?? {};
+  let { userReg, password } = req.body ?? {};
+  // console.log("Login attempt for user:", userReg);
+  userReg = userReg?.toUpperCase();
 
   if (!userReg || !password) {
     return res.status(400).json({ error: "Username and password required" });
@@ -50,7 +52,7 @@ export const Login = async (req, res) => {
       [user.member_id, hashedToken, expiresAt],
     );
 
-    res.json({ accessToken, refreshToken });
+    res.json({ accessToken, refreshToken, role: user.role_name });
   } catch (err) {
     res.status(500).json({ error: "Server error" });
   }

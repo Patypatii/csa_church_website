@@ -44,7 +44,7 @@ const limiter = rateLimit({
   },
 });
 
-app.use(limiter);
+// app.use(limiter);
 app.use(morganMiddleware);
 
 // Static Files
@@ -82,10 +82,11 @@ app.use("/api", api);
 
 app.use("/questions", apiRoutes);
 app.use("/files", apiRoutes);
-app.use("/community-view", express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental")));
+app.use(
+  "/community-view",
+  express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental")),
+);
 app.use("/community-view", apiRoutes);
-
-
 
 // Gallery APIs
 app.get("/api/choir/gallery", (_req, res) => {
