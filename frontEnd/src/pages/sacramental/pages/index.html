@@ -56,6 +56,17 @@
     // Initialize Hub page
     const hubPage = new HubLandingPage('hub-grid-container');
     hubPage.init();
+
+    // Resize observer
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'HUB_RESIZE', height }, '*');
+      }
+    }
+    const observer = new ResizeObserver(sendHeight);
+    observer.observe(document.body);
+    window.addEventListener('load', sendHeight);
   </script>
 </body>
 
