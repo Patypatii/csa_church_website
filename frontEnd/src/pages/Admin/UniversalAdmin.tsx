@@ -10,7 +10,8 @@ import {
   X,
   ChevronRight,
   LogOut,
-  Bell
+  Bell,
+  MessageSquare
 } from 'lucide-react';
 import { useNavigate, useLocation, Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -20,6 +21,7 @@ const menuItems = [
   { id: 'officials', name: 'Officials Management', icon: Users, path: '/admin/officials-hub' },
   { id: 'donations', name: 'Donation Monitor', icon: Heart, path: '/admin/donations' },
   { id: 'devotions', name: 'Devotions & AI', icon: BookOpen, path: '/admin/devotions-hub' },
+  { id: 'suggestions', name: 'User Suggestions', icon: MessageSquare, path: '/admin/suggestions' },
   { id: 'records', name: 'Records Explorer', icon: Database, path: '/admin/records' },
   { id: 'settings', name: 'Settings', icon: Settings, path: '/admin/settings' },
 ];

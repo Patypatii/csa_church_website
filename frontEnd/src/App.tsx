@@ -40,8 +40,11 @@ import JumuiyaDetail from "./pages/Jumuiya/JumuiyaDetail";
 import CommunityHub from "./pages/sacramental/CommunityHub";
 import UniversalAdmin from "./pages/Admin/UniversalAdmin";
 import AdminDashboard from "./pages/Admin/pages/AdminDashboard";
+import AdminSuggestions from "./pages/Admin/pages/AdminSuggestions";
 import RecordsExplorer from "./pages/Admin/pages/RecordsExplorer";
 import DonationMonitor from "./pages/Admin/pages/DonationMonitor";
+import GalleryPage from "./pages/Gallery/index";
+import SuggestionBox from "./pages/Landing/components/sections/SuggestionBox";
 import { DataProvider } from "./pages/Jumuiya/context/DataContext";
 
 
@@ -84,6 +87,7 @@ const Home: React.FC = () => {
         )}
 
         {/* Show Support section to everyone */}
+        <SuggestionBox />
         <SupportSection />
       </main>
     </div>
@@ -119,6 +123,7 @@ const App: React.FC = () => {
           <Route path="devotions-hub" element={<Appadmin />} />
           <Route path="records" element={<RecordsExplorer />} />
           <Route path="donations" element={<DonationMonitor />} />
+          <Route path="suggestions" element={<AdminSuggestions />} />
           <Route path="settings" element={<div className="p-8 bg-white rounded-2xl shadow-sm border border-slate-200">Settings Page Coming Soon</div>} />
         </Route>
 
@@ -168,6 +173,7 @@ const App: React.FC = () => {
             path="/community/:moduleSlug?"
             element={<CommunityHub />}
           />
+          <Route path="/gallery" element={<GalleryPage />} />
         </Route>
 
       </>,
