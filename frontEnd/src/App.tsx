@@ -42,6 +42,8 @@ import UniversalAdmin from "./pages/Admin/UniversalAdmin";
 import AdminDashboard from "./pages/Admin/pages/AdminDashboard";
 import RecordsExplorer from "./pages/Admin/pages/RecordsExplorer";
 import DonationMonitor from "./pages/Admin/pages/DonationMonitor";
+import CommunityManager from "./pages/Admin/pages/CommunityManager";
+import CommunityDetailEditor from "./pages/Admin/pages/CommunityDetailEditor";
 import { DataProvider } from "./pages/Jumuiya/context/DataContext";
 
 
@@ -90,6 +92,7 @@ const Home: React.FC = () => {
   );
 };
 
+
 const App: React.FC = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -119,6 +122,8 @@ const App: React.FC = () => {
           <Route path="devotions-hub" element={<Appadmin />} />
           <Route path="records" element={<RecordsExplorer />} />
           <Route path="donations" element={<DonationMonitor />} />
+          <Route path="community-management" element={<CommunityManager />} />
+          <Route path="community-management/:categoryId" element={<CommunityDetailEditor />} />
           <Route path="settings" element={<div className="p-8 bg-white rounded-2xl shadow-sm border border-slate-200">Settings Page Coming Soon</div>} />
         </Route>
 
