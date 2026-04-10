@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FaPhoneAlt, FaWhatsapp, FaEnvelope, FaArrowLeft, FaCheckCircle, FaStar, FaQuoteLeft } from 'react-icons/fa';
 import { POSITION_INFO, DEFAULT_POSITION_INFO } from './constants/positionInfo';
 
-const API_BASE = '/api/officials/list';
+const API_BASE = `${import.meta.env.VITE_SERVER_URI}/api/officials/list`;
 
 const CATEGORY_COLORS: Record<string, string> = {
     'Executive': 'from-purple-600 to-purple-800',

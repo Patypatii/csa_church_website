@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { FaPhoneAlt, FaWhatsapp } from 'react-icons/fa'
 
-const API_BASE = '/api/officials/list'
-const UPLOAD_BASE = ''
+const API_BASE = `${import.meta.env.VITE_SERVER_URI}/api/officials/list`
+const UPLOAD_BASE = import.meta.env.VITE_SERVER_URI || ''
 
 const CATEGORY_ORDER = [
   'Executive','Jumuiya Coordinators','Bible Coordinators','Rosary',

@@ -1,5 +1,5 @@
-// Base URL for the API endpoints - using proxy
-const API_BASE_URL = '/api';
+// Base URL for the API endpoints - using environment variable
+const API_BASE_URL = `${import.meta.env.VITE_SERVER_URI}/api`;
 
 /**
  * ApiService class provides methods to interact with the backend API.
