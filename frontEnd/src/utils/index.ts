@@ -37,3 +37,5 @@ export class LocalStorage {
     localStorage.clear();
   }
 }
+
+

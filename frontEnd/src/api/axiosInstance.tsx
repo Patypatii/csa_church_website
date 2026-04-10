@@ -1,8 +1,5 @@
-
-
 import axios from "axios";
 import { LocalStorage } from "../utils";
-// import { error } from "console";
 
 // Create an Axios instance for API requests
 const apiClient = axios.create({
@@ -11,19 +8,17 @@ const apiClient = axios.create({
   timeout: 120000,
 });
 
-// Add an interceptor to set authorization header with user token before requests
+
+// Add an interceptor to set authorization header
 apiClient.interceptors.request.use(
-  function (config) {
-    // Retrieve user token from local storage
-    const token = LocalStorage.get("token");
-    // Set authorization header with bearer token
-    config.headers.Authorization = `Bearer ${token}`;
+  (config) => {
+    const userdata =LocalStorage.get('userdata');
+    if (userdata && userdata.accessToken) {
+      config.headers.Authorization = `Bearer ${userdata.accessToken}`;
+    }
     return config;
   },
-
-  function (error) {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 apiClient.interceptors.response.use(
@@ -31,26 +26,30 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Only retry once to avoid infinite loop
+    // Handle 401 Unauthorized (Token expired)
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (!refreshToken) throw new Error("No refresh token found");
+        const userdata = LocalStorage.get('userdata');
+        if (!userdata || !userdata.refreshToken) {
+          throw new Error("No refresh token available");
+        }
 
         // Call refresh endpoint
-        const { data } = await axios.post("http://localhost:3001/authentication/v1/refresh", { refreshToken });
+        const { data } = await axios.post(`${import.meta.env.VITE_SERVER_URI}/authentication/v1/refresh`, {
+          refreshToken: userdata.refreshToken
+        });
 
-        // Save new access token
-        localStorage.setItem("accessToken", data.accessToken);
+        // Update userdata with new accessToken
+        const updatedData = { ...userdata, accessToken: data.accessToken };
+        localStorage.setItem("userdata", JSON.stringify(updatedData));
 
-        // Retry original request with new token
+        // Retry original request
         originalRequest.headers["Authorization"] = `Bearer ${data.accessToken}`;
         return apiClient(originalRequest);
       } catch (err) {
-        // Refresh failed → logout user
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
+        // Refresh failed → logout
+        localStorage.removeItem("userdata");
         window.location.href = "/login";
         return Promise.reject(err);
       }
@@ -61,8 +60,11 @@ apiClient.interceptors.response.use(
 );
 
 
+export const loginApi = (data: { userReg: string; password: string }) => {
+  return apiClient.post("/authentication/v1/login", data);
+};
 
-// API functions for different actions
+// API functions
 export const generateAndSaveQuestions = (data: { topic: string }) => {
   return apiClient.post("/questions/v1", data);
 };

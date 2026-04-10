@@ -7,17 +7,16 @@ interface PublicRouteProps {
 }
 
 /**
- * PublicRoute - Protects routes that should be accessible only when NOT logged in
- * If user is already logged in, redirects to home /
- * If user is not logged in, renders the children
+ * PublicRoute - For routes only accessible when LOGGED OUT (like /login).
+ * If authenticated, redirects the user back to where they came from or Home.
  */
+
 const PublicRoute = ({ children }: PublicRouteProps) => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
 
-  // If already logged in, redirect to home
-  if (isAuthenticated && location.pathname.includes("/login")) {
-    // Check if there's a location to redirect back to after logout
+  if (isAuthenticated) {
+    // If user is already logged in, redirect them back to where they came from
     const from = location.state?.from?.pathname || "/";
     return <Navigate to={from} replace />;
   }

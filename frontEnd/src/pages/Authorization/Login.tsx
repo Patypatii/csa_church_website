@@ -1,41 +1,44 @@
 import React, { useState } from "react";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
+import { loginApi } from "../../api/axiosInstance";
+import { useAuth } from "../../context/AuthContext";
 
 interface ErrorResponse {
   message: string;
 }
 
+const Loader: React.FC = () => {
+  return (
+    <div className="flex items-center justify-center">
+      <div className="w-6 h-6 border-2 border-t-blue-600 border-gray-300 rounded-full animate-spin"></div>
+    </div>
+  );
+};
+
 const Login: React.FC = () => {
   const [userReg, setUserReg] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const { login } = useAuth();
+
   const navigate = useNavigate();
 
   const submit = async () => {
-    console.log("Submitting login with:", { userReg, password });
     try {
-      const response = await axios.post(
-        "http://localhost:3001/authentication/v1/login",
-        {
-          userReg,
-          password,
-        }
-      );
-      console.log("Login response:", response.data);
+      setLoading(true);
+      const response = await loginApi({ userReg, password })
 
       if (response.data.status === "success") {
-        localStorage.setItem("token", response.data.token);
-        alert(`${response.data.name} welcome to our site`)
-        navigate("/", { state: { Response: true } });
+        login(response.data); 
       }
-      else if (response.data.error == "User email not found") {
+
+      else if (response.data.message == "User email not found") {
         alert("Login User email not found. Please enter your email and change your password.");
-        localStorage.setItem("token", response.data.token);
+        login(response.data); 
         navigate("reset", { state: { purpose: 'email' } });
-
       }
-
       else {
         alert(response.data.message || "Login failed");
       }
@@ -44,6 +47,8 @@ const Login: React.FC = () => {
       console.error("Login error:", error);
 
       alert((axiosError.response?.data as ErrorResponse)?.message || "Login failed. Please check your credentials.");
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -101,7 +106,7 @@ const Login: React.FC = () => {
             onClick={submit}
             className="w-full px-4 py-2 text-white transition-colors bg-blue-700 rounded-md hover:bg-blue-800"
           >
-            Sign In
+        {loading ? <Loader /> : "Sign In"}
           </button>
 
           <div className="mt-4 text-center">

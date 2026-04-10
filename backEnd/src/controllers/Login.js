@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 import { testDb } from "../Configs/dbConfig.js";
 import logger from "../logger/winston.js";
 import jwt from "jsonwebtoken";
-import { token } from "morgan";
 dotenv.config();
 
 export const Login = async (req, res) => {
@@ -12,12 +11,13 @@ export const Login = async (req, res) => {
   userReg = userReg?.toUpperCase();
 
   if (!userReg || !password) {
-    return res.status(400).json({ error: "Username and password required" });
+    logger.error("Username and password required");
+    return res.status(400).json({ status: false, message: "Username and password required" });
   }
 
   try {
     const result = await testDb.query(
-      `SELECT m.member_id, m.password, m.first_name, m.email, r.role_name 
+      `SELECT m.member_id, m.password, m.first_name, m.last_name, m.email, r.role_name 
        FROM members m 
        JOIN member_roles mr ON m.member_id = mr.member_id 
        JOIN roles r ON mr.role_id = r.role_id 
@@ -26,17 +26,19 @@ export const Login = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      logger.error("Invalid username or password");
+      return res.status(401).json({ status: false, message: "Invalid username or password" });
     }
 
     const user = result.rows[0];
     const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      logger.error("Invalid username or password");
+      return res.status(401).json({ status: false, message: "Invalid username or password" });
     }
 
-    const accessToken = generateAccesstoken(user.member_id, user.role_name);
+    const accessToken = generateAccesstoken(user.member_id, user.role_name , user.first_name , user.last_name , user.email);
     const refreshToken = generateRefreshtoken(user.member_id, user.role_name);
 
     // calculate expiry
@@ -52,14 +54,19 @@ export const Login = async (req, res) => {
       [user.member_id, hashedToken, expiresAt],
     );
 
-    res.json({ accessToken, refreshToken, role: user.role_name });
+    if (!user.email) {
+      logger.error("User email not found");
+       res.json({message: "User email not found" });
+    }
+    res.status(200).json({status: "success",  accessToken, refreshToken, role: user.role_name , firstName: user.first_name , lastName: user.last_name , email: user.email });
   } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    logger.error("Server error");
+    res.status(500).json({ status: false, message: "Server error" });
   }
 };
 
-export const generateAccesstoken = (id, role) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: "15min" });
+export const generateAccesstoken = (id, role , firstName , lastName , email) => {
+  return jwt.sign({ id, role , firstName , lastName , email }, process.env.JWT_SECRET, { expiresIn: "15min" });
 };
 
 export const generateRefreshtoken = (id, role) => {
