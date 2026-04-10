@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface CommunityHubModalProps {
+interface CommunityModalProps {
     isOpen: boolean;
     onClose: () => void;
     title: string;
@@ -9,7 +9,7 @@ interface CommunityHubModalProps {
     type?: 'info' | 'success' | 'warning' | 'error';
 }
 
-const CommunityHubModal: React.FC<CommunityHubModalProps> = ({ 
+const CommunityModal: React.FC<CommunityModalProps> = ({ 
     isOpen, 
     onClose, 
     title, 
@@ -81,4 +81,4 @@ const CommunityHubModal: React.FC<CommunityHubModalProps> = ({
     );
 };
 
-export default CommunityHubModal;
+export default CommunityModal;

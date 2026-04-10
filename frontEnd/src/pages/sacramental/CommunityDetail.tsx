@@ -5,7 +5,7 @@ import { useCommunityData } from './context/CommunityDataContext';
 import type { CommunityModule, PracticeSchedule } from './context/CommunityDataContext';
 import { apiClient } from '../../api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import CommunityHubModal from './components/CommunityHubModal';
+import CommunityModal from './components/CommunityModal';
 
 // ─── Next Practice Countdown (Choir-specific) ────────────────────────────────
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -89,7 +89,7 @@ const PracticeCountdown: React.FC<{ schedules: PracticeSchedule[] }> = ({ schedu
 };
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CommunityHubDetail: React.FC = () => {
+const CommunityDetail: React.FC = () => {
     const { moduleId } = useParams<{ moduleId: string }>();
     const navigate = useNavigate();
     const { getModuleById } = useCommunityData();
@@ -242,7 +242,7 @@ const CommunityHubDetail: React.FC = () => {
                     <i className="fas fa-exclamation-triangle text-4xl text-orange-400 mb-4"></i>
                     <h2 className="text-xl font-bold text-gray-800 mb-2">Ministry Not Found</h2>
                     <p className="text-gray-500 mb-6">We could not find the community ministry you are looking for.</p>
-                    <button onClick={() => navigate('/community')} className="px-6 py-2 bg-blue-600 text-white rounded-full font-medium">Back to Hub</button>
+                    <button onClick={() => navigate('/community')} className="px-6 py-2 bg-blue-600 text-white rounded-full font-medium">Back to Community</button>
                 </div>
             </div>
         );
@@ -261,7 +261,7 @@ const CommunityHubDetail: React.FC = () => {
                     </div>
                     <div className="text-center md:text-left text-white">
                         <Link to="/community" className="text-white text-sm font-semibold mb-3 flex items-center gap-1 w-fit mx-auto md:mx-0 bg-black/20 hover:bg-black/40 px-3 py-1.5 rounded-full border border-white/20 transition">
-                            <i className="fas fa-chevron-left text-xs"></i> Back to Hub
+                            <i className="fas fa-chevron-left text-xs"></i> Back to Community
                         </Link>
                         <h1 className="text-4xl md:text-5xl font-extrabold mb-3 tracking-tight drop-shadow-lg">{moduleData.title}</h1>
                         <p className="text-lg text-white/90 max-w-2xl drop-shadow-md">{moduleData.description}</p>
@@ -627,7 +627,7 @@ const CommunityHubDetail: React.FC = () => {
             </div>
 
             {/* Success Modal */}
-            <CommunityHubModal 
+            <CommunityModal 
                 isOpen={showSuccessModal} 
                 onClose={() => setShowSuccessModal(false)}
                 title="Welcome Aboard!"
@@ -638,10 +638,10 @@ const CommunityHubDetail: React.FC = () => {
                     <i className="fas fa-info-circle text-emerald-500 mt-1"></i>
                     <p className="text-sm text-emerald-700">Please attend our next meeting on <strong>{moduleData.meetingSchedule}</strong> for a brief orientation.</p>
                 </div>
-            </CommunityHubModal>
+            </CommunityModal>
 
             {/* Payment Modal / STK Push Confirmation */}
-            <CommunityHubModal
+            <CommunityModal
                 isOpen={showPaymentModal}
                 onClose={() => setShowPaymentModal(false)}
                 title={pendingPayment.type === 'Join' ? 'New Membership' : pendingPayment.description}
@@ -677,9 +677,9 @@ const CommunityHubDetail: React.FC = () => {
                 >
                     Pay Ksh {pendingPayment.amount} Now
                 </button>
-            </CommunityHubModal>
+            </CommunityModal>
         </div>
     );
 };
 
-export default CommunityHubDetail;
+export default CommunityDetail;

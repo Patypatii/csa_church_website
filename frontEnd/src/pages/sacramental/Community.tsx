@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCommunityData } from './context/CommunityDataContext';
 
-const CommunityHub: React.FC = () => {
+const Community: React.FC = () => {
   const navigate = useNavigate();
   const { modules } = useCommunityData();
 
@@ -15,7 +15,7 @@ const CommunityHub: React.FC = () => {
           <div className="inline-flex items-center justify-center p-4 bg-white/10 rounded-full mb-6 backdrop-blur-md shadow-lg border border-white/20">
             <i className="fas fa-church text-4xl text-blue-200"></i>
           </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight drop-shadow-md">Community Hub</h1>
+          <h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight drop-shadow-md">Community</h1>
           <p className="text-lg md:text-xl text-blue-100 max-w-3xl mx-auto font-light leading-relaxed">
             Discover and join our vibrant church ministries. Grow in faith, serve the parish, and find your spiritual family.
           </p>
@@ -48,7 +48,7 @@ const CommunityHub: React.FC = () => {
                 </p>
 
                 <div className="mt-6 pt-4 border-t border-slate-100 text-blue-600 font-bold flex items-center justify-between group-hover:text-blue-700 transition-colors">
-                  <span>Explore Portal</span>
+                  <span>Enter {mod.title}</span>
                   <i className="fas fa-arrow-right group-hover:translate-x-2 transition-transform duration-300"></i>
                 </div>
               </div>
@@ -68,4 +68,4 @@ const CommunityHub: React.FC = () => {
   );
 };
 
-export default CommunityHub;
+export default Community;

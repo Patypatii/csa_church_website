@@ -33,8 +33,8 @@ import {
 import ImageSlider from "./pages/Landing/components/ImageSlider";
 import JumuiyaLanding from "./pages/Jumuiya/JumuiyaLanding";
 import JumuiyaDetail from "./pages/Jumuiya/JumuiyaDetail";
-import CommunityHub from "./pages/sacramental/CommunityHub";
-import CommunityHubDetail from "./pages/sacramental/CommunityHubDetail";
+import Community from "./pages/sacramental/Community";
+import CommunityDetail from "./pages/sacramental/CommunityDetail";
 import { CommunityProvider } from "./pages/sacramental/context/CommunityDataContext";
 import UniversalAdmin from "./pages/Admin/UniversalAdmin";
 import AdminDashboard from "./pages/Admin/pages/AdminDashboard";
@@ -100,8 +100,8 @@ const App: React.FC = () => {
           }
         >
           <Route index element={<AdminDashboard />} />
-          <Route path="officials-hub" element={<AdminPanel />} />
-          <Route path="devotions-hub" element={<Appadmin />} />
+          <Route path="officials" element={<AdminPanel />} />
+          <Route path="devotions" element={<Appadmin />} />
           <Route path="records" element={<RecordsExplorer />} />
           <Route path="donations" element={<DonationMonitor />} />
           <Route path="community-management" element={<CommunityManager />} />
@@ -157,7 +157,7 @@ const App: React.FC = () => {
             path="/community"
             element={
               <CommunityProvider>
-                <CommunityHub />
+                <Community />
               </CommunityProvider>
             }
           />
@@ -165,7 +165,7 @@ const App: React.FC = () => {
             path="/community/:moduleId"
             element={
               <CommunityProvider>
-                <CommunityHubDetail />
+                <CommunityDetail />
               </CommunityProvider>
             }
           />

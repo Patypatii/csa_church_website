@@ -13,9 +13,9 @@ export const getIndex = (_req, res) => {
     const indexPath = path.resolve(__dirname, '../../../frontEnd/src/pages/sacramental/pages/index.html');
     res.sendFile(indexPath, (err) => {
         if (err) {
-            console.error('[HubController] Error sending index.html:', err);
+            console.error('[CommunityController] Error sending index.html:', err);
             if (!res.headersSent) {
-                res.status(500).send('Error loading community hub page. Please ensure front-end is built.');
+                res.status(500).send('Error loading community page. Please ensure front-end is built.');
             }
         }
     });
@@ -29,7 +29,7 @@ export const getHubData = async (_req, res) => {
         }
 
         const result = await db.query('SELECT * FROM hub_modules').catch(err => {
-            console.error('[HubController] Query Failed:', err.message);
+            console.error('[CommunityController] Query Failed:', err.message);
             return { rows: [] }; // Return empty rows to prevent crash
         });
 
@@ -49,9 +49,9 @@ export const getHubData = async (_req, res) => {
         
         return res.status(200).json(modules);
     } catch (err) {
-        console.error('[HubController] Critical error in getHubData:', err);
+        console.error('[CommunityController] Critical error in getHubData:', err);
         return res.status(500).json({ 
-            error: 'Server error while fetching hub data', 
+            error: 'Server error while fetching community data', 
             details: err.message,
             fallback: true 
         });
@@ -70,7 +70,7 @@ export const getModule = async (req, res) => {
             
             return res.sendFile(pagePath, (err) => {
                 if (err && !res.headersSent) {
-                    console.error(`[HubController] Failed to serve HTML for ${id}:`, err.message);
+                    console.error(`[CommunityController] Failed to serve HTML for ${id}:`, err.message);
                     res.status(200).send('<!-- Falling back to client-side rendering -->');
                 }
             });
@@ -150,7 +150,7 @@ export const getModule = async (req, res) => {
 
         return res.status(200).json(moduleInfo);
     } catch (err) {
-        console.error(`[HubController] DB Error for module ${id}:`, err);
+        console.error(`[CommunityController] DB Error for module ${id}:`, err);
         return res.status(500).json({ 
             error: `Error loading module "${id}".`, 
             message: err.message,
