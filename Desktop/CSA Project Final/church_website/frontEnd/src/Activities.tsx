@@ -123,55 +123,75 @@ const Activities: React.FC = () => {
     <div className={`min-h-screen bg-gradient-to-br ${getLiturgicalColor()} text-white p-10`}>
 
       {/* WEEKLY */}
-      <h2 className="text-3xl font-bold mb-6">Weekly Activities</h2>
+      <h2 className="text-3xl font-extrabold mb-6 tracking-wide">Weekly Activities</h2>
       <div className="grid md:grid-cols-3 gap-6 mb-16">
         {weeklyActivities.map(w => {
           const next = getNextWeeklyDate(w.day, w.time);
           const c = getCountdown(next, now);
 
           return (
-            <div key={w.id} className="p-6 bg-white/10 rounded-2xl backdrop-blur-lg shadow-xl">
+            <div key={w.id} className="p-6 bg-white/10 rounded-2xl backdrop-blur-lg shadow-xl hover:scale-105 transition">
+
               <img src={w.imageUrl} className="h-32 w-full object-cover rounded mb-3"/>
-              <h3 className="font-bold">{w.activity}</h3>
-              <p>{w.day} • {w.time}</p>
+
+              <h3 className="text-lg font-bold tracking-wide">{w.activity}</h3>
+
+              {/* DAY + TIME */}
+              <p className="inline-block mt-2 px-4 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold text-sm shadow-lg">
+                {w.day} • {w.time}
+              </p>
+
+              {/* 🔥 VENUE (UPDATED) */}
+              <p className="inline-block mt-3 px-3 py-1 rounded-full bg-blue-600/80 text-white font-semibold text-xs shadow-md">
+                📍 {w.venue}
+              </p>
 
               <div className="flex gap-4 mt-4 animate-pulse">
                 {Object.entries(c).map(([k,v])=>(
                   <div key={k} className="text-center">
                     <div className="text-xl font-bold drop-shadow-[0_0_10px_white]">{v}</div>
-                    <span className="text-xs">{k}</span>
+                    <span className="text-xs uppercase tracking-wide">{k}</span>
                   </div>
                 ))}
               </div>
+
             </div>
           );
         })}
       </div>
 
       {/* SEMESTER */}
-      <h2 className="text-3xl font-bold mb-6">Semester Activities</h2>
+      <h2 className="text-3xl font-extrabold mb-6 tracking-wide">Semester Activities</h2>
       <div className="grid md:grid-cols-3 gap-6">
         {filteredSemester.map(a => {
           const date = new Date(a.datetime);
           const c = getCountdown(date, now);
 
           return (
-            <div key={a.id} className="p-6 bg-white/10 rounded-2xl backdrop-blur-lg shadow-xl">
-              
+            <div key={a.id} className="p-6 bg-white/10 rounded-2xl backdrop-blur-lg shadow-xl hover:scale-105 transition">
+
               <img
                 src={semesterImages[a.title] || "https://images.unsplash.com/photo-1507692049790-de58290a4334"}
                 className="h-32 w-full object-cover rounded mb-3"
               />
 
-              <h3 className="font-bold">{a.title}</h3>
-              <p>{date.toLocaleString()}</p>
-              <p>{a.venue}</p>
+              <h3 className="text-lg font-bold tracking-wide">{a.title}</h3>
+
+              {/* DATE */}
+              <p className="inline-block mt-2 px-3 py-1 rounded-full bg-black/60 text-cyan-300 font-semibold text-sm shadow-md">
+                {date.toLocaleString()}
+              </p>
+
+              {/* 🔥 VENUE (UPDATED) */}
+              <p className="inline-block mt-3 px-3 py-1 rounded-full bg-purple-600/80 text-white font-semibold text-xs shadow-md">
+                📍 {a.venue}
+              </p>
 
               <div className="flex gap-4 mt-4 animate-pulse">
                 {Object.entries(c).map(([k,v])=>(
                   <div key={k} className="text-center">
                     <div className="text-xl font-bold drop-shadow-[0_0_10px_white]">{v}</div>
-                    <span className="text-xs">{k}</span>
+                    <span className="text-xs uppercase tracking-wide">{k}</span>
                   </div>
                 ))}
               </div>
