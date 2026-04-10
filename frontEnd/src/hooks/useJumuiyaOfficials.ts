@@ -54,6 +54,8 @@ export function useJumuiyaOfficials(filters: { termId?: number | string; categor
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jumuiya-officials'] });
+      queryClient.invalidateQueries({ queryKey: ['currentTerm'] });
+      queryClient.invalidateQueries({ queryKey: ['terms'] });
       toast.success('Jumuiya official added successfully!');
     },
     onError: (error: Error) => {
@@ -78,6 +80,8 @@ export function useJumuiyaOfficials(filters: { termId?: number | string; categor
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jumuiya-officials'] });
+      queryClient.invalidateQueries({ queryKey: ['currentTerm'] });
+      queryClient.invalidateQueries({ queryKey: ['terms'] });
       toast.success('Jumuiya official updated successfully!');
     },
     onError: (error: Error) => {
@@ -101,6 +105,8 @@ export function useJumuiyaOfficials(filters: { termId?: number | string; categor
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jumuiya-officials'] });
+      queryClient.invalidateQueries({ queryKey: ['currentTerm'] });
+      queryClient.invalidateQueries({ queryKey: ['terms'] });
       toast.success('Jumuiya official deleted successfully!');
     },
     onError: (error: Error) => {

@@ -3,7 +3,7 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   RouterProvider,
-  Route,
+  Route
 } from "react-router-dom";
 // import Authorisation from "./assets/Layouts/Authorisation";
 // import Reset from "./pages/Authorization/Reset";
@@ -22,6 +22,8 @@ import Layout from "./pages/Devotions/components/Layout";
 import Appadmin from "./pages/Devotions/Adminpage/App"
 import AdminPanel from "./pages/officials/AdminPanel";
 import PublicView from "./pages/officials/PublicView";
+import OfficialProfile from "./pages/officials/OfficialProfile";
+import PublicHistoryView from "./pages/officials/PublicHistoryView";
 import {
   AboutSection,
   CommunitySection,
@@ -36,6 +38,14 @@ import ImageSlider from "./pages/Landing/components/ImageSlider";
 import JumuiyaLanding from "./pages/Jumuiya/JumuiyaLanding";
 import JumuiyaDetail from "./pages/Jumuiya/JumuiyaDetail";
 import CommunityHub from "./pages/sacramental/CommunityHub";
+import UniversalAdmin from "./pages/Admin/UniversalAdmin";
+import AdminDashboard from "./pages/Admin/pages/AdminDashboard";
+import AdminSuggestions from "./pages/Admin/pages/AdminSuggestions";
+import RecordsExplorer from "./pages/Admin/pages/RecordsExplorer";
+import DonationMonitor from "./pages/Admin/pages/DonationMonitor";
+import SuggestionBox from "./pages/Landing/components/sections/SuggestionBox";
+import GalleryManager from "./pages/Admin/pages/GalleryManager";
+import GalleryPage from "./pages/Gallery/index";
 import { DataProvider } from "./pages/Jumuiya/context/DataContext";
 
 
@@ -51,34 +61,15 @@ const Login = lazy(() => import("./pages/Authorization/Login"));
 const FallBack: React.FC = () => <div>🍷 Please wait ...</div>;
 
 const Home: React.FC = () => {
-  const { user } = useAuth();
-
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <main className="flex-grow">
-        {/* Show landing page content when NOT logged in */}
-        {!user && (
-          <>
-            <ImageSlider />
-            <AboutSection />
-            <CommunitySection />
-            <GallerySection />
-          </>
-        )}
-
-        {/* Show all sections when logged in */}
-        {user && (
-          <>
-            <JumuiyaSection />
-            <OfficialsSection />
-            <ProjectsSection />
-            <ActivitiesSection />
-            <GallerySection />
-          </>
-        )}
-
-        {/* Show Support section when NOT logged in */}
-        {!user && <SupportSection />}
+    <div className="flex flex-col h-full bg-gray-50">
+      <main className="w-full">
+        <ImageSlider />
+        <AboutSection />
+        <CommunitySection />
+        <GallerySection />
+        <SuggestionBox />
+        <SupportSection />
       </main>
     </div>
   );
@@ -100,12 +91,29 @@ const App: React.FC = () => {
           <Route path="reset" element={<Reset />} />
           <Route path="otp/:reg" element={<ResetPasswordPage />} />
         </Route>
-        <Route path="/admin/quiz" element={<Appadmin />} />
-        <Route path="/admin/officials" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
-        <Route path="/officials" element={<PublicView />} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <UniversalAdmin />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="officials-hub" element={<AdminPanel />} />
+          <Route path="devotions-hub" element={<Appadmin />} />
+          <Route path="records" element={<RecordsExplorer />} />
+          <Route path="donations" element={<DonationMonitor />} />
+          <Route path="suggestions" element={<AdminSuggestions />} />
+          <Route path="gallery" element={<GalleryManager />} />
+          <Route path="settings" element={<div className="p-8 bg-white rounded-2xl shadow-sm border border-slate-200">Settings Page Coming Soon</div>} />
+        </Route>
 
         <Route path="/" element={<Pageoulet />}>
           <Route index element={<Home />} />
+          <Route path="officials" element={<PublicView />} />
+          <Route path="officials/:id" element={<OfficialProfile />} />
+          <Route path="officials/history" element={<PublicHistoryView />} />
 
           <Route
             path="/devotions"
@@ -144,9 +152,10 @@ const App: React.FC = () => {
             }
           />
           <Route
-            path="/community-hub/:moduleSlug?"
+            path="/community/:moduleSlug?"
             element={<CommunityHub />}
           />
+          <Route path="/gallery" element={<GalleryPage />} />
         </Route>
 
       </>,

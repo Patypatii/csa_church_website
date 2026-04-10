@@ -26,10 +26,10 @@ export function OfficialFormSection({ onSubmit, isSubmitting, displayTerm, offic
   const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
-    if (officialsExist && displayTerm) {
+    if (displayTerm) {
       setTermOfService(displayTerm);
     }
-  }, [displayTerm, officialsExist]);
+  }, [displayTerm]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -61,17 +61,18 @@ export function OfficialFormSection({ onSubmit, isSubmitting, displayTerm, offic
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !category || !position || !photo) return;
-
     try {
-      const optimizedPhotoBlob = await resizeImage(photo);
       const fd = new FormData();
       fd.append('name', name);
       fd.append('category', category);
       fd.append('position', position);
       if (contact) fd.append('contact', contact);
       if (termOfService) fd.append('term_of_service', termOfService);
-      fd.append('photo', optimizedPhotoBlob, 'photo.jpg');
+
+      if (photo) {
+        const optimizedPhotoBlob = await resizeImage(photo);
+        fd.append('photo', optimizedPhotoBlob, 'photo.jpg');
+      }
 
       await onSubmit(fd);
       
@@ -88,7 +89,7 @@ export function OfficialFormSection({ onSubmit, isSubmitting, displayTerm, offic
   };
 
   const termMismatch = officialsExist && termOfService && termOfService !== displayTerm;
-  const isInvalid = !name || !category || !position || !photo || !!contactError || isSubmitting || !!termMismatch;
+  const isInvalid = !name || !category || !position || !!contactError || isSubmitting || !!termMismatch;
 
   return (
     <div className="mb-12 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700 transition-colors">
@@ -168,13 +169,24 @@ export function OfficialFormSection({ onSubmit, isSubmitting, displayTerm, offic
             />
             {officialsExist && displayTerm && (
               <>
-                <p className={`text-[11px] mt-1 font-medium italic flex items-center gap-1 ${termMismatch ? 'text-red-500' : 'text-blue-600 dark:text-blue-400'}`}>
-                  {termMismatch ? <X className="w-3 h-3" /> : <Check className="w-3 h-3" />}
-                  {termMismatch 
-                    ? `Warning: Must match currently active term (${displayTerm})`
-                    : `Pre-filled to match current term (${displayTerm})`
-                  }
-                </p>
+                <div className="flex items-center justify-between gap-1 mt-1">
+                  <p className={`text-[11px] font-medium italic flex items-center gap-1 ${termMismatch ? 'text-red-500' : 'text-blue-600 dark:text-blue-400'}`}>
+                    {termMismatch ? <X className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+                    {termMismatch 
+                      ? `Error: Must match ${displayTerm}`
+                      : `Pre-filled to match current term (${displayTerm})`
+                    }
+                  </p>
+                  {termMismatch && (
+                    <button 
+                      type="button"
+                      onClick={() => setTermOfService(displayTerm)}
+                      className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full hover:bg-red-600 transition-colors"
+                    >
+                      FIX
+                    </button>
+                  )}
+                </div>
                 {termMismatch && (
                   <p className="text-[10px] text-red-400 leading-tight mt-1">
                     To use a new year, please archive the current officials first.
@@ -185,7 +197,7 @@ export function OfficialFormSection({ onSubmit, isSubmitting, displayTerm, offic
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Photo *</label>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Photo (Optional)</label>
             <div className="relative">
               <input 
                 type="file" 
@@ -193,7 +205,6 @@ export function OfficialFormSection({ onSubmit, isSubmitting, displayTerm, offic
                 onChange={handlePhotoChange} 
                 className="hidden" 
                 id="photo-upload"
-                required={true}
               />
               <label 
                 htmlFor="photo-upload" 

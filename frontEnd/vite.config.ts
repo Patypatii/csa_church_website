@@ -10,6 +10,9 @@ export default defineConfig({
       },
     }),
   ],
+  optimizeDeps: {
+    include: ['react/jsx-runtime', 'framer-motion'],
+  },
   server: {
     proxy: {
       '/api': {
@@ -52,9 +55,21 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
-
-
-
+      '/community-view': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/authentication': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/questions': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 })

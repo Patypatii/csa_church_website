@@ -3,9 +3,9 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
 
-if (!process.env.MAIL_USER || !process.env.MAIL_PASSWORD) {
-  throw new Error("Email credentials are missing in .env");
-}
+// if (!process.env.MAIL_USER || !process.env.MAIL_PASSWORD) {
+//   throw new Error("Email credentials are missing in .env");
+// }
 
 const transporter = nodemailer.createTransport({
   // host: "smtp.gmail.com",
@@ -35,23 +35,23 @@ export const sendEmail = async (subject, text, to) => {
     throw error;
   }
 };
-// import path from "path";
-// import { fileURLToPath } from "url";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// dotenv.config({ path: path.join(__dirname, "..", "..", ".env") });
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, "..", "..", ".env") });
 
-// const TOKEN = process.env.MAILTRAP_TOKEN;
-// console.log(TOKEN);
+const TOKEN = process.env.MAILTRAP_TOKEN;
+console.log(TOKEN);
 
-// const client = new MailtrapClient({
-//   token: TOKEN,
-// });
+const client = new MailtrapClient({
+  token: TOKEN,
+});
 
-// const sender = {
-//   email: "hello@demomailtrap.co",
-//   name: "Mailtrap Test",
-// };
+const sender = {
+  email: "hello@demomailtrap.co",
+  name: "Mailtrap Test",
+};
 
 // const sendEmail = async (subject, text, recipient) => {
 //   const recipients = [

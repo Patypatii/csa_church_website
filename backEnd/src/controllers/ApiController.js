@@ -1,19 +1,52 @@
 import { testDb } from "../Configs/dbConfig.js";
+import logger from "../logger/winston.js";
+
+
+// Explicit sort column overrides for tables without a standard 'id' column
+const TABLE_SORT_COLUMNS = {
+  members: 'member_id',
+  mpesa_request: 'created_at',
+};
 
 // Get all records from a table
 export const getTableData = async (tableName) => {
+  const sortCol = TABLE_SORT_COLUMNS[tableName] || 'id';
+
   try {
-    const result = await testDb.query(`SELECT * FROM ${tableName} ORDER BY id DESC`);
+    // Attempt query with ordering (using quotes to handle potential reserved words)
+    const result = await testDb.query(
+      `SELECT * FROM "${tableName}" ORDER BY "${sortCol}" DESC`
+    );
     return result.rows;
-  } catch (error) {
-    console.error(`Error fetching ${tableName}:`, error.message);
-    logger.error(`Error fetching ${tableName}: ${error.message}`);
-    // Return empty array if table doesn't exist (PostgreSQL error code 42P01)
-    if (error.code === '42P01') {
-      logger.warn(`Table ${tableName} with error.code ${error.code} does not exist. Returning empty array.`);
+  } catch (firstError) {
+    // Fallback to unordered if ordering column is missing
+    if (firstError.code === '42703') {
+      logger.warn(`Falling back to unordered SELECT for "${tableName}" - column "${sortCol}" not found`);
+      try {
+        const fallback = await testDb.query(`SELECT * FROM "${tableName}"`);
+        return fallback.rows;
+      } catch (fallbackError) {
+        console.error(`Fallback SELECT also failed for "${tableName}":`, fallbackError.message);
+        return [];
+      }
+    }
+    
+    // Check if table exists
+    if (firstError.code === '42P01') {
+      console.error(`[ApiController] Table "${tableName}" does not exist in DB.`);
       return [];
     }
-    throw error;
+    
+    // Other database errors - log to console for immediate visibility in server logs
+    console.error(`[ApiController] Database Error fetching ${tableName}:`, firstError);
+    logger.error(`Error fetching ${tableName}: ${firstError.message}`);
+    
+    // Connection issues fallback (return empty array instead of crashing app)
+    if (firstError.message.includes('connection') || firstError.message.includes('queryable')) {
+       return [];
+    }
+    
+    throw firstError;
   }
 };
 
@@ -54,7 +87,7 @@ export const deleteRecord = async (tableName, id) => {
 
 // Get all data from all tables
 export const getAllData = async () => {
-  const tables = ['members', 'events', 'contributions', 'officials', 'projects', 'activities', 'gallery', 'jumuiya'];
+  const tables = ['members', 'events', 'contributions', 'officials', 'projects', 'activities', 'gallery', 'jumuiya', 'mpesa_request', 'suggestions'];
   const data = {};
   
   for (const table of tables) {

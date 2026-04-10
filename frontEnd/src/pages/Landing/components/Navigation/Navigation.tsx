@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import AdminPanel from "../AdminPanel";
 import { useAuth } from "../../../../context/AuthContext";
 
 function Navigation() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showAdmin, setShowAdmin] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -16,7 +17,7 @@ function Navigation() {
 
   const navLinks = [
     { name: "Home", path: "/" },
-    { name: "Community Hub", path: "/community-hub" },
+    { name: "Community", path: "/community" },
     { name: "Jumuiya", path: "/jumuiya" },
     { name: "Officials", path: "/officials" },
     ...(user ? [
@@ -52,9 +53,13 @@ function Navigation() {
                   {link.name}
                 </a>
               ) : (
-                <Link
+                 <Link
                   to={link.path}
-                  className="text-gray-600 hover:text-blue-600 font-medium transition-colors text-sm whitespace-nowrap"
+                  className={`font-medium transition-colors text-sm whitespace-nowrap pb-1 ${
+                    location.pathname === link.path 
+                      ? "text-blue-600 border-b-2 border-blue-600" 
+                      : "text-gray-600 hover:text-blue-600"
+                  }`}
                 >
                   {link.name}
                 </Link>
@@ -73,9 +78,18 @@ function Navigation() {
               {user.role === "admin" && (
                 <button
                   className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-semibold transition-colors text-xs"
-                  onClick={() => setShowAdmin(true)}
+                  onClick={() => navigate("/admin")}
                 >
                   Admin
+                </button>
+              )}
+              {/* Developer Bypass: Allows opening Admin Panel without login in DEV mode */}
+              {import.meta.env.DEV && user?.role !== "admin" && (
+                <button
+                  className="bg-amber-100 text-amber-700 hover:bg-amber-200 px-3 py-1.5 rounded-lg font-bold transition-colors text-xs border border-amber-200"
+                  onClick={() => navigate("/admin")}
+                >
+                  Dev Admin
                 </button>
               )}
               <button
@@ -86,12 +100,23 @@ function Navigation() {
               </button>
             </div>
           ) : (
-            <button
-              className="hidden md:block bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-full font-bold shadow-sm transition-all text-sm"
-              onClick={() => navigate("/login")}
-            >
-              Log In
-            </button>
+            <div className="hidden md:flex items-center gap-4">
+               {/* Developer Bypass for Guests */}
+              {import.meta.env.DEV && (
+                <button
+                  className="bg-amber-100 text-amber-700 hover:bg-amber-200 px-3 py-1.5 rounded-lg font-bold transition-colors text-xs border border-amber-200"
+                  onClick={() => navigate("/admin")}
+                >
+                  Dev Admin
+                </button>
+              )}
+              <button
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-full font-bold shadow-sm transition-all text-sm"
+                onClick={() => navigate("/login")}
+              >
+                Log In
+              </button>
+            </div>
           )}
 
           {/* Mobile Menu Toggle Button */}
@@ -123,7 +148,9 @@ function Navigation() {
                 ) : (
                   <Link
                     to={link.path}
-                    className="block py-2 text-gray-600 hover:text-blue-600 font-medium transition-colors"
+                    className={`block py-2 font-medium transition-colors ${
+                      location.pathname === link.path ? "text-blue-600 bg-blue-50 px-3 rounded-lg" : "text-gray-600 hover:text-blue-600"
+                    }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {link.name}
@@ -138,7 +165,7 @@ function Navigation() {
                   {user.role === "admin" && (
                     <button
                       className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold"
-                      onClick={() => { setShowAdmin(true); setIsMobileMenuOpen(false); }}
+                      onClick={() => { navigate("/admin"); setIsMobileMenuOpen(false); }}
                     >
                       Admin Panel
                     </button>
