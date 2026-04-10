@@ -1,29 +1,29 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 
-// Standard imports (Not lazy loaded as per core logic or user request)
+// Standard imports (Optimized for performance)
 import { Home } from "./pages/Landing/components/page/Home";
 import { PublicRoute, ProtectedRoute } from "./Regulator";
 import { DataProvider } from "./pages/Jumuiya/context/DataContext";
+import Pageoulet from "./assets/Layouts/Pageoulet";
+import Authorisation from "./assets/Layouts/Authorisation";
+import Login from "./pages/Authorization/Login";
+import Reset from "./pages/Authorization/Reset";
+import ResetPasswordPage from "./pages/Authorization/ResetPasswordPage";
+import PublicView from "./pages/officials/PublicView";
+import OfficialProfile from "./pages/officials/OfficialProfile";
+import GalleryPage from "./pages/Landing/components/page/GalleryPage";
 
-// Layouts
-const Authorisation = lazy(() => import("./assets/Layouts/Authorisation"));
-const Pageoulet = lazy(() => import("./assets/Layouts/Pageoulet"));
+// Layouts (Complex ones stay lazy)
 const Layout = lazy(() => import("./pages/Devotions/components/Layout"));
 const UniversalAdmin = lazy(() => import("./pages/Admin/UniversalAdmin"));
 
 // Landing standalone pages
 const ProjectsPage = lazy(() => import("./pages/Landing/components/page/ProjectsPage"));
 const ActivitiesPage = lazy(() => import("./pages/Landing/components/page/ActivitiesPage"));
-const GalleryPage = lazy(() => import("./pages/Landing/components/page/GalleryPage"));
 
 // Utility pages
 const NotFound = lazy(() => import("./pages/NotFound"));
-
-// Authorization
-const Login = lazy(() => import("./pages/Authorization/Login"));
-const Reset = lazy(() => import("./pages/Authorization/Reset"));
-const ResetPasswordPage = lazy(() => import("./pages/Authorization/ResetPasswordPage"));
 
 // Devotions
 const Dashboard = lazy(() => import("./pages/Devotions/pages/Dashboard"));
@@ -36,8 +36,6 @@ const Appadmin = lazy(() => import("./pages/Devotions/Adminpage/App"));
 
 // Officials
 const AdminPanel = lazy(() => import("./pages/officials/AdminPanel"));
-const PublicView = lazy(() => import("./pages/officials/PublicView"));
-const OfficialProfile = lazy(() => import("./pages/officials/OfficialProfile"));
 const PublicHistoryView = lazy(() => import("./pages/officials/PublicHistoryView"));
 
 // Jumuiya
@@ -48,9 +46,15 @@ const JumuiyaDetail = lazy(() => import("./pages/Jumuiya/JumuiyaDetail"));
 const AdminDashboard = lazy(() => import("./pages/Admin/pages/AdminDashboard"));
 const RecordsExplorer = lazy(() => import("./pages/Admin/pages/RecordsExplorer"));
 const DonationMonitor = lazy(() => import("./pages/Admin/pages/DonationMonitor"));
+const CommunityManager = lazy(() => import("./pages/Admin/pages/CommunityManager"));
+const CommunityDetailEditor = lazy(() => import("./pages/Admin/pages/CommunityDetailEditor"));
+const AdminSuggestions = lazy(() => import("./pages/Admin/pages/AdminSuggestions"));
+const GalleryManager = lazy(() => import("./pages/Admin/pages/GalleryManager"));
 
 // Sacramental / Community
-const CommunityHub = lazy(() => import("./pages/sacramental/CommunityHub"));
+import { CommunityProvider } from "./pages/sacramental/context/CommunityDataContext";
+const Community = lazy(() => import("./pages/sacramental/Community"));
+const CommunityDetail = lazy(() => import("./pages/sacramental/CommunityDetail"));
 const NotificationPage = lazy(() => import("./pages/Devotions/pages/NotificationPage"));
 
 // Fallback component
@@ -157,8 +161,20 @@ const App: React.FC = () => {
 
           {/* Community Hub */}
           <Route
-            path="community/:moduleSlug?"
-            element={<CommunityHub />}
+            path="community"
+            element={
+              <CommunityProvider>
+                <Community />
+              </CommunityProvider>
+            }
+          />
+          <Route
+            path="community/:moduleId"
+            element={
+              <CommunityProvider>
+                <CommunityDetail />
+              </CommunityProvider>
+            }
           />
 
           {/* 404 - Catch-all for unmatched routes */}

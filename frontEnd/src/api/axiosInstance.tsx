@@ -41,9 +41,13 @@ apiClient.interceptors.response.use(
         // Call refresh endpoint
         const { data } = await refreshAccessAndRefreshToken(userdata.refreshToken)
 
-        // Update userdata with new accessToken
-        const updatedData = { ...userdata, accessToken: data.accessToken };
-        localStorage.setItem("userdata", JSON.stringify(updatedData));
+        // Update userdata with new tokens
+        const updatedData = { 
+          ...userdata, 
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken || userdata.refreshToken // Fallback to old if not rotated
+        };
+        LocalStorage.set("userdata", updatedData);
 
         // Retry original request
         originalRequest.headers["Authorization"] = `Bearer ${data.accessToken}`;
@@ -150,9 +154,9 @@ export const getSTKPushStatus = (checkoutId: string) => {
 };
 
 export const resetEmailApi = (data: { email: string; password?: string; purpose: string }) => {
-  return apiClient.post("/authentication/v1/reset-email", data);
+  return apiClient.post("/authentication/reset-email", data);
 };
 
 export const resetPasswordApi = (data: { email: string; password?: string; purpose: string }) => {
-  return apiClient.post("/authentication/v1/reset", data);
-};
+  return apiClient.post("/authentication/reset", data);
+};

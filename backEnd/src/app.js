@@ -4,18 +4,14 @@ import { fileURLToPath } from "url";
 import { createServer } from "http";
 import cors from "cors";
 import apiRoutes from "./routers/index.js";
-import { api } from "./routers/api.js";
-import officialsRouter from "./routers/officialsRouter.js";
-import jumuiyaOfficialsRouter from "./routers/jumuiyaOfficialsRouter.js";
-import { BackendDataService } from "./services/backend-data.js";
 import morganMiddleware from "./logger/morgan.js";
+import { BackendDataService } from "./services/backend-data.js";
 import { rateLimit } from "express-rate-limit";
 import requestIp from "request-ip";
 import corsOptions from "./Configs/corsConfigs.js";
-import upload from "./Configs/multerStorageConfig.js";
 import { Server } from "socket.io";
-import cookieParser from "cookie-Parser"
-import { errorHandler } from "./middleWares/error.middlewares.js";
+import cookieParser from "cookie-parser"
+import { errorHandler } from "./middlewares/error.middlewares.js";
 import { initializeSocketIO, setSocketInstance } from "./socket/index.js";
 
 
@@ -58,7 +54,7 @@ const limiter = rateLimit({
   keyGenerator: (req, res) => {
     return req.clientIp;
   },
-  handler: (_, __, ___, res) => {
+  handler: (req, res, next, options) => {
     res.status(options.statusCode || 429).json({
       error: `There are too many requests. You are only allowed ${options.max
       } requests per ${options.windowMs / 60000} minutes`,
@@ -70,37 +66,9 @@ const limiter = rateLimit({
 app.use(morganMiddleware);
 
 app.use("/api", apiRoutes)
-// app.use("/api", api);
-// app.use("/community-hub", hubRouter);
 
-// Static Files
-app.use(express.static(path.join(__dirname, "../../frontEnd/public")));
-app.use(express.static(path.join(__dirname, "../../frontEnd/src/pages/sacramental/public")));
-// Routes
-app.get('/', (_req, res) => res.redirect('/community-hub'));
-app.use("/api/officials", officialsRouter);
-app.use("/api/jumuiya-officials", jumuiyaOfficialsRouter);
-// Gallery APIs
-app.get("/api/choir/gallery", (_req, res) => {
-  const gallery = BackendDataService.load("choir_gallery.json", []);
-  res.json(gallery);
-});
-
-app.post("/api/choir/gallery", upload.single("file"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-  const gallery = BackendDataService.load("choir_gallery.json", []);
-  const newPhoto = {
-    id: Date.now().toString(),
-    filename: req.file.filename,
-    eventName: req.body.eventName || "Untitled Event",
-    description: req.body.description || "",
-    uploadDate: new Date().toISOString(),
-    imageUrl: `/images/gallery/${req.file.filename}`,
-  };
-  gallery.push(newPhoto);
-  BackendDataService.save("choir_gallery.json", gallery);
-  res.status(201).json(newPhoto);
-});
+// Organized Static Route for locally uploaded media files
+app.use("/uploads", express.static(path.join(__dirname, "../localFileUploads")));
 
 
 // Initialize Backend Data Service

@@ -51,7 +51,7 @@ export const connectToMongoDb = async () => {
       `☘️  MongoDB Connected! Db host: ${connectionInstance.connection.host}`,
     );
   } catch (error) {
-    logger.error("MongoDB connection error: ", error);
-    process.exit(1)
+    logger.error("MongoDB connection failed (non-fatal): ", error.message);
+    logger.info("Server will continue running without MongoDB features.");
   }
 };

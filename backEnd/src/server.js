@@ -3,6 +3,7 @@ import { httpServer } from "./app.js";
 import { connectDb, connectToMongoDb } from "./Configs/dbConfig.js";
 import logger from "./logger/winston.js";
 import { runMigration } from "./migrations/scripts/index.js";
+import { startKeepAliveWorker } from "./services/keep-alive.js";
 
 process.on('uncaughtException', (err) => {
   logger.error('Uncaught Exception:', err);
@@ -17,13 +18,17 @@ const initServer = async () => {
   // Start DB connections in parallel without blocking the app server
   try {
     await connectDb();
-    //  await connectToMongoDb(;
+    // await connectToMongoDb();
     // await runMigration();
-
 
     httpServer.listen(serverConfig.PORT, () => {
       logger.info(`⚙️  Server is running on http://localhost:${serverConfig.PORT}`);
-      startKeepAliveWorker();
+      
+      if (typeof startKeepAliveWorker === 'function') {
+        startKeepAliveWorker();
+      } else {
+        logger.warn("startKeepAliveWorker is not a function or is undefined");
+      }
     });
   } catch (error) {
     logger.error("Failed to start server:", error.message);

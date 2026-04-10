@@ -1,13 +1,13 @@
 import { Router } from "express";
 import { Login, refreshAccessToken } from "../../controllers/Login.js";
 import { OTPverification, Reset } from "../../controllers/Reset.js";
-import verifyToken from "../../middleWares/Tokens.js";
+import verifyToken from "../../middlewares/Tokens.js";
 import { stkCalls, stkGuestCalls, checkStatus } from "../../controllers/stkPush/stkCall.js";
 import { callback } from "../../controllers/stkPush/stkController.js";
 
 import { assignPermissionsToRole, deleteAllMembers, getPermissionsByRole, getRolesAndPermissions, getUserRolesAndPermissions , listAllMembers, listAllUsersRolesPermissions, registerPermissions, registerRoles  , registerUser} from "../../controllers/roles-permisions/roles_permissions.js";
-import { assignRolePermissionValidator, registerPermissionValidator, registerRoleValidator } from "../../validatoter/index.js";
-import { validate } from "../../middleWares/validateRequestBody.js";
+import { assignRolePermissionValidator, registerPermissionValidator, registerRoleValidator } from "../../validators/index.js";
+import { validate } from "../../middlewares/validateRequestBody.js";
 
 // authRoutes
 // description on login the complete uri will be /authentication/v1/login
