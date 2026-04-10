@@ -18,4 +18,8 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+export const generateAndSaveQuestions = async (data: { topic: string }) => {
+  return axiosInstance.post('/v1/generate-questions', data);
+};
+
 export default axiosInstance;

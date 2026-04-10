@@ -1,26 +1,24 @@
-# Git Merge Status
+# CSA Project Frontend/Backend Fix TODO ✅
 
-**Status:** Completed ✅
+**Current Task:** Fix Vite build error (missing generateAndSaveQuestions) and backend EJS dependency
 
-## Steps Completed:
-- [x] Removed unnecessary root package-lock.json files  
-- [x] Completed merge commit with upstream changes from main
-- [x] Added and committed all local changes (axiosInstance.ts, App.tsx, SemesterAdmin.tsx, etc.)
-- [x] Verified clean git status
+## Plan Breakdown & Progress:
 
-## Next Steps:
-- [ ] cd church_website/backEnd && npm install
-- [ ] cd church_website/frontEnd && npm install  
-- [ ] Test frontend: cd church_website/frontEnd && npm run dev
-- [ ] Push changes: git push origin master (or main)
+### 1. [✅] Create TODO.md with steps
+### 2. [✅] Edit church_website/frontEnd/src/api/axiosInstance.ts - Add missing generateAndSaveQuestions export
+### 3. [✅] Added ejs to backend package.json
+### 4. [ ] Full backend install: cd church_website/backEnd && npm install
+### 5. [ ] Frontend install (if needed): cd church_website/frontEnd && npm install
+### 6. [ ] Start backend: cd church_website/backEnd && npm run dev
+### 7. [ ] Test frontend: cd church_website/frontEnd && npm run dev
+### 8. [ ] Verify AI Question Generation works in Devotions Admin page
+### 9. [ ] Update TODO.md as completed ✅
 
-- [ ] **Step 5:** If needed, login to set token, refresh page
+**Status:** Frontend API fixed, backend deps updated. Run npm install manually in backEnd/frontEnd directories, then test dev servers. Vite should now build without import error.
 
-- [ ] **Step 6:** Verify data shows in table, mark complete
+To test:
+1. cd church_website/backEnd && npm install
+2. cd church_website/backEnd && npm run dev  (backend)
+3. cd church_website/frontEnd && npm run dev  (frontend)
 
-- [ ] **Step 4:** Test /api/semester in Network tab (should show data)
-
-- [ ] **Step 5:** If needed, login to set token, refresh page
-
-- [ ] **Step 6:** Verify data shows in table, mark complete
 

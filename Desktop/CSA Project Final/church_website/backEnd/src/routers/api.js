@@ -46,11 +46,28 @@ api.get("/semester", (req, res) => {
 // POST /api/semester
 api.post("/semester", async (req, res) => {
   try {
+    const { datetime, title, venue, description } = req.body;
+    
+    // Validate required fields
+    if (!title || !venue || !datetime) {
+      return res.status(400).json({ error: 'Title, venue, and datetime are required' });
+    }
+    
+    // Validate datetime
+    const testDate = new Date(datetime);
+    if (isNaN(testDate.getTime())) {
+      return res.status(400).json({ error: 'Invalid datetime format. Use ISO format like 2026-01-31T08:00:00' });
+    }
+    
     const currentData = BackendDataService.load("semester.json", []);
     const maxId = currentData.length > 0 ? Math.max(...currentData.map((d) => d.id)) : 0;
     const newEvent = {
       id: maxId + 1,
-      ...req.body
+      title,
+      datetime,
+      venue,
+      description: description || '',
+      imageUrl: req.body.imageUrl || ''
     };
     const updatedData = [...currentData, newEvent];
     BackendDataService.save("semester.json", updatedData);
