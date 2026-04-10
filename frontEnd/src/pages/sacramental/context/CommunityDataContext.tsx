@@ -84,14 +84,14 @@ export interface CommunityModule {
 const initialModules: CommunityModule[] = [
     {
         id: 'choir',
-        title: 'St. Cecilia Choir',
+        title: 'Choir',
         description: 'Join our liturgical choir and lead the congregation in sacred worship through music.',
         path: '/community/choir',
         color: '#2c3e50',
         icon: 'fas fa-music',
         scheduleLabel: 'Practice Schedule',
         registrationEndpoint: '/api/enrollments',
-        about: 'The St. Cecilia Choir is dedicated to uplifting the spirits of the congregation through carefully selected hymns and chants. We sing at the Sunday 10 AM Mass and during special events.',
+        about: 'The Choir is dedicated to uplifting the spirits of the congregation through carefully selected hymns and chants. We sing at the Sunday 10 AM Mass and during special events.',
         meetingSchedule: 'Tuesdays 6PM–8PM & Saturdays 1PM–4PM — Church Hall',
         practiceSchedules: [
             { id: '1', day: 'Tuesday', startTime: '18:00', endTime: '20:00', location: 'Church Hall' },
