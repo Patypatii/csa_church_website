@@ -3,10 +3,12 @@ import {LineChart, Line,XAxis, YAxis, Tooltip, ResponsiveContainer} from "rechar
 import { memberProgressData, memberSummaryData } from "../../../api/axiosInstance";
 import type { Summary, WeekData } from "../../../interface/api";
 import Card from "../components/Card";
+import { useAuth } from "../../../context/AuthContext";
 
 
 
 export default function MemberDashboard() {
+  const { user } = useAuth();
   const [data, setData] = useState<WeekData[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
 
@@ -18,13 +20,14 @@ export default function MemberDashboard() {
   }));
 
   useEffect(() => {
-
     async function fetchData() {
-      try {
+      const userId = user?.jumuiya_id;
+      if (!userId) return;
 
+      try {
         const [progressRes, summaryRes] = await Promise.all([
-         await memberProgressData(),
-         await memberSummaryData()
+          memberProgressData(userId),
+          memberSummaryData(userId)
         ]);
 
         setData(progressRes.data);
@@ -35,7 +38,7 @@ export default function MemberDashboard() {
     }
 
     fetchData();
-  }, []);
+  }, [user?.jumuiya_id]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">

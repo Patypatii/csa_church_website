@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { FaBell, FaPlus, FaCheckCircle, FaInbox, FaUsers, FaChurch, FaRegClock } from "react-icons/fa";
+import { FaPlus, FaCheckCircle, FaInbox, FaUsers, FaChurch, FaRegClock } from "react-icons/fa";
 import { MdUpdate, MdHistory } from "react-icons/md";
-import type { fileUpload } from "../../../interface/api";
 import { useNotifications } from "../../../context/NotificationContext";
 import { useAuth } from "../../../context/AuthContext";
 import { createNotificationEventApi } from "../../../api/axiosInstance";
@@ -82,7 +81,7 @@ const NotificationCard: React.FC<{ event: any }> = ({ event }) => {
 
              {Array.isArray(event.images) && event.images.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                   {event.images.slice(0, 3).map((img, i) => (
+                   {event.images.slice(0, 3).map((img: string, i: number) => (
                       <div key={i} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 group/img shadow-sm">
                          <img src={img} alt="attachment" className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-700" />
                          <div className="absolute inset-0 bg-black/5 group-hover/img:bg-transparent transition-colors" />
@@ -97,13 +96,13 @@ const NotificationCard: React.FC<{ event: any }> = ({ event }) => {
 };
 
 const Notifications: React.FC = () => {
-  const { notifications, markAllAsRead, refreshNotifications, isConnected, socketError } = useNotifications();
+  const { notifications, markAllAsRead, refreshNotifications, isConnected } = useNotifications();
   const { user } = useAuth();
 
   const [activeCategory, setActiveCategory] = useState<"csa" | "jumuiya" | null>(null);
   const [showModal, setShowModal] = useState(false);
 
-  const roles = useMemo(() => user?.role ?? [], [user?.role]);
+  const roles = useMemo(() => user?.role ? [user.role] : [], [user?.role]);
   const isAdmin = true; // Hardcoded true as per previous logic
 
   useEffect(() => {
