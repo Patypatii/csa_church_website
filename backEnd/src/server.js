@@ -18,13 +18,17 @@ const initServer = async () => {
   // Start DB connections in parallel without blocking the app server
   try {
     await connectDb();
-    //  await connectToMongoDb(;
+    // await connectToMongoDb();
     // await runMigration();
-
 
     httpServer.listen(serverConfig.PORT, () => {
       logger.info(`⚙️  Server is running on http://localhost:${serverConfig.PORT}`);
-      startKeepAliveWorker();
+      
+      if (typeof startKeepAliveWorker === 'function') {
+        startKeepAliveWorker();
+      } else {
+        logger.warn("startKeepAliveWorker is not a function or is undefined");
+      }
     });
   } catch (error) {
     logger.error("Failed to start server:", error.message);

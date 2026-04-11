@@ -20,6 +20,12 @@ class ApiService {
 
     try {
       const response = await apiClient.get(`/${tableName}`);
+      
+      // Update cache on success
+      if (response.data && Array.isArray(response.data)) {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(response.data));
+      }
+      
       return response.data;
     } catch (error) {
       console.warn(`Error fetching ${tableName}, using fallback content:`, error);
@@ -145,6 +151,33 @@ class ApiService {
    */
   async getGallery(): Promise<any[]> {
     return this.fetchTableData('gallery');
+  }
+
+  /**
+   * Fetches a single official by their ID.
+   * @param id - The ID of the official.
+   */
+  async getOfficialById(id: string | number): Promise<any> {
+    try {
+      const response = await apiClient.get(`/officials/${id}`);
+      return response.data.data || response.data;
+    } catch (error) {
+      console.error(`Error fetching official ${id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetches the election history of officials.
+   */
+  async getOfficialHistory(): Promise<any[]> {
+    try {
+      const response = await apiClient.get('/officials/history');
+      return response.data.data || response.data;
+    } catch (error) {
+      console.error('Error fetching officials history:', error);
+      return [];
+    }
   }
 
   /**

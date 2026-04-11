@@ -43,6 +43,16 @@ export const Login = async (req, res) => {
     const accessToken = generateAccesstoken(user.member_id, user.roles, user.first_name, user.last_name, user.email, user.jumuiya_id);
     const refreshToken = generateRefreshtoken(user.member_id, user.roles);
 
+    // Save hashed refresh token to database
+    const hashedToken = await bcrypt.hash(refreshToken, 10);
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 20); // Matches generateRefreshtoken expiresIn: "20h"
+
+    await testDb.query(
+      `INSERT INTO refresh_tokens (member_id, token, expires_at) VALUES ($1, $2, $3)`,
+      [user.member_id, hashedToken, expiresAt]
+    );
+
     res.status(200).json({
       status: "success",
       accessToken,
@@ -79,12 +89,12 @@ export const refreshAccessToken = async (req, res) => {
     // Verify token
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
 
-    //  Check if token exists in DB
+    //  Check if any active tokens exist for this user in DB
     const result = await testDb.query(
-      `SELECT * FROM refresh_tokens WHERE token = $1 
+      `SELECT * FROM refresh_tokens WHERE member_id = $1 
 AND revoked = FALSE 
 AND expires_at > NOW()`,
-      [refreshToken],
+      [decoded.id],
     );
 
     if (result.rows.length === 0) {
@@ -122,9 +132,24 @@ AND expires_at > NOW()`,
 
     const user = userResult.rows[0];
     const accessToken = generateAccesstoken(user.member_id, user.roles, user.first_name, user.last_name, user.email, user.jumuiya_id);
+    const newRefreshToken = generateRefreshtoken(user.member_id, user.roles);
 
-    res.status(200).json({ accessToken });
+    // Save new hashed refresh token to database
+    const hashedToken = await bcrypt.hash(newRefreshToken, 10);
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 20);
+
+    // Update existing token record or insert new one (simplest is to insert and we keep the rotation logic)
+    // Here we choose to delete old ones for this user to keep DB clean
+    await testDb.query(`DELETE FROM refresh_tokens WHERE member_id = $1`, [user.member_id]);
+    await testDb.query(
+      `INSERT INTO refresh_tokens (member_id, token, expires_at) VALUES ($1, $2, $3)`,
+      [user.member_id, hashedToken, expiresAt]
+    );
+
+    res.status(200).json({ accessToken, refreshToken: newRefreshToken });
   } catch (error) {
+    logger.error("Refresh error", error);
     return res.status(403).json({ error: error.message });
   }
 };

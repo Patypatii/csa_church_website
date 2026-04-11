@@ -37,13 +37,13 @@ function getWindows(schedules: PracticeSchedule[], now: Date) {
 }
 
 const PracticeCountdown: React.FC<{ schedules: PracticeSchedule[] }> = ({ schedules }) => {
-    const [, setTick] = useState(0);
+    const [now, setNow] = useState(() => new Date());
+
     useEffect(() => {
-        const id = setInterval(() => setTick(t => t + 1), 1000);
+        const id = setInterval(() => setNow(new Date()), 1000);
         return () => clearInterval(id);
     }, []);
 
-    const now = new Date();
     const windows = getWindows(schedules, now);
     const inProgress = windows.find(w => now >= w.start && now < w.end);
 
@@ -62,7 +62,7 @@ const PracticeCountdown: React.FC<{ schedules: PracticeSchedule[] }> = ({ schedu
 
     const sorted = [...windows].sort((a, b) => a.start.getTime() - b.start.getTime());
     const next = sorted[0];
-    const diff = next.start.getTime() - now.getTime();
+    const diff = Math.max(0, next.start.getTime() - now.getTime());
     const days = Math.floor(diff / 86400000);
     const hours = Math.floor((diff % 86400000) / 3600000);
     const minutes = Math.floor((diff % 3600000) / 60000);
@@ -560,11 +560,21 @@ const CommunityDetail: React.FC = () => {
                                     </div>
                                     <ul className="space-y-4 text-slate-700">
                                         {moduleData.fees.registration !== undefined && (
-                                            <li className="flex justify-between items-center border-b border-slate-50 pb-3">
-                                                <span className="text-slate-500 font-medium">Registration</span>
-                                                <span className="font-bold text-slate-800">
-                                                    {moduleData.fees.registration === 0 || moduleData.fees.registration === 'Free' ? <span className="text-emerald-600">Free</span> : `Ksh ${moduleData.fees.registration}`}
-                                                </span>
+                                            <li className="flex justify-between items-center border-b border-slate-50 pb-3 gap-4">
+                                                <div className="flex-grow">
+                                                    <span className="text-slate-500 font-medium block">Registration</span>
+                                                    <span className="font-bold text-slate-800">
+                                                        {moduleData.fees.registration === 0 || moduleData.fees.registration === 'Free' ? <span className="text-emerald-600">Free</span> : `Ksh ${moduleData.fees.registration}`}
+                                                    </span>
+                                                </div>
+                                                {moduleData.fees.registration !== 0 && moduleData.fees.registration !== 'Free' && (
+                                                    <button
+                                                        onClick={() => initiateSpecificPayment(Number(moduleData.fees?.registration), `Registration for ${moduleData.title}`, 'Subscription')}
+                                                        className="px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-black hover:bg-emerald-200 transition"
+                                                    >
+                                                        PAY NOW
+                                                    </button>
+                                                )}
                                             </li>
                                         )}
                                         {moduleData.fees.subscription !== undefined && (

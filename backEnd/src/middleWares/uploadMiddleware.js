@@ -9,7 +9,7 @@ export function uploadMiddleware(req, res, next) {
  
     if (err) {
       logger.error("Unexpected upload error", err);
-      throw new ApiError (500, "Internal upload error")
+      return next(new ApiError(500, "Internal upload error"));
     }
 
     // Normalize: merge both into req.files array
