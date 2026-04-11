@@ -12,7 +12,7 @@ import {
   Calendar,
   Search
 } from 'lucide-react';
-import { apiClient } from '../../../../../api/axiosInstance';
+import { fetchGallery } from '../../../../../api/axiosInstance';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface GalleryItem {
@@ -49,7 +49,7 @@ const GallerySection: React.FC = () => {
   useEffect(() => {
     const loadGallery = async () => {
       try {
-        const { data } = await apiClient.get('/gallery');
+        const { data } = await fetchGallery();
         setItems(data.items || []);
         setTheme(data.theme || 'default');
       } catch (error) {

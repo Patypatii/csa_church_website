@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useCommunityData } from './context/CommunityDataContext';
 import type { CommunityModule, PracticeSchedule } from './context/CommunityDataContext';
-import { apiClient } from '../../api/axiosInstance';
+import { fetchCommunityDetail, enrollInCommunity, initiateSTKPush } from '../../api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import CommunityModal from './components/CommunityModal';
 
@@ -114,8 +114,7 @@ const CommunityDetail: React.FC = () => {
 
     const enrollMutation = useMutation({
         mutationFn: async (data: typeof formData) => {
-            const endpoint = moduleData?.registrationEndpoint || '/api/enrollments';
-            return await apiClient.post(endpoint, {
+            return await enrollInCommunity(moduleId || 'unknown', {
                 full_name: data.name,
                 class_id: selectedClassId || moduleId,
                 voice_type: moduleId === 'choir' ? data.voiceType : data.phone,
@@ -175,10 +174,10 @@ const CommunityDetail: React.FC = () => {
 
         // Trigger STK Push logic here
         toast.promise(
-            apiClient.post('/api/payment/stkpush', {
+            initiateSTKPush({
                 phoneNumber: formData.phone,
                 amount: pendingPayment.amount,
-                description: pendingPayment.description
+                // description: pendingPayment.description // Note: initiateSTKPush only takes phoneNumber and amount in axiosInstance
             }),
             {
                 loading: 'Initiating M-Pesa Payment...',
@@ -204,7 +203,7 @@ const CommunityDetail: React.FC = () => {
     const { data: serverModuleData, isLoading, isError } = useQuery({
         queryKey: ['community', moduleId],
         queryFn: async () => {
-            const res = await apiClient.get(`/community-view/${moduleId}`);
+            const res = await fetchCommunityDetail(moduleId!);
             if (res.data?.isMissing || res.data?.isServerError) throw new Error('Not available');
             return res.data;
         },

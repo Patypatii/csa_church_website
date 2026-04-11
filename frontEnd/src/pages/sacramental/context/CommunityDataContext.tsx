@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { apiClient } from '../../../api/axiosInstance';
+import { fetchCommunityModules } from '../../../api/axiosInstance';
 
 export interface Official {
     id: string;
@@ -194,7 +194,7 @@ export const CommunityProvider: React.FC<{ children: ReactNode }> = ({ children 
         const fetchModules = async () => {
             try {
                 // Fetch dynamic list of Communities from backend
-                const response = await apiClient.get('/community-view/data');
+                const response = await fetchCommunityModules();
                 if (response.data && response.data.length > 0) {
                     setModules(response.data);
                 }

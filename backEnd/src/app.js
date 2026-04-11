@@ -44,7 +44,7 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
   pingTimeout: 60000,
   cors: {
-    origin:process.env.CORS_ORIGIN,
+    origin: corsOptions.origin,
     credentials: true,
   },
 });

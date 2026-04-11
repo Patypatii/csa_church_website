@@ -213,3 +213,40 @@ export const resetEmailApi = (data: { email: string; password?: string; purpose:
 export const resetPasswordApi = (data: { email: string; password?: string; purpose: string }) => {
   return apiClient.post("/authentication/reset", data);
 };
+
+// --- Missing/Centralized API Functions ---
+
+// Fetch dynamic list of community ministries
+export const fetchCommunityModules = () => {
+  return apiClient.get("/community-view/data");
+};
+
+// Fetch details for a specific community ministry
+export const fetchCommunityDetail = (moduleId: string) => {
+  return apiClient.get(`/community-view/${moduleId}`);
+};
+
+// Enroll in a community/ministry
+export const enrollInCommunity = (moduleId: string, data: any) => {
+  return apiClient.post("/enrollments", {
+    ...data,
+    class_id: data.class_id || moduleId
+  });
+};
+
+// Verify OTP for password reset
+export const verifyOTP = (email: string, otp: string) => {
+  return apiClient.post(`/authentication/otp/${email}`, { otp });
+};
+
+// Fetch all gallery items
+export const fetchGallery = () => {
+  return apiClient.get("/gallery");
+};
+
+// Pool all data from all tables (Production/Admin)
+export const fetchAllAllData = () => {
+  return apiClient.get("/all/data");
+};
+
+

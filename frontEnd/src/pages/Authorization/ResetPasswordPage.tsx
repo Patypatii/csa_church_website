@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import OTPInput from "./OTPInput";
 import { ChevronLeft } from "lucide-react";
-import { apiClient } from "../../api/axiosInstance";
+import { verifyOTP } from "../../api/axiosInstance";
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ const ResetPasswordPage = () => {
 
   const handleOTPComplete = async (otp: string) => {
     try {
-      const { data, status } = await apiClient.post(`/authentication/v1/otp/${email}`, { otp });
+      const { data, status } = await verifyOTP(email, otp);
       
       if (status >= 200 && status < 300) {
         alert("OTP verified! You can reset your password.");

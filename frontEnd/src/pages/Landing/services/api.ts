@@ -204,7 +204,7 @@ class ApiService {
    */
   async poolAllData(): Promise<Record<string, any[]>> {
     try {
-      const response = await apiClient.get('/all');
+      const response = await apiClient.get('/all/data');
       return response.data;
     } catch (error) {
       console.error('Error pooling all data:', error);
