@@ -4,8 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { FaPhoneAlt, FaWhatsapp } from 'react-icons/fa'
 
 import apiService from '../../pages/Landing/services/api'
-// Extract only the domain from the versioned API URI for image assets
-const UPLOAD_BASE = (import.meta.env.VITE_SERVER_URI || '').split('/api')[0]
+import { UPLOAD_BASE } from '../../api/config'
 
 const CATEGORY_ORDER = [
   'Executive','Jumuiya Coordinators','Bible Coordinators','Rosary',

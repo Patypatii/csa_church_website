@@ -4,9 +4,11 @@ import { LocalStorage } from "../utils";
 import type { fileUpload } from "../interface/api";
 import { normalizeFiles } from "../pages/Devotions/utitlty";
 
+import { BASE_URL } from "./config";
+
 // Create an Axios instance for API requests
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_SERVER_URI,
+  baseURL: BASE_URL,
   withCredentials: true,
   timeout: 120000,
 });

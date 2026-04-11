@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import apiService from '../../Landing/services/api';
 // Extract only the domain from the versioned API URI for image assets
-const UPLOAD_BASE = (import.meta.env.VITE_SERVER_URI || '').split('/api')[0];
+import { UPLOAD_BASE } from '../../../api/config';
 import { 
   Image as ImageIcon, 
   Upload, 

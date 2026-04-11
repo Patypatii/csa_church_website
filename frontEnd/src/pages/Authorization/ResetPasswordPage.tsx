@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import OTPInput from "./OTPInput";
 import { ChevronLeft } from "lucide-react";
+import { apiClient } from "../../api/axiosInstance";
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
@@ -8,14 +9,9 @@ const ResetPasswordPage = () => {
 
   const handleOTPComplete = async (otp: string) => {
     try {
-      const res = await fetch(`http://localhost:3001/authentication/v1/otp/${email}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ otp }),
-      });
-      const data = await res.json();
+      const { data, status } = await apiClient.post(`/authentication/v1/otp/${email}`, { otp });
       
-      if (res.ok) {
+      if (status >= 200 && status < 300) {
         alert("OTP verified! You can reset your password.");
         navigate("/login", { replace: true });
       } else {
@@ -23,6 +19,7 @@ const ResetPasswordPage = () => {
       }
     } catch (err) {
       console.error(err);
+      alert("Verification failed. Please try again.");
     }
   };
 

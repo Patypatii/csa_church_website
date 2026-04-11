@@ -7,7 +7,7 @@ import {
 import { useHistory } from '../../hooks/useHistory';
 import { useTerms } from '../../hooks/useTerms';
 
-const UPLOAD_BASE = '';
+import { UPLOAD_BASE } from '../../api/config';
 const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect fill="%23e5e7eb" width="100" height="100"/%3E%3Ccircle cx="50" cy="35" r="15" fill="%239ca3af"/%3E%3Cpath d="M20 100 Q20 70 50 70 Q80 70 80 100" fill="%239ca3af"/%3E%3C/svg%3E';
 
 const CATEGORY_COLORS: Record<string, string> = {
