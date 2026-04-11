@@ -84,7 +84,7 @@ export interface CommunityModule {
 const initialModules: CommunityModule[] = [
     {
         id: 'choir',
-        title: 'Choir',
+        title: 'St. Thomas Aquinas Choir',
         description: 'Join our liturgical choir and lead the congregation in sacred worship through music.',
         path: '/community/choir',
         color: '#2c3e50',
@@ -92,10 +92,10 @@ const initialModules: CommunityModule[] = [
         scheduleLabel: 'Practice Schedule',
         registrationEndpoint: '/api/enrollments',
         about: 'The Choir is dedicated to uplifting the spirits of the congregation through carefully selected hymns and chants. We sing at the Sunday 10 AM Mass and during special events.',
-        meetingSchedule: 'Tuesdays 6PM–8PM & Saturdays 1PM–4PM — Church Hall',
+        meetingSchedule: 'Tuesdays 6PM–8PM @ Church Hall · Saturdays 1PM–4PM @ LH 32',
         practiceSchedules: [
             { id: '1', day: 'Tuesday', startTime: '18:00', endTime: '20:00', location: 'Church Hall' },
-            { id: '2', day: 'Saturday', startTime: '13:00', endTime: '16:00', location: 'Church Hall' }
+            { id: '2', day: 'Saturday', startTime: '13:00', endTime: '16:00', location: 'LH 32' }
         ],
         musicClasses: [
             { id: '1', title: 'Sight Reading', instructor: 'Dr. Music', schedule: 'Mondays 4PM', description: 'Learn to read music notes and understand basic music theory.', skillLevel: 'Beginner' }
@@ -108,7 +108,7 @@ const initialModules: CommunityModule[] = [
             { id: '1', title: 'Easter Concert', date: '2027-04-12', description: 'Annual Easter Sunday concert.', status: 'Upcoming' },
             { id: '2', title: 'Vocal Training', date: 'Every Saturday', description: 'Weekly vocal coaching for new members.', status: 'Ongoing' }
         ],
-        fees: { registration: 0, subscription: 50, uniform: 'White shirt + Black trousers' }
+        fees: { registration: 20, subscription: 50, uniform: 'White shirt + Black trousers' }
     },
     {
         id: 'dancers',

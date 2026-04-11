@@ -24,7 +24,7 @@ const pool = new Pool({
 const modulesMeta = [
     {
         id: 'choir',
-        title: 'Choir',
+        title: 'St. Thomas Aquinas Choir',
         description: 'Join our heavenly voices in praise and worship.',
         color: '#ffffff',
         icon: 'fas fa-music'
