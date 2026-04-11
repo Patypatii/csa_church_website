@@ -113,19 +113,17 @@ const App: React.FC = () => {
           <Route path="officials/history" element={<PublicHistoryView />} />
 
           {/* Standalone Landing Pages */}
-          <Route path="gallery" element={<ProtectedRoute><GalleryPage /></ProtectedRoute>} />
-          <Route path="projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
-          <Route path="activities" element={<ProtectedRoute><ActivitiesPage /></ProtectedRoute>} />
+          <Route path="gallery" element={<GalleryPage />} />
+          <Route path="projects" element={<ProjectsPage />} />
+          <Route path="activities" element={<ActivitiesPage />} />
           
           {/* show notification to all */}
-          <Route path="Notification" element={<ProtectedRoute><NotificationPage /></ProtectedRoute>} />
+          <Route path="Notification" element={<NotificationPage />} />
           {/* Devotions (Protected) */}
           <Route
             path="devotions"
             element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
+              <Layout />
             }
           >
             <Route index element={<Dashboard />} />
@@ -136,25 +134,21 @@ const App: React.FC = () => {
             <Route path="challenge" element={<Challenge />} />
           </Route>
 
-          {/* Jumuiya (Protected) */}
+          {/* Jumuiya */}
           <Route
             path="jumuiya"
             element={
-              <ProtectedRoute>
-                <DataProvider>
-                  <JumuiyaLanding />
-                </DataProvider>
-              </ProtectedRoute>
+              <DataProvider>
+                <JumuiyaLanding />
+              </DataProvider>
             }
           />
           <Route
             path="jumuiya/:id"
             element={
-              <ProtectedRoute>
-                <DataProvider>
-                  <JumuiyaDetail />
-                </DataProvider>
-              </ProtectedRoute>
+              <DataProvider>
+                <JumuiyaDetail />
+              </DataProvider>
             }
           />
 

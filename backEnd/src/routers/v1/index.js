@@ -25,7 +25,7 @@ router.use("/jumuiya-officials", jumuiyaOfficialsRouter);
 router.use("/", galleryRouter); // handles /choir/gallery
 router.use("/questions", verifyToken, QuestionsRoutes);
 router.use("/files", verifyToken, uploadMedia);
-router.use("/notifications", verifyToken, notificationRoutes);
+router.use("/notifications", notificationRoutes);
 router.use("/csa", verifyToken, JumuiComparisonRoutes);
 router.use("/community-view", communityRouter);
 

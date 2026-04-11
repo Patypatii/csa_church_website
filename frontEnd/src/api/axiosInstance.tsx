@@ -110,7 +110,7 @@ apiClient.interceptors.response.use(
 
 // Create a separate instance for refresh to avoid interceptor recursion
 const refreshClient = axios.create({
-  baseURL: import.meta.env.VITE_SERVER_URI,
+  baseURL: BASE_URL,
 });
 
 // API functions for refresh both access and refresh token

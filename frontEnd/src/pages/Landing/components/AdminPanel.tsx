@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import apiService from '../services/api'
+import { apiClient } from '../../../api/axiosInstance'
 
 interface AdminPanelProps {
   onClose: () => void;
@@ -164,24 +165,17 @@ function AdminPanel({ onClose }: AdminPanelProps) {
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URI}/authentication/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newUser),
-      })
-      const result = await response.json()
-      if (response.ok) {
+      const response = await apiClient.post('/authentication/register', newUser)
+      if (response.status === 201 || response.status === 200) {
         alert('User added successfully!')
         setNewUser({ username: '', password: '', role: 'user' })
         setShowAddUser(false)
         loadData()
       } else {
-        alert('Failed to add user: ' + (result.error || 'Unknown error'))
+        alert('Failed to add user: ' + (response.data?.error || 'Unknown error'))
       }
-    } catch (error) {
-      alert('Error adding user: ' + (error instanceof Error ? error.message : 'Unknown error'))
+    } catch (error: any) {
+      alert('Error adding user: ' + (error.response?.data?.error || error.message || 'Unknown error'))
     }
   }
 
